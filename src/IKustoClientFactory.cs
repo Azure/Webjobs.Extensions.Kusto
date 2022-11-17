@@ -3,6 +3,8 @@
 
 using Kusto.Cloud.Platform.Utils;
 using Kusto.Data;
+using Kusto.Data.Common;
+using Kusto.Data.Net.Client;
 using Kusto.Ingest;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
@@ -10,6 +12,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     internal interface IKustoClientFactory
     {
         IKustoIngestClient IngestClientFactory(string engineConnectionString);
+        ICslQueryProvider QueryProviderFactory(string engineConnectionString);
     }
     internal class KustoManagedStreamingClientFactory : IKustoClientFactory
     {
@@ -34,6 +37,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         private static IKustoIngestClient GetManagedStreamingClient(KustoConnectionStringBuilder engineKcsb, KustoConnectionStringBuilder dmKcsb)
         {
             return KustoIngestFactory.CreateManagedStreamingIngestClient(engineKcsb, dmKcsb);
+        }
+
+        public ICslQueryProvider QueryProviderFactory(string engineConnectionString)
+        {
+            return KustoClientFactory.CreateCslQueryProvider(engineConnectionString);
         }
     }
 }

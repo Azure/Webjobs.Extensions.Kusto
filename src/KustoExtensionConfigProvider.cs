@@ -84,11 +84,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             }
         }
 
-        internal KustoContext CreateContext(KustoAttribute kustoAttribute)
+        internal KustoIngestContext CreateContext(KustoAttribute kustoAttribute)
         {
             IKustoIngestClient service = this.GetIngestClient(kustoAttribute);
 
-            return new KustoContext
+            return new KustoIngestContext
             {
                 IngestService = service,
                 ResolvedAttribute = kustoAttribute,

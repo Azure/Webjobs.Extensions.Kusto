@@ -2,6 +2,18 @@
   "version": 2,
   "dependencies": {
     ".NETStandard,Version=v2.0": {
+      "Microsoft.Azure.Kusto.Data": {
+        "type": "Direct",
+        "requested": "[11.0.0, )",
+        "resolved": "11.0.0",
+        "contentHash": "OcmHar2jOhEOyXLoqBPtyOE1+xEKvDdFyuEkfGrHRn6ZSkHeTeUIefVh9zZ6iV6H0fFVlnAqOfuXYNwDLLxdOQ==",
+        "dependencies": {
+          "Microsoft.Azure.Kusto.Cloud.Platform": "11.0.0",
+          "Microsoft.Azure.Kusto.Cloud.Platform.Aad": "11.0.0",
+          "Microsoft.Identity.Client": "4.46.0",
+          "Microsoft.Identity.Client.Extensions.Msal": "2.23.0"
+        }
+      },
       "Microsoft.Azure.Kusto.Ingest": {
         "type": "Direct",
         "requested": "[11.0.0, )",
@@ -146,17 +158,6 @@
           "Azure.Identity": "1.3.0",
           "Microsoft.Azure.Kusto.Cloud.Platform": "11.0.0",
           "Microsoft.Identity.Client": "4.45.0"
-        }
-      },
-      "Microsoft.Azure.Kusto.Data": {
-        "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "OcmHar2jOhEOyXLoqBPtyOE1+xEKvDdFyuEkfGrHRn6ZSkHeTeUIefVh9zZ6iV6H0fFVlnAqOfuXYNwDLLxdOQ==",
-        "dependencies": {
-          "Microsoft.Azure.Kusto.Cloud.Platform": "11.0.0",
-          "Microsoft.Azure.Kusto.Cloud.Platform.Aad": "11.0.0",
-          "Microsoft.Identity.Client": "4.46.0",
-          "Microsoft.Identity.Client.Extensions.Msal": "2.23.0"
         }
       },
       "Microsoft.Bcl.AsyncInterfaces": {

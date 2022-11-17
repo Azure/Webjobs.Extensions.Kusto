@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using Kusto.Data.Common;
 using Kusto.Ingest;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
@@ -16,6 +17,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
         public IKustoIngestClient IngestClientFactory(string engineConnectionString)
         {
             return this._ingestClient;
+        }
+
+        public ICslQueryProvider QueryProviderFactory(string engineConnectionString)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

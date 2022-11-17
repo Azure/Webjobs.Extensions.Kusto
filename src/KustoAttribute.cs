@@ -19,51 +19,27 @@ namespace Microsoft.Azure.WebJobs.Kusto
     [Binding]
     public sealed class KustoAttribute : Attribute, IConnectionProvider
     {
-
         /// <summary>Initializes a new instance of the <see cref="KustoAttribute"/> class.</summary>
         /// <param name="database">The name of the database</param>
-        /// <param name="tableName">The name of the table to which to ingest data.</param>
-        public KustoAttribute(string database, string tableName)
+        public KustoAttribute(string database)
         {
             this.Database = AssignValue(database, nameof(database));
-            this.TableName = AssignValue(tableName, nameof(tableName));
-        }
-
-        /// <summary>Initializes a new instance of the <see cref="KustoAttribute"/> class.</summary>
-        /// <param name="database">The name of the database</param>
-        /// <param name="tableName">The name of the table to which to ingest data.</param>
-        /// <param name="mappingRef">The mapping reference to use.</param>
-        public KustoAttribute(string database, string tableName, string mappingRef)
-        {
-            this.Database = AssignValue(database, nameof(database));
-            this.TableName = AssignValue(tableName, nameof(tableName));
-            this.MappingRef = mappingRef;
-        }
-
-        /// <summary>Initializes a new instance of the <see cref="KustoAttribute"/> class.</summary>
-        /// <param name="database">The name of the database</param>
-        /// <param name="tableName">The name of the table to which to ingest data.</param>
-        /// <param name="mappingRef">The mapping reference to use.</param>
-        /// <param name="dataFormat">Denotes the format of data. Can be one of JSON , CSV or other supported ingestion formats.</param>
-        public KustoAttribute(string database, string tableName, string mappingRef, string dataFormat)
-        {
-            this.Database = AssignValue(database, nameof(database));
-            this.TableName = AssignValue(tableName, nameof(tableName));
-            this.MappingRef = mappingRef;
-            this.DataFormat = dataFormat;
         }
 
         [AutoResolve]
-        public string Database { get; }
+        public string Database { get; private set; }
 
         [AutoResolve]
-        public string TableName { get; }
+        public string TableName { get; set; }
 
         [AutoResolve]
-        public string MappingRef { get; }
+        public string MappingRef { get; set; }
 
         [AutoResolve]
-        public string DataFormat { get; }
+        public string DataFormat { get; set; }
+
+        [AutoResolve]
+        public string KqlCommand { get; set; }
 
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private string DebuggerDisplay

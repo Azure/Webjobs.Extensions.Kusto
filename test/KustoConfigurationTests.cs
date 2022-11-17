@@ -20,7 +20,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
         {
             // Given
             KustoExtensionConfigProvider kustoExtensionConfigProvider = InitializeCreatesClients();
-            var attribute = new KustoAttribute("unittestdb", "Items");
+            var attribute = new KustoAttribute("unittestdb")
+            {
+                TableName = "Items"
+            };
             // When
             _ = kustoExtensionConfigProvider.CreateContext(attribute);
             _ = kustoExtensionConfigProvider.CreateContext(attribute);

@@ -22,7 +22,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
         {
             // Set-up
             var mockIngestionClient = new Mock<IKustoIngestClient>(MockBehavior.Strict);
-            KustoContext context = KustoTestHelper.CreateContext(mockIngestionClient.Object);
+            KustoIngestContext context = KustoTestHelper.CreateContext(mockIngestionClient.Object);
             var collector = new KustoAsyncCollector<Item>(context);
             // when
             await collector.AddAsync(new Item { ID = 1, Name = "x" });
@@ -51,7 +51,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
                 Capture.In(actualKustoIngestionProps),
                 Capture.In(actualStreamSourceOptions))).ReturnsAsync(mockIngestionResult.Object);
             // When
-            KustoContext context = KustoTestHelper.CreateContext(mockIngestionClient.Object);
+            KustoIngestContext context = KustoTestHelper.CreateContext(mockIngestionClient.Object);
             var collector = new KustoAsyncCollector<Item>(context);
             IEnumerable<int> numberOfItems = Enumerable.Range(1, 5);
             var expectedItems = new List<Item>();
@@ -95,7 +95,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
                 Capture.In(actualKustoIngestionProps),
                 Capture.In(actualStreamSourceOptions))).ReturnsAsync(mockIngestionResult.Object);
             // When
-            KustoContext context = KustoTestHelper.CreateContext(mockIngestionClient.Object);
+            KustoIngestContext context = KustoTestHelper.CreateContext(mockIngestionClient.Object);
             var collector = new KustoAsyncCollector<Item>(context);
             var expectedItem = new Item { ID = 10, Name = "x-" + 10 };
             await collector.AddAsync(expectedItem);

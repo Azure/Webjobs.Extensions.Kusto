@@ -6,7 +6,7 @@ using Microsoft.Azure.WebJobs.Kusto;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {
-    internal class KustoContext
+    internal class KustoQueryContext
     {
         public KustoAttribute ResolvedAttribute { get; set; }
 

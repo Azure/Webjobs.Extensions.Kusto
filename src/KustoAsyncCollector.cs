@@ -19,9 +19,9 @@ namespace Microsoft.Azure.WebJobs.Kusto
     {
         private readonly List<T> _rows = new List<T>();
         private readonly SemaphoreSlim _rowLock = new SemaphoreSlim(1, 1);
-        private readonly KustoContext _kustoContext;
+        private readonly KustoIngestContext _kustoContext;
 
-        public KustoAsyncCollector(KustoContext kustoContext)
+        public KustoAsyncCollector(KustoIngestContext kustoContext)
         {
             this._kustoContext = kustoContext;
         }

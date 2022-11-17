@@ -18,7 +18,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "addproduct")]
             HttpRequest req, ILogger log,
             [Kusto(database:"sdktestsdb" ,
-            tableName:"Products" ,
+            TableName ="Products" ,
             Connection = "KustoConnectionString")] out Product product)
         {
             log.LogInformation($"AddProduct function started");

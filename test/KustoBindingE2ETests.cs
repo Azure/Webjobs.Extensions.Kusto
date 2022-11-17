@@ -153,11 +153,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
         {
             [NoAutomaticTrigger]
             public static void Outputs(
-                [Kusto(database: DatabaseName, tableName: TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object newItem,
-                [Kusto(database: DatabaseName, tableName: TableName, Connection = KustoConstants.DefaultConnectionStringName)] out string newItemString,
-                [Kusto(database: DatabaseName, tableName: TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object[] arrayItem,
-                [Kusto(database: DatabaseName, tableName: TableName, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncCollector<object> asyncCollector,
-                [Kusto(database: DatabaseName, tableName: TableName, Connection = KustoConstants.DefaultConnectionStringName)] ICollector<object> collector)
+                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object newItem,
+                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out string newItemString,
+                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object[] arrayItem,
+                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncCollector<object> asyncCollector,
+                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] ICollector<object> collector)
             {
                 newItem = new { };
                 newItemString = "{}";

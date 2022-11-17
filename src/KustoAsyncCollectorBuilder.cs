@@ -16,7 +16,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
 
         IAsyncCollector<T> IConverter<KustoAttribute, IAsyncCollector<T>>.Convert(KustoAttribute attribute)
         {
-            KustoContext context = this._configProvider.CreateContext(attribute);
+            KustoIngestContext context = this._configProvider.CreateContext(attribute);
             return new KustoAsyncCollector<T>(context);
         }
     }

@@ -171,17 +171,6 @@
           "Microsoft.Identity.Client": "4.45.0"
         }
       },
-      "Microsoft.Azure.Kusto.Data": {
-        "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "OcmHar2jOhEOyXLoqBPtyOE1+xEKvDdFyuEkfGrHRn6ZSkHeTeUIefVh9zZ6iV6H0fFVlnAqOfuXYNwDLLxdOQ==",
-        "dependencies": {
-          "Microsoft.Azure.Kusto.Cloud.Platform": "11.0.0",
-          "Microsoft.Azure.Kusto.Cloud.Platform.Aad": "11.0.0",
-          "Microsoft.Identity.Client": "4.46.0",
-          "Microsoft.Identity.Client.Extensions.Msal": "2.23.0"
-        }
-      },
       "Microsoft.Azure.Storage.Blob": {
         "type": "Transitive",
         "resolved": "11.1.7",
@@ -861,9 +850,22 @@
       "microsoft.azure.webjobs.extensions.kusto": {
         "type": "Project",
         "dependencies": {
+          "Microsoft.Azure.Kusto.Data": "[11.0.0, )",
           "Microsoft.Azure.Kusto.Ingest": "[11.0.0, )",
           "Microsoft.Azure.WebJobs": "[3.0.33, )",
           "Newtonsoft.Json": "[13.0.1, )"
+        }
+      },
+      "Microsoft.Azure.Kusto.Data": {
+        "type": "CentralTransitive",
+        "requested": "[11.0.0, )",
+        "resolved": "11.0.0",
+        "contentHash": "OcmHar2jOhEOyXLoqBPtyOE1+xEKvDdFyuEkfGrHRn6ZSkHeTeUIefVh9zZ6iV6H0fFVlnAqOfuXYNwDLLxdOQ==",
+        "dependencies": {
+          "Microsoft.Azure.Kusto.Cloud.Platform": "11.0.0",
+          "Microsoft.Azure.Kusto.Cloud.Platform.Aad": "11.0.0",
+          "Microsoft.Identity.Client": "4.46.0",
+          "Microsoft.Identity.Client.Extensions.Msal": "2.23.0"
         }
       },
       "Microsoft.Azure.Kusto.Ingest": {
