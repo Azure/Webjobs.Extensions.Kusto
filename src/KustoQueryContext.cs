@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using Kusto.Ingest;
+using Kusto.Data.Common;
 using Microsoft.Azure.WebJobs.Kusto;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
@@ -10,6 +10,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     {
         public KustoAttribute ResolvedAttribute { get; set; }
 
-        public IKustoIngestClient IngestService { get; set; }
+        public ICslQueryProvider QueryProvider { get; set; }
     }
 }

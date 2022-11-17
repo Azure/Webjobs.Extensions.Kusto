@@ -1,20 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common;
 using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
 {
-    public class KustoConfigurationTests
+    public class KustoConfigurationTests : IDisposable
     {
         private static readonly IConfiguration _baseConfig = KustoTestHelper.BuildConfiguration();
+        private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
+
         [Fact]
         public void ConfigurationCachesClients()
         {
@@ -25,9 +29,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
                 TableName = "Items"
             };
             // When
-            _ = kustoExtensionConfigProvider.CreateContext(attribute);
-            _ = kustoExtensionConfigProvider.CreateContext(attribute);
-            var asyncBuilder = new KustoAsyncCollectorBuilder<KustoOpenType>(kustoExtensionConfigProvider);
+            _ = kustoExtensionConfigProvider.CreateIngestionContext(attribute);
+            _ = kustoExtensionConfigProvider.CreateIngestionContext(attribute);
+            var asyncBuilder = new KustoAsyncCollectorBuilder<KustoOpenType>(this._loggerFactory.CreateLogger("TestLogger"), kustoExtensionConfigProvider);
             // Then
             Assert.NotNull(asyncBuilder);
             Assert.Single(kustoExtensionConfigProvider.IngestClientCache);
@@ -46,6 +50,22 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
             // Then
             Assert.NotNull(kustoExtensionConfigProvider);
             return kustoExtensionConfigProvider;
+        }
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this._loggerFactory != null)
+                {
+                    this._loggerFactory.Dispose();
+                }
+            }
         }
     }
 }

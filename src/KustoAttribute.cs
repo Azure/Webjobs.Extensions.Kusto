@@ -41,6 +41,9 @@ namespace Microsoft.Azure.WebJobs.Kusto
         [AutoResolve]
         public string KqlCommand { get; set; }
 
+        [AutoResolve]
+        public string KqlParameters { get; set; }
+
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private string DebuggerDisplay
         {

@@ -11,5 +11,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         public const string IngestPrefix = "ingest-";
         public const string ProtocolSuffix = "://";
         public static readonly string ClientDetailForTracing = "Kusto.Function.Client:" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static readonly string ClientRequestId = "AzFunctions.InputBinding;" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
     }
 }

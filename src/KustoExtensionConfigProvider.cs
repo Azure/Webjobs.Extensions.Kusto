@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Azure.WebJobs.Host.Bindings;
@@ -12,6 +13,7 @@ using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Azure.WebJobs.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using static Microsoft.Azure.WebJobs.Extensions.Kusto.KustoQueryConverters;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {
@@ -22,6 +24,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     internal class KustoExtensionConfigProvider : IExtensionConfigProvider
     {
         internal ConcurrentDictionary<string, IKustoIngestClient> IngestClientCache { get; } = new ConcurrentDictionary<string, IKustoIngestClient>();
+        internal ConcurrentDictionary<string, ICslQueryProvider> QueryClientCache { get; } = new ConcurrentDictionary<string, ICslQueryProvider>();
         private readonly IConfiguration _configuration;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IKustoClientFactory _kustoClientFactory;
@@ -54,11 +57,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             }
             ILogger logger = this._loggerFactory.CreateLogger(LogCategories.Bindings);
 #pragma warning disable CS0618 // Cannot use var. FluentBindingRule is in Beta
-            FluentBindingRule<KustoAttribute> rule = context.AddBindingRule<KustoAttribute>();
+            FluentBindingRule<KustoAttribute> inputOutputRule = context.AddBindingRule<KustoAttribute>();
             // Validate the attributes we have
-            rule.AddValidator(this.ValidateConnection);
+            inputOutputRule.AddValidator(this.ValidateConnection);
             // Bind to the types
-            rule.BindToCollector<KustoOpenType>(typeof(KustoAsyncCollectorBuilder<>), this);
+            inputOutputRule.BindToCollector<KustoOpenType>(typeof(KustoAsyncCollectorBuilder<>), logger, this);
+            var converter = new KustoCslQueryConverter(logger, this);
+            inputOutputRule.BindToInput(converter);
+            inputOutputRule.BindToInput<OpenType>(typeof(KustoGenericsConverter<>), logger, this);
         }
         internal void ValidateConnection(KustoAttribute attribute, Type paramType)
         {
@@ -76,15 +82,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     $"The {attributeProperty} property cannot be an empty value.");
             }
 
-            if (string.IsNullOrEmpty(attribute.TableName))
+            if (string.IsNullOrEmpty(attribute.TableName) && string.IsNullOrEmpty(attribute.KqlCommand))
             {
-                string attributeProperty = $"{nameof(KustoAttribute)}.{nameof(KustoAttribute.TableName)}";
+                string attributeProperty = $"{nameof(KustoAttribute)}.{nameof(KustoAttribute.TableName)} or {nameof(KustoAttribute)}.{nameof(KustoAttribute.KqlCommand)}";
                 throw new InvalidOperationException(
                     $"The {attributeProperty} property cannot be an empty value.");
             }
         }
 
-        internal KustoIngestContext CreateContext(KustoAttribute kustoAttribute)
+        internal KustoIngestContext CreateIngestionContext(KustoAttribute kustoAttribute)
         {
             IKustoIngestClient service = this.GetIngestClient(kustoAttribute);
 
@@ -101,6 +107,26 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             string engineConnectionString = this.GetConnectionString(connection);
             string cacheKey = BuildCacheKey(engineConnectionString);
             return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString));
+        }
+
+
+        internal KustoQueryContext CreateQueryContext(KustoAttribute kustoAttribute)
+        {
+            ICslQueryProvider queryProvider = this.GetQueryClient(kustoAttribute);
+
+            return new KustoQueryContext
+            {
+                QueryProvider = queryProvider,
+                ResolvedAttribute = kustoAttribute,
+            };
+        }
+
+        internal ICslQueryProvider GetQueryClient(KustoAttribute kustoAttribute)
+        {
+            string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? KustoConstants.DefaultConnectionStringName : kustoAttribute.Connection;
+            string engineConnectionString = this.GetConnectionString(connection);
+            string cacheKey = BuildCacheKey(engineConnectionString);
+            return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString));
         }
 
         internal string GetConnectionString(string connectionStringSetting)

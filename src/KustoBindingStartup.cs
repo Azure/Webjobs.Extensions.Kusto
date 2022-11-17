@@ -14,7 +14,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
     {
         public void Configure(IWebJobsBuilder builder)
         {
-            builder.Services.AddSingleton<IKustoClientFactory>(new KustoManagedStreamingClientFactory());
+            builder.Services.AddSingleton<IKustoClientFactory>(new KustoClient());
             builder.AddKusto();
         }
     }

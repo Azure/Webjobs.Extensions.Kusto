@@ -14,7 +14,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         IKustoIngestClient IngestClientFactory(string engineConnectionString);
         ICslQueryProvider QueryProviderFactory(string engineConnectionString);
     }
-    internal class KustoManagedStreamingClientFactory : IKustoClientFactory
+    internal class KustoClient : IKustoClientFactory
     {
         public IKustoIngestClient IngestClientFactory(string engineConnectionString)
         {
@@ -41,7 +41,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 
         public ICslQueryProvider QueryProviderFactory(string engineConnectionString)
         {
-            return KustoClientFactory.CreateCslQueryProvider(engineConnectionString);
+            var engineKcsb = new KustoConnectionStringBuilder(engineConnectionString)
+            {
+                ClientVersionForTracing = KustoConstants.ClientDetailForTracing
+            };
+            return KustoClientFactory.CreateCslQueryProvider(engineKcsb);
         }
     }
 }

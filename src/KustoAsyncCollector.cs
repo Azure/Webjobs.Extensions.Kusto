@@ -19,11 +19,11 @@ namespace Microsoft.Azure.WebJobs.Kusto
     {
         private readonly List<T> _rows = new List<T>();
         private readonly SemaphoreSlim _rowLock = new SemaphoreSlim(1, 1);
-        private readonly KustoIngestContext _kustoContext;
+        private readonly KustoIngestContext _kustoIngestContext;
 
         public KustoAsyncCollector(KustoIngestContext kustoContext)
         {
-            this._kustoContext = kustoContext;
+            this._kustoIngestContext = kustoContext;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
         /// <param name="configuration"> Used to build up the connection.</param>
         private async Task IngestRowsAsync()
         {
-            KustoAttribute resolvedAttribute = this._kustoContext.ResolvedAttribute;
+            KustoAttribute resolvedAttribute = this._kustoIngestContext.ResolvedAttribute;
             var upsertRowsAsyncSw = Stopwatch.StartNew();
             DataSourceFormat format = this.GetDataFormat();
 
@@ -118,7 +118,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
 
         private async Task<IngestionStatus> IngestData(string dataToIngest, KustoIngestionProperties kustoIngestionProperties, StreamSourceOptions streamSourceOptions)
         {
-            IKustoIngestionResult ingestionResult = await this._kustoContext.IngestService.IngestFromStreamAsync(KustoBindingUtilities.StreamFromString(dataToIngest), kustoIngestionProperties, streamSourceOptions);
+            IKustoIngestionResult ingestionResult = await this._kustoIngestContext.IngestService.IngestFromStreamAsync(KustoBindingUtilities.StreamFromString(dataToIngest), kustoIngestionProperties, streamSourceOptions);
             IngestionStatus ingestionStatus = ingestionResult.GetIngestionStatusBySourceId(streamSourceOptions.SourceId);
             return ingestionStatus;
         }
@@ -156,7 +156,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
 
         private DataSourceFormat GetDataFormat()
         {
-            KustoAttribute resolvedAttribute = this._kustoContext.ResolvedAttribute;
+            KustoAttribute resolvedAttribute = this._kustoIngestContext.ResolvedAttribute;
             DataSourceFormat returnFormat = DataSourceFormat.json;
             if (string.IsNullOrEmpty(resolvedAttribute.DataFormat))
             {
