@@ -10,11 +10,11 @@ using Microsoft.Azure.WebJobs.Kusto;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
 {
-    public static class GetProducts
+    public static class GetProductsList
     {
-        [FunctionName("GetProducts")]
+        [FunctionName("GetProductsList")]
         public static IActionResult Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts/{productId}/name/{name}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts-list/{productId}/name/{name}")]
 #pragma warning disable IDE0060 // Remove unused parameter
             HttpRequest req,
 #pragma warning restore IDE0060 // Remove unused parameter

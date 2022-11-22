@@ -3,7 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace Microsoft.Azure.WebJobs.Kusto
 {
@@ -17,6 +20,12 @@ namespace Microsoft.Azure.WebJobs.Kusto
             writer.Flush();
             stream.Position = 0;
             return stream;
+        }
+
+
+        public static string SerializeRow(IDataReader reader)
+        {
+            return JsonConvert.SerializeObject(Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, i => reader.GetValue(i)));
         }
 
         public static IDictionary<string, string> ParseParameters(string parameters)

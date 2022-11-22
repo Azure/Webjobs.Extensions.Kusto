@@ -50,7 +50,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 return queryContext;
             }
         }
-        internal class KustoGenericsConverter<T> : IAsyncConverter<KustoAttribute, IEnumerable<T>>
+        internal class KustoGenericsConverter<T> : IAsyncConverter<KustoAttribute, IEnumerable<T>>, IConverter<KustoAttribute, IAsyncEnumerable<T>>
         {
             private readonly KustoExtensionConfigProvider _configProvider;
             private readonly ILogger _logger;
@@ -106,6 +106,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                         return queryReader.ToJObjects().Select(jObject => jObject.ToObject<T>()).ToList();
                     }
                 }
+            }
+
+            public IAsyncEnumerable<T> Convert(KustoAttribute attribute)
+            {
+                KustoQueryContext context = this._configProvider.CreateQueryContext(attribute);
+                return new KustoAsyncEnumerable<T>(context);
             }
         }
     }
