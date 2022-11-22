@@ -13,6 +13,7 @@ using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Azure.WebJobs.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using static Microsoft.Azure.WebJobs.Extensions.Kusto.KustoQueryConverters;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
@@ -64,6 +65,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             inputOutputRule.BindToCollector<KustoOpenType>(typeof(KustoAsyncCollectorBuilder<>), logger, this);
             var converter = new KustoCslQueryConverter(logger, this);
             inputOutputRule.BindToInput(converter);
+            inputOutputRule.BindToInput<string>(typeof(KustoGenericsConverter<string>), logger, this);
+            inputOutputRule.BindToInput<JArray>(typeof(KustoGenericsConverter<JArray>), logger, this);
             inputOutputRule.BindToInput<OpenType>(typeof(KustoGenericsConverter<>), logger, this);
         }
         internal void ValidateConnection(KustoAttribute attribute, Type paramType)

@@ -5,13 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Kusto.Cloud.Platform.Data;
+using Kusto.Cloud.Platform.Utils;
 using Kusto.Data.Common;
 using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {
@@ -50,7 +51,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 return queryContext;
             }
         }
-        internal class KustoGenericsConverter<T> : IAsyncConverter<KustoAttribute, IEnumerable<T>>, IConverter<KustoAttribute, IAsyncEnumerable<T>>
+        internal class KustoGenericsConverter<T> : IAsyncConverter<KustoAttribute, IEnumerable<T>>, IAsyncConverter<KustoAttribute, string>, IAsyncConverter<KustoAttribute, JArray>, IConverter<KustoAttribute, IAsyncEnumerable<T>>
         {
             private readonly KustoExtensionConfigProvider _configProvider;
             private readonly ILogger _logger;
@@ -78,34 +79,29 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             }
             public virtual async Task<IEnumerable<T>> BuildItemFromAttributeAsync(KustoAttribute attribute)
             {
-                KustoQueryContext kustoQueryContext = this._configProvider.CreateQueryContext(attribute);
-                string tracingRequestId = Guid.NewGuid().ToString();
-                ClientRequestProperties clientRequestProperties;
-                if (!string.IsNullOrEmpty(attribute.KqlParameters))
-                {
-                    // expect that this is a JSON in a specific format
-                    // We expect that we have a declarative query mechanism to perform KQL
-                    IDictionary<string, string> queryParameters = KustoBindingUtilities.ParseParameters(attribute.KqlParameters);
-                    clientRequestProperties = new ClientRequestProperties(options: null, parameters: queryParameters)
-                    {
-                        ClientRequestId = $"{KustoConstants.ClientRequestId};{tracingRequestId}",
-                    };
-                }
-                else
-                {
-                    clientRequestProperties = new ClientRequestProperties()
-                    {
-                        ClientRequestId = $"{KustoConstants.ClientRequestId};{tracingRequestId}",
-                    };
-                }
-                Task<IDataReader> queryTask = kustoQueryContext.QueryProvider.ExecuteQueryAsync(attribute.Database, attribute.KqlCommand, clientRequestProperties);
-                using (IDataReader queryReader = await queryTask.ConfigureAwait(false))
-                {
-                    using (queryReader)
-                    {
-                        return queryReader.ToJObjects().Select(jObject => jObject.ToObject<T>()).ToList();
-                    }
-                }
+                this._logger.LogDebug("BEGIN ConvertAsync (IEnumerable)");
+                var sw = Stopwatch.StartNew();
+                List<T> result = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider)).ToObject<List<T>>();
+                this._logger.LogDebug($"END ConvertAsync (string) Duration={sw.ElapsedMilliseconds}ms");
+                return result;
+            }
+
+            async Task<string> IAsyncConverter<KustoAttribute, string>.ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
+            {
+                this._logger.LogDebug("BEGIN ConvertAsync (string)");
+                var sw = Stopwatch.StartNew();
+                string result = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider)).ToString();
+                this._logger.LogDebug($"END ConvertAsync (string) Duration={sw.ElapsedMilliseconds}ms");
+                return result;
+            }
+
+            async Task<JArray> IAsyncConverter<KustoAttribute, JArray>.ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
+            {
+                this._logger.LogDebug("BEGIN ConvertAsync (JArray)");
+                var sw = Stopwatch.StartNew();
+                JArray result = await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider);
+                this._logger.LogDebug($"END ConvertAsync (JArray) Duration={sw.ElapsedMilliseconds}ms");
+                return result;
             }
 
             public IAsyncEnumerable<T> Convert(KustoAttribute attribute)
@@ -113,6 +109,39 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 KustoQueryContext context = this._configProvider.CreateQueryContext(attribute);
                 return new KustoAsyncEnumerable<T>(context);
             }
+        }
+        private static async Task<JArray> BuildJsonArrayFromAttributeAsync(KustoAttribute attribute, KustoExtensionConfigProvider configProvider)
+        {
+            KustoQueryContext kustoQueryContext = configProvider.CreateQueryContext(attribute);
+            string tracingRequestId = Guid.NewGuid().ToString();
+            ClientRequestProperties clientRequestProperties;
+            if (!string.IsNullOrEmpty(attribute.KqlParameters))
+            {
+                // expect that this is a JSON in a specific format
+                // We expect that we have a declarative query mechanism to perform KQL
+                IDictionary<string, string> queryParameters = KustoBindingUtilities.ParseParameters(attribute.KqlParameters);
+                clientRequestProperties = new ClientRequestProperties(options: null, parameters: queryParameters)
+                {
+                    ClientRequestId = $"{KustoConstants.ClientRequestId};{tracingRequestId}",
+                };
+            }
+            else
+            {
+                clientRequestProperties = new ClientRequestProperties()
+                {
+                    ClientRequestId = $"{KustoConstants.ClientRequestId};{tracingRequestId}",
+                };
+            }
+            Task<IDataReader> queryTask = kustoQueryContext.QueryProvider.ExecuteQueryAsync(attribute.Database, attribute.KqlCommand, clientRequestProperties);
+            var jArray = new JArray();
+            using (IDataReader queryReader = await queryTask.ConfigureAwait(false))
+            {
+                using (queryReader)
+                {
+                    queryReader.ToJObjects().ForEach(jObject => jArray.Add(jObject));
+                }
+            }
+            return jArray;
         }
     }
 }
