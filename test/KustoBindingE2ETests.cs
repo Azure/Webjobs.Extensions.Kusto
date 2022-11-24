@@ -1,18 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-
-
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Kusto.Cloud.Platform.Utils;
 using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Azure.WebJobs.Host.Indexers;
 using Microsoft.Azure.WebJobs.Host.TestCommon;
 using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
@@ -29,7 +29,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
         private const string DatabaseName = "TestDatabase";
         private const string TableName = "TestTable";
         private const string Query = "declare query_parameters (name:string);TestTable | where Name == name";
-        private static readonly IConfiguration _baseConfig = KustoTestHelper.BuildConfiguration();
+        //private static readonly IConfiguration _baseConfig = KustoTestHelper.BuildConfiguration();
         private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
         private readonly TestLoggerProvider _loggerProvider = new TestLoggerProvider();
 
@@ -41,8 +41,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
         [Fact]
         public async Task OutputBindings()
         {
-            Assert.NotNull(_baseConfig);
-            // Given
+            // Arrange
             var mockIngestionClient = new Mock<IKustoIngestClient>();
             var mockIngestionResult = new Mock<IKustoIngestionResult>();
             var ingestionStatus = new IngestionStatus()
@@ -66,8 +65,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
                     Validate(s, kip, sso);
                 });
             var ingestClientFactory = new MockClientFactory(mockIngestionClient.Object);
+            // Act
             await this.RunTestAsync(typeof(KustoEndToEndFunctions), ingestClientFactory, "Outputs");
-            // Verify the interactions
+            // Assert
             mockIngestionClient.Verify(m => m.IngestFromStreamAsync(
                             It.IsAny<Stream>(),
                             It.IsAny<KustoIngestionProperties>(),
@@ -98,25 +98,52 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
         [Fact]
         public async Task InputBindings()
         {
-            Assert.NotNull(_baseConfig);
-            //Given
+            //Arrange
             var mockQueryClient = new Mock<ICslQueryProvider>();
             var queryClientFactory = new MockClientFactory(mockQueryClient.Object);
-            Enumerable.Range(1, 3).ForEach(counter =>
+
+            string itemName = "I1";
+            IDataReader mockDataReader = KustoTestHelper.MockResultDataReaderItems(itemName, 1);
+            mockQueryClient.Setup(
+                m => m.ExecuteQueryAsync(DatabaseName, Query, It.IsAny<ClientRequestProperties>()))
+            .Returns(Task.FromResult(mockDataReader))
+            .Callback<string, string, ClientRequestProperties>((db, query, crp) =>
             {
-                var crp = new ClientRequestProperties();
-                crp.SetParameter("name", "I" + counter);
-                IDataReader mockDataReader = KustoTestHelper.MockResultDataReaderItems("I" + counter, counter, crp);
-                mockQueryClient.Setup(
-                    m => m.ExecuteQueryAsync(DatabaseName, Query, It.IsAny<ClientRequestProperties>())
-                ).Returns(Task.FromResult(mockDataReader));
+                Assert.True(crp.HasParameter("name"));
             });
-            // When
+            // Act
             await this.RunTestAsync(typeof(KustoEndToEndFunctions), queryClientFactory, "Inputs");
-            // Then
+            // Assert
             mockQueryClient.Verify(f => f.ExecuteQueryAsync(DatabaseName, It.IsAny<string>(), It.IsAny<ClientRequestProperties>()), Times.Once());
-            // mockQueryClient.VerifyAll();
+            mockQueryClient.VerifyAll();
         }
+
+        [Fact]
+        public async Task NoConnectionStringError()
+        {
+            //Arrange
+            var mockQueryClient = new Mock<ICslQueryProvider>();
+            var queryClientFactory = new MockClientFactory(mockQueryClient.Object);
+            // Act
+            FunctionIndexingException ex = await Assert.ThrowsAsync<FunctionIndexingException>(
+                () => this.RunTestAsync(typeof(KustoEndToEndFunctions), queryClientFactory, "NoConnectionString"));
+            // Assert
+            Assert.IsType<InvalidOperationException>(ex.InnerException);
+        }
+
+        [Fact]
+        public async Task InvalidBindingTypeError()
+        {
+            //Arrange
+            var mockQueryClient = new Mock<ICslQueryProvider>();
+            var queryClientFactory = new MockClientFactory(mockQueryClient.Object);
+            // Act
+            FunctionInvocationException ex = await Assert.ThrowsAsync<FunctionInvocationException>(
+                () => this.RunTestAsync(typeof(KustoEndToEndFunctions), queryClientFactory, "InvalidBindingType"));
+            // Assert
+            Assert.IsType<InvalidOperationException>(ex.InnerException);
+        }
+
 
         public void Dispose()
         {
@@ -135,7 +162,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
             }
         }
 
-        private async Task RunTestAsync(Type testType, IKustoClientFactory kustoIngestClientFactory, string testName, object argument = null, bool includeDefaultConnectionString = true)
+        private async Task RunTestAsync(Type testType, IKustoClientFactory kustoClientFactory, string testName, object argument = null, bool includeDefaultConnectionString = true)
         {
             var locator = new ExplicitTypeLocator(testType);
             var arguments = new Dictionary<string, object>
@@ -163,7 +190,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton<ITypeLocator>(locator);
-                    services.AddSingleton(kustoIngestClientFactory);
+                    services.AddSingleton(kustoClientFactory);
                 })
                 .ConfigureLogging(logging =>
                 {
@@ -203,11 +230,26 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
             }
             [NoAutomaticTrigger]
             public static void Inputs(
-            [Kusto(database: DatabaseName, KqlCommand = Query, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> itemOne
+            [Kusto(database: DatabaseName, KqlCommand = Query, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> itemOne,
+            [Kusto(database: DatabaseName, KqlCommand = Query, KqlParameters = "@name=I2", Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemTwo,
+            [Kusto(database: DatabaseName, KqlCommand = Query, KqlParameters = "@name=I3", Connection = KustoConstants.DefaultConnectionStringName)] JArray itemThree
             )
             {
                 Assert.NotNull(itemOne);
                 Assert.Equal(2, itemOne.Count());
+                Assert.NotNull(itemTwo);
+                Assert.NotNull(itemThree);
+                Assert.Equal(2, itemThree.Count);
+            }
+            public static void NoConnectionString(
+            [Kusto(database: DatabaseName, KqlCommand = Query, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> _)
+            {
+
+            }
+            public static void InvalidBindingType(
+            [Kusto(database: DatabaseName, KqlCommand = Query, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<JObject> _)
+            {
+
             }
         }
     }

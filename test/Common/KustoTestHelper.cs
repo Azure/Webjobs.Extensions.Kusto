@@ -42,12 +42,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
             };
         }
 
-        public static IDataReader MockResultDataReaderItems(string itemName, int counter, ClientRequestProperties crp)
+        public static IDataReader MockResultDataReaderItems(string itemName, int counter)
         {
+            var crp = new ClientRequestProperties();
+            crp.SetParameter("name", itemName);
             DataSet testDataSet = PrepareDataSet(itemName, counter);
             DataTableReader testDataSetReader = testDataSet.CreateDataReader();
             var options = KustoDataReaderOptions.CreateFromClientRequestProperties(crp);
-            return KustoJsonDataStream.CreateReaderWriterPairForTest(testDataSetReader, options, processIntermediateStream: null);
+            return KustoJsonDataStream.CreateReaderWriterPairForTest(testDataSetReader, options);
         }
         private static DataSet PrepareDataSet(string itemName, int counter)
         {
