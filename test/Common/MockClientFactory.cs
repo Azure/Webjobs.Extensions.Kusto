@@ -6,12 +6,18 @@ using Kusto.Ingest;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 {
-    public class MockManagedStreamingClientFactory : IKustoClientFactory
+    public class MockClientFactory : IKustoClientFactory
     {
         private readonly IKustoIngestClient _ingestClient;
-        public MockManagedStreamingClientFactory(IKustoIngestClient mockClient)
+        private readonly ICslQueryProvider _queryClient;
+        public MockClientFactory(IKustoIngestClient mockClient)
         {
             this._ingestClient = mockClient;
+        }
+
+        public MockClientFactory(ICslQueryProvider queryClient)
+        {
+            this._queryClient = queryClient;
         }
 
         public IKustoIngestClient IngestClientFactory(string engineConnectionString)
@@ -21,7 +27,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 
         public ICslQueryProvider QueryProviderFactory(string engineConnectionString)
         {
-            throw new System.NotImplementedException();
+            return this._queryClient;
         }
     }
 }

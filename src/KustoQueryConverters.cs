@@ -138,7 +138,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 using (queryReader)
                 {
-                    queryReader.ToJObjects().ForEach(jObject => jArray.Add(jObject));
+                    IEnumerable<JObject> objects = queryReader.ToJObjects();
+                    objects.ForEach(jObject => jArray.Add(jObject));
                 }
             }
             return jArray;

@@ -40,7 +40,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
         {
             var nameResolver = new KustoNameResolver();
             var mockIngestionClient = new Mock<IKustoIngestClient>(MockBehavior.Strict);
-            var ingestClientFactory = new MockManagedStreamingClientFactory(mockIngestionClient.Object);
+            var ingestClientFactory = new MockClientFactory(mockIngestionClient.Object);
 
             var kustoExtensionConfigProvider = new KustoExtensionConfigProvider(_baseConfig, NullLoggerFactory.Instance, ingestClientFactory);
             kustoExtensionConfigProvider.IngestClientCache.Clear();

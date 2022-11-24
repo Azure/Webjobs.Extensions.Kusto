@@ -4,8 +4,12 @@
 
 
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Text;
+using Kusto.Cloud.Platform.Data;
+using Kusto.Data.Common;
+using Kusto.Data.Data;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Host.Config;
@@ -36,6 +40,32 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
                 IngestService = ingestClientService,
                 ResolvedAttribute = attribute
             };
+        }
+
+        public static IDataReader MockResultDataReaderItems(string itemName, int counter, ClientRequestProperties crp)
+        {
+            DataSet testDataSet = PrepareDataSet(itemName, counter);
+            DataTableReader testDataSetReader = testDataSet.CreateDataReader();
+            var options = KustoDataReaderOptions.CreateFromClientRequestProperties(crp);
+            return KustoJsonDataStream.CreateReaderWriterPairForTest(testDataSetReader, options, processIntermediateStream: null);
+        }
+        private static DataSet PrepareDataSet(string itemName, int counter)
+        {
+            var set = new DataSet();
+            for (int tableIndex = 0; tableIndex <= 2; tableIndex++)
+            {
+                DataTable table = ExtendedDataTable.Create<Row>("TableName_" + tableIndex);
+                // Number of rows to generate
+                var rows = new Row[2];
+                for (int i = 0; i < rows.Length; i++)
+                {
+                    rows[i] = Row.CreateRandom(itemName, counter);
+                    table.Rows.Add(rows[i].ToObjectArray());
+                }
+                set.Tables.Add(table);
+            }
+            set.AcceptChanges();
+            return set;
         }
 
         public static List<Item> LoadItems(Stream stream)

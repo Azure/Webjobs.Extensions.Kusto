@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
 {
-    public class KustoBindingStartupTests
+    public class KustoOutputBindingsStartupTests
     {
         [Fact]
         public void StartupIsDiscoverable()

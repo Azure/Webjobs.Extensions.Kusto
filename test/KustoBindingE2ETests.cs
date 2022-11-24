@@ -5,9 +5,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Kusto.Cloud.Platform.Utils;
+using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common;
 using Microsoft.Azure.WebJobs.Host.TestCommon;
@@ -25,6 +28,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
     {
         private const string DatabaseName = "TestDatabase";
         private const string TableName = "TestTable";
+        private const string Query = "declare query_parameters (name:string);TestTable | where Name == name";
         private static readonly IConfiguration _baseConfig = KustoTestHelper.BuildConfiguration();
         private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
         private readonly TestLoggerProvider _loggerProvider = new TestLoggerProvider();
@@ -61,7 +65,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
                 {
                     Validate(s, kip, sso);
                 });
-            var ingestClientFactory = new MockManagedStreamingClientFactory(mockIngestionClient.Object);
+            var ingestClientFactory = new MockClientFactory(mockIngestionClient.Object);
             await this.RunTestAsync(typeof(KustoEndToEndFunctions), ingestClientFactory, "Outputs");
             // Verify the interactions
             mockIngestionClient.Verify(m => m.IngestFromStreamAsync(
@@ -90,6 +94,29 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
             }
         }
 
+
+        [Fact]
+        public async Task InputBindings()
+        {
+            Assert.NotNull(_baseConfig);
+            //Given
+            var mockQueryClient = new Mock<ICslQueryProvider>();
+            var queryClientFactory = new MockClientFactory(mockQueryClient.Object);
+            Enumerable.Range(1, 3).ForEach(counter =>
+            {
+                var crp = new ClientRequestProperties();
+                crp.SetParameter("name", "I" + counter);
+                IDataReader mockDataReader = KustoTestHelper.MockResultDataReaderItems("I" + counter, counter, crp);
+                mockQueryClient.Setup(
+                    m => m.ExecuteQueryAsync(DatabaseName, Query, It.IsAny<ClientRequestProperties>())
+                ).Returns(Task.FromResult(mockDataReader));
+            });
+            // When
+            await this.RunTestAsync(typeof(KustoEndToEndFunctions), queryClientFactory, "Inputs");
+            // Then
+            mockQueryClient.Verify(f => f.ExecuteQueryAsync(DatabaseName, It.IsAny<string>(), It.IsAny<ClientRequestProperties>()), Times.Once());
+            // mockQueryClient.VerifyAll();
+        }
 
         public void Dispose()
         {
@@ -173,6 +200,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
                 });
                 collector.Add(new { });
                 collector.Add(new { });
+            }
+            [NoAutomaticTrigger]
+            public static void Inputs(
+            [Kusto(database: DatabaseName, KqlCommand = Query, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> itemOne
+            )
+            {
+                Assert.NotNull(itemOne);
+                Assert.Equal(2, itemOne.Count());
             }
         }
     }
