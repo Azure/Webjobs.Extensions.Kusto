@@ -359,3 +359,5 @@ __azurite_db*__.json
 
 # Python virtual environment
 .venv
+/coveragereport
+/build

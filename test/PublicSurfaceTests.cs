@@ -3,7 +3,7 @@
 
 using Microsoft.Azure.WebJobs.Kusto;
 
-namespace Microsoft.Azure.WebJobs.Host.UnitTests
+namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
 {
     public class PublicSurfaceTests
     {
@@ -18,7 +18,7 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests
                 "KustoBindingStartup",
                 "KustoAttribute"
             };
-            TestCommon.TestHelpers.AssertPublicTypes(expected, assembly);
+            Host.TestCommon.TestHelpers.AssertPublicTypes(expected, assembly);
         }
     }
 }

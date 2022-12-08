@@ -12,6 +12,11 @@ using Newtonsoft.Json;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {
+    /// <summary>
+    /// Provides a mechanism to get an AsyncEnumerable. Useful in scenarios where a large number of records match
+    /// the input query predicate and the results have to be streamed async
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     internal class KustoAsyncEnumerable<T> : IAsyncEnumerable<T>
     {
         private readonly KustoQueryContext _kustoQueryContext;
@@ -32,7 +37,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 this._kustoQueryContext = kustoQueryContext ?? throw new ArgumentNullException(nameof(kustoQueryContext));
             }
-
+            /// <summary>
+            /// Get the current row being processed
+            /// </summary>
             public T Current { get; private set; }
 
             public ValueTask DisposeAsync()
@@ -45,7 +52,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 return new ValueTask<bool>(this.GetNextRowAsync());
             }
-
+            /// <summary>
+            /// Assign the current record by moving ahead in the stream. The result of the Query in ADX is an IDataReader that can be
+            /// read from and individual records be assigned
+            /// </summary>
+            /// <returns></returns>
             private async Task<bool> GetNextRowAsync()
             {
                 if (this._kustoQueryContext.QueryProvider != null)

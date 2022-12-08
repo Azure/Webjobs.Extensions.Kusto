@@ -13,13 +13,23 @@ namespace Microsoft.Azure.WebJobs.Kusto
 
         private readonly ILogger _logger;
 
-
+        /// <summary>
+        /// Use the builder to create the async collector that is used to read and collect multiple items. If we get a multiple input scenaio
+        /// we want to Add them into a collection and then flush it once (than ingesting on a per item basis)
+        /// </summary>
+        /// <param name="logger">The logger to log in the collector (if there are any binding failures)</param>
+        /// <param name="configProvider">Config provider to create the ingestion context and initialize the client</param>
         public KustoAsyncCollectorBuilder(ILogger logger, KustoExtensionConfigProvider configProvider)
         {
             this._logger = logger;
             this._configProvider = configProvider;
         }
 
+        /// <summary>
+        /// Get the collector to read / collect
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <returns><see cref="IAsyncCollector"/></returns>
         IAsyncCollector<T> IConverter<KustoAttribute, IAsyncCollector<T>>.Convert(KustoAttribute attribute)
         {
             this._logger.LogDebug("BEGIN Convert (KustoAsyncCollectorBuilder)");

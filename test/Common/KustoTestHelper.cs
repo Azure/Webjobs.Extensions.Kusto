@@ -10,6 +10,7 @@ using System.Text;
 using Kusto.Cloud.Platform.Data;
 using Kusto.Data.Common;
 using Kusto.Data.Data;
+using Kusto.Data.Net.Client;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Host.Config;
@@ -42,13 +43,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
             };
         }
 
-        public static IDataReader MockResultDataReaderItems(string itemName, int counter)
+        public static IDataReader MockResultDataReaderItems(string databaseName, string itemName, int counter)
         {
             var crp = new ClientRequestProperties();
+            var kustoClientRequestDescriptor = new KustoClientRequestDescriptor("test-data-source", databaseName, "c-id" + counter);
             crp.SetParameter("name", itemName);
             DataSet testDataSet = PrepareDataSet(itemName, counter);
             DataTableReader testDataSetReader = testDataSet.CreateDataReader();
-            var options = KustoDataReaderOptions.CreateFromClientRequestProperties(crp);
+            var options = KustoDataReaderOptions.CreateFromClientRequestProperties(crp, kustoClientRequestDescriptor);
             return KustoJsonDataStream.CreateReaderWriterPairForTest(testDataSetReader, options);
         }
         private static DataSet PrepareDataSet(string itemName, int counter)

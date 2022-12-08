@@ -15,6 +15,11 @@ using Newtonsoft.Json;
 
 namespace Microsoft.Azure.WebJobs.Kusto
 {
+    /// <summary>
+    /// Provides a holder to add multiple items of the generic type T through Add and then provide a way to flush them 
+    /// in a single batch using Flush
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     internal class KustoAsyncCollector<T> : IAsyncCollector<T>, IDisposable
     {
         private readonly List<T> _rows = new List<T>();

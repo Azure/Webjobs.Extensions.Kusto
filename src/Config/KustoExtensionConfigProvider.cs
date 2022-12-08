@@ -78,13 +78,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     $"The {attributeProperty} property cannot be an empty value.");
             }
 
-            if (string.IsNullOrEmpty(attribute.Database))
-            {
-                string attributeProperty = $"{nameof(KustoAttribute)}.{nameof(KustoAttribute.Database)}";
-                throw new InvalidOperationException(
-                    $"The {attributeProperty} property cannot be an empty value.");
-            }
-
+            // Empty database check is added right when the KustoAttribute is constructed. This however is deferred here. 
+            // TODO : Add check based on parameters and parameter indexes ?
             if (string.IsNullOrEmpty(attribute.TableName) && string.IsNullOrEmpty(attribute.KqlCommand))
             {
                 string attributeProperty = $"{nameof(KustoAttribute)}.{nameof(KustoAttribute.TableName)} or {nameof(KustoAttribute)}.{nameof(KustoAttribute.KqlCommand)}";
@@ -96,7 +91,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         internal KustoIngestContext CreateIngestionContext(KustoAttribute kustoAttribute)
         {
             IKustoIngestClient service = this.GetIngestClient(kustoAttribute);
-
             return new KustoIngestContext
             {
                 IngestService = service,
@@ -116,7 +110,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         internal KustoQueryContext CreateQueryContext(KustoAttribute kustoAttribute)
         {
             ICslQueryProvider queryProvider = this.GetQueryClient(kustoAttribute);
-
             return new KustoQueryContext
             {
                 QueryProvider = queryProvider,
@@ -134,11 +127,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 
         internal string GetConnectionString(string connectionStringSetting)
         {
-            if (string.IsNullOrEmpty(connectionStringSetting))
-            {
-                throw new ArgumentException("Must specify ConnectionString, which should refer to the name of an app setting that " +
-                    "contains a Kusto connection string");
-            }
+            // Already validated upfront in Validate that ConnectionString setting is passed in and not null
             return this._configuration.GetConnectionStringOrSetting(connectionStringSetting);
         }
         internal static string BuildCacheKey(string connectionString)

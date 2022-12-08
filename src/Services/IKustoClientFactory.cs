@@ -9,6 +9,10 @@ using Kusto.Ingest;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {
+    /// <summary>
+    /// Wrap around Kusto internal classes and provides a mechanism to provide the query and ingest clients. Has an additional benefit that
+    /// testing is a lot easier
+    /// </summary>
     internal interface IKustoClientFactory
     {
         IKustoIngestClient IngestClientFactory(string engineConnectionString);
@@ -16,6 +20,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     }
     internal class KustoClient : IKustoClientFactory
     {
+        /// <summary>
+        /// Given the engine connection string, return a managed ingest client
+        /// </summary>
+        /// <param name="engineConnectionString">The engine connection string. The ingest URL will be derieved from this for the managed ingest</param>
+        /// <returns>A managed ingest client. Attempts ingestion through streaming and then fallsback to Queued ingest mode</returns>
         public IKustoIngestClient IngestClientFactory(string engineConnectionString)
         {
             var engineKcsb = new KustoConnectionStringBuilder(engineConnectionString)
@@ -38,6 +47,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             return KustoIngestFactory.CreateManagedStreamingIngestClient(engineKcsb, dmKcsb);
         }
+
+        /// <summary>
+        /// Given the engine connection string, return a query client
+        /// </summary>
+        /// <param name="engineConnectionString">The engine connection string</param>
+        /// <returns>A query client to execute KQL</returns>
 
         public ICslQueryProvider QueryProviderFactory(string engineConnectionString)
         {

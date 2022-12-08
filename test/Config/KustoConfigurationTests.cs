@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
+namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Config
 {
     public class KustoConfigurationTests : IDisposable
     {

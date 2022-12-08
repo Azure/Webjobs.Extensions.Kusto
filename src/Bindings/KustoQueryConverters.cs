@@ -61,13 +61,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 this._configProvider = configProvider;
             }
 
+            /// <summary>
+            /// Get matching records into a list and return it
+            /// </summary>
+            /// <param name="attribute">The attribute that contains the query and parameters for teh query</param>
+            /// <param name="cancellationToken">The async cancellation token</param>
+            /// <returns>A list of T , the type of the object retrieved</returns>
             public async Task<IEnumerable<T>> ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
             {
                 this._logger.LogDebug("BEGIN ConvertAsync (IEnumerable)");
                 var sw = Stopwatch.StartNew();
                 try
                 {
-                    IEnumerable<T> results = await this.BuildItemFromAttributeAsync(attribute);
+                    List<T> results = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider)).ToObject<List<T>>();
                     this._logger.LogDebug($"END ConvertAsync (IEnumerable) Duration={sw.ElapsedMilliseconds}ms");
                     return results;
                 }
@@ -77,15 +83,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     throw;
                 }
             }
-            public virtual async Task<IEnumerable<T>> BuildItemFromAttributeAsync(KustoAttribute attribute)
-            {
-                this._logger.LogDebug("BEGIN ConvertAsync (IEnumerable)");
-                var sw = Stopwatch.StartNew();
-                List<T> result = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider)).ToObject<List<T>>();
-                this._logger.LogDebug($"END ConvertAsync (string) Duration={sw.ElapsedMilliseconds}ms");
-                return result;
-            }
-
+            /// <summary>
+            /// Get matching records as a string and return it
+            /// </summary>
+            /// <param name="attribute">The attribute that contains the query and parameters for teh query</param>
+            /// <param name="cancellationToken">The async cancellation token</param>
+            /// <returns>A string (array) that contains the string representation</returns>
             async Task<string> IAsyncConverter<KustoAttribute, string>.ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
             {
                 this._logger.LogDebug("BEGIN ConvertAsync (string)");
@@ -94,7 +97,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 this._logger.LogDebug($"END ConvertAsync (string) Duration={sw.ElapsedMilliseconds}ms");
                 return result;
             }
-
+            /// <summary>
+            /// Get matching JSON Array for processing
+            /// </summary>
+            /// <param name="attribute">The attribute that contains the query and parameters for teh query</param>
+            /// <param name="cancellationToken">The async cancellation token</param>
+            /// <returns>A JSON Array that contains the list of retrieved records</returns>
             async Task<JArray> IAsyncConverter<KustoAttribute, JArray>.ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
             {
                 this._logger.LogDebug("BEGIN ConvertAsync (JArray)");
@@ -103,7 +111,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 this._logger.LogDebug($"END ConvertAsync (JArray) Duration={sw.ElapsedMilliseconds}ms");
                 return result;
             }
-
+            /// <summary>
+            /// Provide an async implementation of collecting retrieved objects as a list
+            /// </summary>
+            /// <param name="attribute"></param>
+            /// <returns>A list of T , the type of the object retrieved (async)</returns>
             public IAsyncEnumerable<T> Convert(KustoAttribute attribute)
             {
                 KustoQueryContext context = this._configProvider.CreateQueryContext(attribute);
@@ -136,10 +148,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             var jArray = new JArray();
             using (IDataReader queryReader = await queryTask.ConfigureAwait(false))
             {
-                using (queryReader)
+                if (queryReader != null)
                 {
-                    IEnumerable<JObject> objects = queryReader.ToJObjects();
-                    objects.ForEach(jObject => jArray.Add(jObject));
+                    using (queryReader)
+                    {
+                        queryReader.ToJObjects().ForEach(jObject => jArray.Add(jObject));
+                    }
                 }
             }
             return jArray;
