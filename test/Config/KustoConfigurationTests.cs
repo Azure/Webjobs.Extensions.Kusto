@@ -17,7 +17,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Config
     public class KustoConfigurationTests : IDisposable
     {
         private static readonly IConfiguration _baseConfig = KustoTestHelper.BuildConfiguration();
-        private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
+        private readonly ILogger _logger = new LoggerFactory().CreateLogger<KustoConfigurationTests>();
 
         [Fact]
         public void ConfigurationCachesClients()
@@ -31,7 +31,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Config
             // When
             _ = kustoExtensionConfigProvider.CreateIngestionContext(attribute);
             _ = kustoExtensionConfigProvider.CreateIngestionContext(attribute);
-            var asyncBuilder = new KustoAsyncCollectorBuilder<KustoOpenType>(this._loggerFactory.CreateLogger("TestLogger"), kustoExtensionConfigProvider);
+            var asyncBuilder = new KustoAsyncCollectorBuilder<KustoOpenType>(this._logger, kustoExtensionConfigProvider);
             // Then
             Assert.NotNull(asyncBuilder);
             Assert.Single(kustoExtensionConfigProvider.IngestClientCache);
@@ -53,19 +53,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Config
         }
         public void Dispose()
         {
-            this.Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (this._loggerFactory != null)
-                {
-                    this._loggerFactory.Dispose();
-                }
-            }
         }
     }
 }

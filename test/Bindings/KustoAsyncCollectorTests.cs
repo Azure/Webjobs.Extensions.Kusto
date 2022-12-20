@@ -10,6 +10,7 @@ using Kusto.Cloud.Platform.Utils;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common;
 using Microsoft.Azure.WebJobs.Kusto;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -17,13 +18,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
 {
     public class KustoAsyncCollectorTests
     {
+        private readonly ILogger _logger = new LoggerFactory().CreateLogger<KustoAsyncCollectorTests>();
+
         [Fact]
         public async Task AddAsyncAccumulatesDataAsync()
         {
             // Set-up
             var mockIngestionClient = new Mock<IKustoIngestClient>(MockBehavior.Strict);
             KustoIngestContext context = KustoTestHelper.CreateContext(mockIngestionClient.Object);
-            var collector = new KustoAsyncCollector<Item>(context);
+            var collector = new KustoAsyncCollector<Item>(context, this._logger);
             // when
             await collector.AddAsync(new Item { ID = 1, Name = "x" });
             // then - Verifies the ingestion service client is initialized and no calls are made to it yet
@@ -52,7 +55,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
                 Capture.In(actualStreamSourceOptions))).ReturnsAsync(mockIngestionResult.Object);
             // When
             KustoIngestContext context = KustoTestHelper.CreateContext(mockIngestionClient.Object);
-            var collector = new KustoAsyncCollector<Item>(context);
+            var collector = new KustoAsyncCollector<Item>(context, this._logger);
             IEnumerable<int> numberOfItems = Enumerable.Range(1, 5);
             var expectedItems = new List<Item>();
             var taskResult = Task.WhenAll(numberOfItems.Select(i =>
@@ -96,7 +99,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
                 Capture.In(actualStreamSourceOptions))).ReturnsAsync(mockIngestionResult.Object);
             // When
             KustoIngestContext context = KustoTestHelper.CreateContext(mockIngestionClient.Object);
-            var collector = new KustoAsyncCollector<Item>(context);
+            var collector = new KustoAsyncCollector<Item>(context, this._logger);
             var expectedItem = new Item { ID = 10, Name = "x-" + 10 };
             await collector.AddAsync(expectedItem);
             await collector.FlushAsync();

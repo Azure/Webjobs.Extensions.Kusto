@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -11,6 +10,7 @@ using System.Threading.Tasks;
 using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Extensions.Kusto;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace Microsoft.Azure.WebJobs.Kusto
@@ -25,10 +25,18 @@ namespace Microsoft.Azure.WebJobs.Kusto
         private readonly List<T> _rows = new List<T>();
         private readonly SemaphoreSlim _rowLock = new SemaphoreSlim(1, 1);
         private readonly KustoIngestContext _kustoIngestContext;
+        private readonly ILogger _logger;
+        private readonly Lazy<string> _contextdetail;
 
-        public KustoAsyncCollector(KustoIngestContext kustoContext)
+
+        public KustoAsyncCollector(KustoIngestContext kustoContext, ILogger logger)
         {
             this._kustoIngestContext = kustoContext;
+            this._logger = logger;
+            this._contextdetail = new Lazy<string>(() => $"TableName='{kustoContext.ResolvedAttribute?.TableName}'," +
+            $"Database='{kustoContext.ResolvedAttribute?.Database}', " +
+            $"MappingRef='{kustoContext.ResolvedAttribute?.MappingRef}', " +
+            $"DataFormat='{this.GetDataFormat()}'");
         }
 
         /// <summary>
@@ -64,16 +72,23 @@ namespace Microsoft.Azure.WebJobs.Kusto
         public async Task FlushAsync(CancellationToken cancellationToken = default)
         {
             await this._rowLock.WaitAsync(cancellationToken);
+            var ingestSourceId = Guid.NewGuid();
             try
             {
                 if (this._rows.Count != 0)
                 {
-                    await this.IngestRowsAsync();
+                    IngestionStatus ingestionStatus = await this.IngestRowsAsync(ingestSourceId);
+                    if (ingestionStatus.Status == Status.Failed)
+                    {
+                        this._logger.LogError("Ingestion status reported failure for {IngestSourceId}. Ingest detail {IngestDetail}", ingestSourceId.ToString(), this._contextdetail.Value);
+                    }
                     this._rows.Clear();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // Once we have the blob Id all the attributes of DataIngestPull can then be retrieved (format,metadata about the ingest etc.)
+                this._logger.LogError("Exception ingesting rows with SourceId {IngestSourceId}. Ingest detail {IngestDetail}", ingestSourceId.ToString(), this._contextdetail.Value, ex);
                 throw;
             }
             finally
@@ -83,15 +98,13 @@ namespace Microsoft.Azure.WebJobs.Kusto
         }
 
         /// <summary>
-        /// Ingests the rows specified in "rows" to the table specified in "kusto-attribute"
+        /// Performs the actual ingestion using managed ingest client
         /// </summary>
-        /// <param name="rows"> The rows to be ingested to Kusto.</param>
-        /// <param name="attribute"> Contains the name of the table to be ingested into.</param>
-        /// <param name="configuration"> Used to build up the connection.</param>
-        private async Task IngestRowsAsync()
+        /// <param name="ingestSourceId">The ingest source id is used to track the ingestion</param>
+        /// <returns></returns>
+        private async Task<IngestionStatus> IngestRowsAsync(Guid ingestSourceId)
         {
             KustoAttribute resolvedAttribute = this._kustoIngestContext.ResolvedAttribute;
-            var upsertRowsAsyncSw = Stopwatch.StartNew();
             DataSourceFormat format = this.GetDataFormat();
 
             var kustoIngestProperties = new KustoIngestionProperties(resolvedAttribute.Database, resolvedAttribute.TableName)
@@ -108,17 +121,14 @@ namespace Microsoft.Azure.WebJobs.Kusto
                 };
                 kustoIngestProperties.IngestionMapping = ingestionMapping;
             }
-            var sourceId = Guid.NewGuid();
             var streamSourceOptions = new StreamSourceOptions()
             {
-                SourceId = sourceId,
+                SourceId = ingestSourceId,
             };
-
             /*
                 The expectation here is that user will provide a CSV mapping or a JSON/Multi-JSON mapping
              */
-            await this.IngestData(dataToIngest, kustoIngestProperties, streamSourceOptions);
-            upsertRowsAsyncSw.Stop();
+            return await this.IngestData(dataToIngest, kustoIngestProperties, streamSourceOptions);
         }
 
         private async Task<IngestionStatus> IngestData(string dataToIngest, KustoIngestionProperties kustoIngestionProperties, StreamSourceOptions streamSourceOptions)
@@ -139,7 +149,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
                 {
                     if (!first)
                     {
-                        textWriter.WriteLine("");
+                        textWriter.WriteLine(string.Empty);
                     }
                     first = false;
                     using (var jsonWriter = new JsonTextWriter(textWriter) { QuoteName = false, Formatting = indent, CloseOutput = false })

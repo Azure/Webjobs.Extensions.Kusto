@@ -63,7 +63,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             inputOutputRule.AddValidator(this.ValidateConnection);
             // Bind to the types
             inputOutputRule.BindToCollector<KustoOpenType>(typeof(KustoAsyncCollectorBuilder<>), logger, this);
-            var converter = new KustoCslQueryConverter(logger, this);
+            var converter = new KustoCslQueryConverter(this);
             inputOutputRule.BindToInput(converter);
             inputOutputRule.BindToInput<string>(typeof(KustoGenericsConverter<string>), logger, this);
             inputOutputRule.BindToInput<JArray>(typeof(KustoGenericsConverter<JArray>), logger, this);

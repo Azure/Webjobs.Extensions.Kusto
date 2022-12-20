@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Kusto.Cloud.Platform.Data;
@@ -21,19 +20,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         internal class KustoCslQueryConverter : IConverter<KustoAttribute, KustoQueryContext>
         {
             private readonly KustoExtensionConfigProvider _configProvider;
-            private readonly ILogger _logger;
             /// <summary>
             /// Initializes a new instance of the <see cref="KustoCslQueryConverter/>"/> class.
             /// </summary>
-            /// <param name="logger">ILogger used to log information and warnings</param>
             /// <param name="configProvider">KustoExtensionConfig provider that is used to initialize the client</param>
             /// <exception cref="ArgumentNullException">
             /// Thrown if the configuration is null
             /// </exception>
-            public KustoCslQueryConverter(ILogger logger, KustoExtensionConfigProvider configProvider)
+            public KustoCslQueryConverter(KustoExtensionConfigProvider configProvider)
             {
-                this._logger = logger;
                 this._configProvider = configProvider;
+
             }
 
             /// <summary>
@@ -44,10 +41,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             /// <returns>The KustoQueryContext</returns>
             public KustoQueryContext Convert(KustoAttribute attribute)
             {
-                this._logger.LogDebug("BEGIN Convert (KustoCslQueryConverter)");
-                var sw = Stopwatch.StartNew();
                 KustoQueryContext queryContext = this._configProvider.CreateQueryContext(attribute);
-                this._logger.LogDebug($"END Convert (KustoCslQueryConverter) Duration={sw.ElapsedMilliseconds}ms");
                 return queryContext;
             }
         }
@@ -69,12 +63,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             /// <returns>A list of T , the type of the object retrieved</returns>
             public async Task<IEnumerable<T>> ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
             {
-                this._logger.LogDebug("BEGIN ConvertAsync (IEnumerable)");
-                var sw = Stopwatch.StartNew();
                 try
                 {
                     List<T> results = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider)).ToObject<List<T>>();
-                    this._logger.LogDebug($"END ConvertAsync (IEnumerable) Duration={sw.ElapsedMilliseconds}ms");
                     return results;
                 }
                 catch (Exception ex)
@@ -91,10 +82,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             /// <returns>A string (array) that contains the string representation</returns>
             async Task<string> IAsyncConverter<KustoAttribute, string>.ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
             {
-                this._logger.LogDebug("BEGIN ConvertAsync (string)");
-                var sw = Stopwatch.StartNew();
                 string result = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider)).ToString();
-                this._logger.LogDebug($"END ConvertAsync (string) Duration={sw.ElapsedMilliseconds}ms");
                 return result;
             }
             /// <summary>
@@ -105,10 +93,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             /// <returns>A JSON Array that contains the list of retrieved records</returns>
             async Task<JArray> IAsyncConverter<KustoAttribute, JArray>.ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
             {
-                this._logger.LogDebug("BEGIN ConvertAsync (JArray)");
-                var sw = Stopwatch.StartNew();
                 JArray result = await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider);
-                this._logger.LogDebug($"END ConvertAsync (JArray) Duration={sw.ElapsedMilliseconds}ms");
                 return result;
             }
             /// <summary>

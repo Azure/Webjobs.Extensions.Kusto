@@ -10,9 +10,9 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Core">
       <Version>2.2.5</Version>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="11.1.0" />
+    <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="11.2.1" />
     <PackageVersion Include="Microsoft.Azure.Kusto.Ingest">
-      <Version>11.1.0</Version>
+      <Version>11.2.1</Version>
     </PackageVersion>
     <PackageVersion Include="Microsoft.Azure.WebJobs.Core">
       <Version>3.0.33</Version>
