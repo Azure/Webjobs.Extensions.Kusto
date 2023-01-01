@@ -3,6 +3,7 @@
 
 
 using System.Globalization;
+using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common;
@@ -16,20 +17,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
     {
         [FunctionName("AddProductJson")]
         public static void Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "addproductjson")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductjson")]
             HttpRequest req, ILogger log,
             [Kusto(database:"sdktestsdb" ,
             TableName ="Products" ,
             Connection = "KustoConnectionString")] out JObject json)
         {
-            var product = new Product
-            {
-                Name = req.Query["name"],
-                ProductID = int.Parse(req.Query["productId"]),
-                Cost = int.Parse(req.Query["cost"])
-            };
-            string productString = string.Format(CultureInfo.InvariantCulture, "(Name:{0} ID:{1} Cost:{2})", product.Name, product.ProductID, product.Cost);
-            json = JObject.FromObject(product);
+            string body = new StreamReader(req.Body).ReadToEnd();
+            json = JObject.Parse(body);
+            string productString = string.Format(CultureInfo.InvariantCulture, "(JSON : {0})", json);
             log.LogInformation("Ingested product JSON {}", productString);
         }
     }

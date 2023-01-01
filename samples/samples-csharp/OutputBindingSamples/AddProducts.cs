@@ -3,11 +3,13 @@
 
 
 using System;
+using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common;
 using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
 {
@@ -15,23 +17,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
     {
         [FunctionName("AddProducts")]
         public static void Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "addproducts")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproducts")]
             HttpRequest req, ILogger log,
             [Kusto(database:"sdktestsdb" ,
             TableName ="Products" ,
             Connection = "KustoConnectionString")] IAsyncCollector<Product> collector)
         {
-            log.LogInformation($"AddProduct function started");
-            var random = new Random();
-            for (int i = 0; i < 10; i++)
+            log.LogInformation($"AddProducts function started");
+            string body = new StreamReader(req.Body).ReadToEnd();
+            Products products = JsonConvert.DeserializeObject<Products>(body);
+            products.products.ForEach(p =>
             {
-                collector.AddAsync(new Product()
-                {
-                    Name = req.Query["name"] + random.Next(1000),
-                    ProductID = int.Parse(req.Query["productId"]) + random.Next(1000),
-                    Cost = int.Parse(req.Query["cost"]) + random.Next(19990)
-                });
-            }
+                collector.AddAsync(p);
+            });
         }
     }
 }
