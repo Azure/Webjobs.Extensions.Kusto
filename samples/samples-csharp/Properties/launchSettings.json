@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Microsoft.Azure.WebJobs.Extensions.Kusto.Samples": {
+      "commandName": "Project"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode>true</RestoreLockedMode>
+    <DelaySign>True</DelaySign>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/dev-key-public.snk</AssemblyOriginatorKeyFile>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>

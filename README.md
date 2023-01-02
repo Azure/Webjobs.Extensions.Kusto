@@ -1,0 +1,1 @@
+﻿### Kusto Az function bindings
