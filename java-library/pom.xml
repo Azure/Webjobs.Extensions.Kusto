@@ -116,6 +116,17 @@
         <artifactId>maven-site-plugin</artifactId>
         <version>${maven.site.plugin.version}</version>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${maven.checkstyle.plugin.version}</version>
+        <configuration>
+            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            <failsOnError>true</failsOnError>
+            <configLocation>checkstyle.xml</configLocation>                    
+            <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
     <reporting>
