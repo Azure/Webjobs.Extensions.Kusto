@@ -37,8 +37,8 @@
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
     <PackageVersion Include="System.Linq.Async.Queryable" Version="6.0.1" />
     <PackageVersion Include="System.Runtime.Caching" Version="4.7.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-    <PackageVersion Include="Moq" Version="4.18.3" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
+    <PackageVersion Include="Moq" Version="4.18.4" />
     <PackageVersion Include="xunit" Version="2.4.0" />
     <PackageVersion Include="xunit.core">
       <Version>2.3.1</Version>

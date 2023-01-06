@@ -4,7 +4,7 @@
  * license information.
  */
 
-package com.function.common;
+package com.microsoft.azure.kusto.functions.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

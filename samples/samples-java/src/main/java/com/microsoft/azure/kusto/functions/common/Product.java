@@ -4,7 +4,7 @@
  * license information.
  */
 
-package com.function.common;
+package com.microsoft.azure.kusto.functions.common;
 
 public class Product {
     private int ProductId;

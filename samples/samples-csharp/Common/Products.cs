@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common
 {
-    public class Products
+    public class ProductList
     {
-        public List<Product> products { get; set; }
+        public List<Product> Products { get; set; }
     }
 }
