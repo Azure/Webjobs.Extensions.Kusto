@@ -7,7 +7,6 @@
     <PackageReference Include="Microsoft.Azure.WebJobs.Host.TestCommon" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
-    <PackageReference Include="xunit.core" />
     <PackageReference Include="xunit.extensibility.core" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>

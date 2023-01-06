@@ -42,16 +42,6 @@
           "Castle.Core": "5.1.1"
         }
       },
-      "xunit.core": {
-        "type": "Direct",
-        "requested": "[2.3.1, )",
-        "resolved": "2.3.1",
-        "contentHash": "LOG4qOFuVQcjYcIuZbKeo03Uvng3lSb2gZJU9ANljwCf+PTd//iAMZS5qcJQZrjhndc4aOUlJGQy5wa0+/iZ6w==",
-        "dependencies": {
-          "xunit.extensibility.core": "[2.3.1]",
-          "xunit.extensibility.execution": "[2.3.1]"
-        }
-      },
       "xunit.extensibility.core": {
         "type": "Direct",
         "requested": "[2.3.1, )",
@@ -837,6 +827,16 @@
           "xunit.analyzers": "0.7.0",
           "xunit.assert": "[2.3.1]",
           "xunit.core": "[2.3.1]"
+        }
+      },
+      "xunit.core": {
+        "type": "CentralTransitive",
+        "requested": "[2.3.1, )",
+        "resolved": "2.3.1",
+        "contentHash": "LOG4qOFuVQcjYcIuZbKeo03Uvng3lSb2gZJU9ANljwCf+PTd//iAMZS5qcJQZrjhndc4aOUlJGQy5wa0+/iZ6w==",
+        "dependencies": {
+          "xunit.extensibility.core": "[2.3.1]",
+          "xunit.extensibility.execution": "[2.3.1]"
         }
       }
     }
