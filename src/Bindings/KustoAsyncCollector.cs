@@ -152,17 +152,15 @@ namespace Microsoft.Azure.WebJobs.Kusto
                         textWriter.WriteLine(string.Empty);
                     }
                     first = false;
-                    using (var jsonWriter = new JsonTextWriter(textWriter) { QuoteName = false, Formatting = indent, CloseOutput = false })
+                    using var jsonWriter = new JsonTextWriter(textWriter) { QuoteName = false, Formatting = indent, CloseOutput = false };
+                    if (typeof(T) == typeof(string))
                     {
-                        if (typeof(T) == typeof(string))
-                        {
-                            textWriter.Write(row.ToString());
-                        }
-                        else
-                        {
-                            // POCO , JObject
-                            JsonSerializer.CreateDefault().Serialize(jsonWriter, row);
-                        }
+                        textWriter.Write(row.ToString());
+                    }
+                    else
+                    {
+                        // POCO , JObject
+                        JsonSerializer.CreateDefault().Serialize(jsonWriter, row);
                     }
                 }
             }

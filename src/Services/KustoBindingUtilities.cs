@@ -54,7 +54,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
                     {
                         throw new ArgumentException("Parameter name must start with \"@\", i.e. \"@param1=param1,@param2=param2\"");
                     }
-                    kvParameters.Add(items[0].Substring(1), items[1]);
+                    kvParameters.Add(items[0][1..], items[1]);
                 }
             }
             return kvParameters;

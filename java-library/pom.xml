@@ -4,14 +4,15 @@
 
   <groupId>com.microsoft.azure.functions</groupId>
   <artifactId>azure-functions-java-library-kusto</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1.1</version>
   <packaging>jar</packaging>
 
   <parent>
     <groupId>com.microsoft.maven</groupId>
-    <artifactId>java-11-parent</artifactId>
-    <version>11.0.0</version>
+    <artifactId>java-8-parent</artifactId>
+    <version>8.0.2</version>
   </parent>
+
 
   <name>Microsoft Azure Functions Java Kusto Types</name>
   <description>This package contains all Java annotations to interact with Microsoft Azure Functions runtime for Kusto (ADX) Bindings.</description>
@@ -72,7 +73,7 @@
     <dependency>
       <groupId>com.microsoft.azure.functions</groupId>
       <artifactId>azure-functions-java-library</artifactId>
-      <version>${azure.functions.version}</version>
+      <version>3.0.0</version>
     </dependency>
   </dependencies>
 
@@ -114,31 +115,38 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-        <version>${maven.site.plugin.version}</version>
+        <version>3.7.1</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${maven.checkstyle.plugin.version}</version>
+        <version>3.0.0</version>
         <configuration>
-            <includeTestSourceDirectory>true</includeTestSourceDirectory>
-            <failsOnError>true</failsOnError>
-            <configLocation>checkstyle.xml</configLocation>                    
-            <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+          <configLocation>checkstyle.xml</configLocation>
+          <consoleOutput>true</consoleOutput>
+          <failsOnError>true</failsOnError>
         </configuration>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
-    <reporting>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-checkstyle-plugin</artifactId>
-              <version>${maven.checkstyle.plugin.version}</version>
-              <configuration>
-                  <configLocation>checkstyle.xml</configLocation>
-              </configuration>
-          </plugin>
-      </plugins>
-    </reporting>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <configLocation>checkstyle.xml</configLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

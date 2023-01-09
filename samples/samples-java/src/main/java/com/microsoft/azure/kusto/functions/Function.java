@@ -28,9 +28,10 @@ public class Function {
     @FunctionName("HttpExample")
     public HttpResponseMessage run(
             @HttpTrigger(
-                name = "req",
-                methods = {HttpMethod.GET, HttpMethod.POST},
-                authLevel = AuthorizationLevel.ANONYMOUS)
+                    name = "req",
+                    methods = {HttpMethod.POST},
+                    authLevel = AuthorizationLevel.ANONYMOUS,
+                    route = "j-addproduct")
                 HttpRequestMessage<Optional<String>> request,
             @KustoOutput(
                     name = "product",
