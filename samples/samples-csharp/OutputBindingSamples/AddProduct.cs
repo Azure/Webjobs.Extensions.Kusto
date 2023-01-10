@@ -4,7 +4,6 @@
 
 using System.Globalization;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common;

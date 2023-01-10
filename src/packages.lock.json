@@ -1,7 +1,7 @@
 {
   "version": 2,
   "dependencies": {
-    ".NETStandard,Version=v2.0": {
+    ".NETStandard,Version=v2.1": {
       "Microsoft.Azure.Kusto.Data": {
         "type": "Direct",
         "requested": "[11.2.1, )",
@@ -54,15 +54,6 @@
         "dependencies": {
           "Microsoft.Build.Tasks.Git": "1.1.1",
           "Microsoft.SourceLink.Common": "1.1.1"
-        }
-      },
-      "NETStandard.Library": {
-        "type": "Direct",
-        "requested": "[2.0.3, )",
-        "resolved": "2.0.3",
-        "contentHash": "st47PosZSHrjECdjeIzZQbzivYBJFv6P2nv4cj2ypdI204DO+vZ7l5raGMiX4eXMJ53RfOIg+/s4DHVZ54Nu2A==",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "1.1.0"
         }
       },
       "Newtonsoft.Json": {
@@ -368,10 +359,7 @@
       "Microsoft.IO.RecyclableMemoryStream": {
         "type": "Transitive",
         "resolved": "2.2.0",
-        "contentHash": "uyjY/cqomw1irT4L7lDeg4sJ36MsjHg3wKqpGrBAdzvZaxo85yMF+sAA9RIzTV92fDxuUzjqksMqA0+SNMkMgA==",
-        "dependencies": {
-          "System.Memory": "4.5.4"
-        }
+        "contentHash": "uyjY/cqomw1irT4L7lDeg4sJ36MsjHg3wKqpGrBAdzvZaxo85yMF+sAA9RIzTV92fDxuUzjqksMqA0+SNMkMgA=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -622,11 +610,7 @@
       "System.Text.Encodings.Web": {
         "type": "Transitive",
         "resolved": "4.7.2",
-        "contentHash": "iTUgB/WtrZ1sWZs84F2hwyQhiRH6QNjQv2DkwrH+WP6RoFga2Q1m3f9/Q7FG8cck8AdHitQkmkXSY8qylcDmuA==",
-        "dependencies": {
-          "System.Buffers": "4.5.1",
-          "System.Memory": "4.5.4"
-        }
+        "contentHash": "iTUgB/WtrZ1sWZs84F2hwyQhiRH6QNjQv2DkwrH+WP6RoFga2Q1m3f9/Q7FG8cck8AdHitQkmkXSY8qylcDmuA=="
       },
       "System.Text.Json": {
         "type": "Transitive",

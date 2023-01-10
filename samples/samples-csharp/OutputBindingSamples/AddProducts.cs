@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 
-using System;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -25,8 +24,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
         {
             log.LogInformation($"AddProducts function started");
             string body = new StreamReader(req.Body).ReadToEnd();
-            Products products = JsonConvert.DeserializeObject<Products>(body);
-            products.products.ForEach(p =>
+            ProductList products = JsonConvert.DeserializeObject<ProductList>(body);
+            products.Products.ForEach(p =>
             {
                 collector.AddAsync(p);
             });
