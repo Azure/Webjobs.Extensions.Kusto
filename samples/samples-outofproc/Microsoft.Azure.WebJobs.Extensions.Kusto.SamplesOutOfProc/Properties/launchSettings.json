@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7247",
+      "launchBrowser": false
+    }
+  }
+}
