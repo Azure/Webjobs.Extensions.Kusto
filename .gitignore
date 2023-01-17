@@ -362,3 +362,4 @@ __azurite_db*__.json
 .venv
 /coveragereport
 /build
+local-packages/
