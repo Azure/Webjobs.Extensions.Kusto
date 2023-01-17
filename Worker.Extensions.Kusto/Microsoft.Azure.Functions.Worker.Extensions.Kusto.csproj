@@ -5,9 +5,9 @@
 		<RootNamespace>Microsoft.Azure.Functions.Worker.Extensions.Kusto</RootNamespace>
 		<Description>Kusto extensions for .NET isolated Azure Functions</Description>
 		<Product>Kusto Binding Worker (.NET isolated Azure Functions)</Product>
-		<!--Version information-->
-		<VersionPrefix>99.99.99</VersionPrefix>
-		<SupportedVersion>1.*-*</SupportedVersion>
+		<!-- Default Version for dev -->
+		<Version>1.0.0</Version>
+		<SupportedVersion>1.0.0</SupportedVersion>
 		<PackageId>Microsoft.Azure.Functions.Worker.Extensions.Kusto</PackageId>
 		<PackageTags>Microsoft Azure WebJobs;AzureFunctions Isolated Dotnet;Isolated Kusto Azure;Kusto Worker</PackageTags>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
@@ -17,7 +17,6 @@
 		<Authors>Microsoft</Authors>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/Azure/Webjobs.Extensions.Kusto</RepositoryUrl>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
 
 	<ItemGroup>

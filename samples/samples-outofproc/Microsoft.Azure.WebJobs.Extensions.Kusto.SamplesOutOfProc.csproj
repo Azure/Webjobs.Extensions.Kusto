@@ -10,12 +10,12 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Worker.Extensions.Kusto\Microsoft.Azure.Functions.Worker.Extensions.Kusto.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Worker.Extensions.Kusto\Microsoft.Azure.Functions.Worker.Extensions.Kusto.csproj" />
   </ItemGroup>
 </Project>

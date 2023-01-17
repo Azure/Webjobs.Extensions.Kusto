@@ -5,7 +5,7 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Functions.Worker.Extensions.Kusto", "Microsoft.Azure.Functions.Worker.Extensions.Kusto.csproj", "{EBF1A8FB-0CFC-48EE-A9FE-51BFB9F054CA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc", "..\samples\samples-outofproc\Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc\Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.csproj", "{14E08254-88E6-4DD4-8CE9-B12A7302E159}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc", "..\samples\samples-outofproc\Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.csproj", "{14E08254-88E6-4DD4-8CE9-B12A7302E159}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
