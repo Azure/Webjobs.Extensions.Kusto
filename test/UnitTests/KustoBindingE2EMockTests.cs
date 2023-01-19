@@ -21,7 +21,7 @@ using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
+namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
 {
     public class KustoBindingE2EMockTests : IDisposable
     {
