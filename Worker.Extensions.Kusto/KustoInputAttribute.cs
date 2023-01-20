@@ -5,7 +5,7 @@ using Microsoft.Azure.Functions.Worker.Extensions.Abstractions;
 
 namespace Microsoft.Azure.Functions.Worker.Extensions.Kusto
 {
-    public sealed class KustoInputAttribute : OutputBindingAttribute
+    public sealed class KustoInputAttribute : InputBindingAttribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="KustoAttribute"/> class.
