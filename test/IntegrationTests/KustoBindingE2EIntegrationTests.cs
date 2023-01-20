@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Kusto.Cloud.Platform.Utils;
 using Kusto.Data;
@@ -20,21 +21,24 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
 {
     // The EndToEnd tests require the KustoConnectionString environment variable to be set.
-    public class KustoBindingE2EIntegrationTests : IDisposable
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public class KustoBindingE2EIntegrationTests : BeforeAfterTestAttribute, IDisposable
     {
-
-        private readonly string CreateItemTable = ".create-merge table kusto_functions_e2e_tests(ID:int,Name:string, Cost:double,Timestamp:datetime)";
-        private readonly string DropTable = ".drop table kusto_functions_e2e_tests";
-        // Queries for input binding with parameters
-        private const string QueryWithBoundParam = "declare query_parameters(startId:int,endId:int);kusto_functions_e2e_tests | where ID >= startId and ID <= endId";
-        // Queries for input binding without parameters
-        private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests|order by ID asc";
         // These have to be decared as consts for the Bindings attributes to use
         private const string TableName = "kusto_functions_e2e_tests";
+        // Create the table
+        private readonly string CreateItemTable = $".create-merge table {TableName}(ID:int,Name:string, Cost:double,Timestamp:datetime)";
+        private readonly string ClearItemTable = $".clear table {TableName} data";
+        private readonly string DropTable = $".drop table {TableName}";
+        // Queries for input binding with parameters
+        private const string QueryWithBoundParam = "declare query_parameters(startId:int,endId:int);kusto_functions_e2e_tests | where ID >= startId and ID <= endId and ingestion_time()>ago(10s)";
+        // Queries for input binding without parameters
+        private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the database name
         private const string DatabaseName = "sdktestsdb";
         private const int startId = 1;
@@ -62,9 +66,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             this.KustoQueryClient = KustoClientFactory.CreateCslQueryProvider(engineKcsb);
             this.KustoAdminClient = KustoClientFactory.CreateCslAdminProvider(engineKcsb);
             // Create the table for the tests
-            System.Data.IDataReader tableCreationResult = await this.KustoAdminClient.ExecuteControlCommandAsync(DatabaseName, this.CreateItemTable);
+            System.Data.IDataReader tableCreationResult = this.KustoAdminClient.ExecuteControlCommand(DatabaseName, this.CreateItemTable);
+            // Since this is a merge , if there is another table get it cleared for tests
+            this.KustoAdminClient.ExecuteControlCommand(this.ClearItemTable);
             Assert.NotNull(tableCreationResult);
-
             var parameter = new Dictionary<string, object>
             {
                 ["id"] = startId
@@ -73,8 +78,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Outputs), parameter);
             // Validate all rows written in output bindings can be queries
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Inputs), parameter);
-            // Drop the tables once done
-            _ = await this.KustoAdminClient.E(DatabaseName, this.DropTable);
         }
 
         /*
@@ -124,6 +127,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     this._loggerFactory.Dispose();
                 }
             }
+        }
+
+        public override void After(MethodInfo methodUnderTest)
+        {
+            // Drop the tables once done
+            _ = this.KustoAdminClient.ExecuteControlCommand(DatabaseName, this.DropTable);
+            this.KustoAdminClient.Dispose();
+            this.KustoQueryClient.Dispose();
         }
 
         private class KustoEndToEndTestClass
@@ -176,7 +187,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.Equal(2, itemTwo.Count);
                 // The string retrieved for Item-3
                 Assert.NotNull(itemThree);
-                Assert.Equal(GetItem(itemId), JsonConvert.DeserializeObject(itemThree));
+                Assert.Equal(GetItem(id), JsonConvert.DeserializeObject<List<Item>>(itemThree).First());
                 // Get all the values for 4
                 Assert.NotNull(itemFour);
                 await foreach (Item actualItem in itemFour.ConfigureAwait(false))
