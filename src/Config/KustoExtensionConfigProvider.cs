@@ -74,8 +74,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             if (string.IsNullOrEmpty(attribute.Connection))
             {
                 string attributeProperty = $"{nameof(KustoAttribute)}.{nameof(KustoAttribute.Connection)}";
-                throw new InvalidOperationException(
-                    $"The {attributeProperty} property cannot be an empty value.");
+                throw new ArgumentNullException(attributeProperty, $"Parameter {attributeProperty} should be passed as an environment variable. This value resolved to null");
             }
 
             // Empty database check is added right when the KustoAttribute is constructed. This however is deferred here. 
@@ -102,6 +101,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? KustoConstants.DefaultConnectionStringName : kustoAttribute.Connection;
             string engineConnectionString = this.GetConnectionString(connection);
+            if (string.IsNullOrEmpty(engineConnectionString))
+            {
+                throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
+            }
             string cacheKey = BuildCacheKey(engineConnectionString);
             return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString));
         }
@@ -121,6 +124,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? KustoConstants.DefaultConnectionStringName : kustoAttribute.Connection;
             string engineConnectionString = this.GetConnectionString(connection);
+            if (string.IsNullOrEmpty(engineConnectionString))
+            {
+                throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
+            }
             string cacheKey = BuildCacheKey(engineConnectionString);
             return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString));
         }

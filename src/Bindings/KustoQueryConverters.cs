@@ -70,8 +70,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "Error in ConvertAsync - EnumerableType ");
-                    throw;
+                    string logMessage = $"Error in Query/Conversion. Attributes [DB='{attribute?.Database}', Query='{attribute?.KqlCommand}',DataFormat='{attribute?.KqlParameters}']";
+                    this._logger.LogError(ex, logMessage);
+                    throw new InvalidOperationException(logMessage, ex);
                 }
             }
             /// <summary>

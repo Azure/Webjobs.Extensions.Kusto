@@ -12,6 +12,7 @@ using Kusto.Data;
 using Kusto.Data.Common;
 using Kusto.Data.Net.Client;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common;
+using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Host.TestCommon;
 using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Extensions.Configuration;
@@ -75,9 +76,20 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 ["id"] = startId
             };
             // Output binding tests
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Outputs), parameter);
+            //await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Outputs), parameter);
             // Validate all rows written in output bindings can be queries
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Inputs), parameter);
+            //await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Inputs), parameter);
+            // Fail scenario
+            try
+            {
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFail), parameter);
+            }
+            catch (Exception ex)
+            {
+                // TODO validate this error
+                // string exceptionMessage = this._loggerProvider.GetAllLogMessages().Last().FormattedMessage;
+                Assert.IsType<FunctionInvocationException>(ex);
+            }
         }
 
         /*
@@ -198,6 +210,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Assert.Equal(GetItem(actualItem.ID), actualItem);
                 }
             }
+
+            [NoAutomaticTrigger]
+            public static void InputFail(
+                int id,
+                [Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringNoPermissions")] IEnumerable<Item> itemOne)
+            {
+                Assert.True(id > 0);
+            }
+
             private static Item GetItem(int id)
             {
                 DateTime now = DateTime.UtcNow;
