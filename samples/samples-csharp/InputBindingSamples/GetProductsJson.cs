@@ -17,7 +17,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
 #pragma warning disable IDE0060 // Remove unused parameter
             HttpRequest req,
 #pragma warning restore IDE0060 // Remove unused parameter
-            [Kusto(database:"sdktestsdb" ,
+            [Kusto(Database:"sdktestsdb" ,
             KqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId" ,
             KqlParameters = "@productId={productId}",
             Connection = "KustoConnectionString")]

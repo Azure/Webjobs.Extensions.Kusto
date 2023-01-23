@@ -1,0 +1,6 @@
+.create-merge table Products (ProductID:int, Name:string, Cost:int)  
+
+.create function ifnotexists GetProductsByName(name:string)
+{
+    Products | where Name == name
+}

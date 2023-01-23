@@ -20,10 +20,10 @@ namespace Microsoft.Azure.WebJobs.Kusto
     public sealed class KustoAttribute : Attribute, IConnectionProvider
     {
         /// <summary>Initializes a new instance of the <see cref="KustoAttribute"/> class.</summary>
-        /// <param name="database">The name of the database</param>
-        public KustoAttribute(string database)
+        /// <param name="Database">The name of the Database</param>
+        public KustoAttribute(string Database)
         {
-            this.Database = AssignValue(database, nameof(database));
+            this.Database = AssignValue(Database, nameof(Database));
         }
 
         [AutoResolve]

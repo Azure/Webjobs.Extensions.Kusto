@@ -40,7 +40,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private const string QueryWithBoundParam = "declare query_parameters(startId:int,endId:int);kusto_functions_e2e_tests | where ID >= startId and ID <= endId and ingestion_time()>ago(10s)";
         // Queries for input binding without parameters
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
-        // Make sure that the InitialCatalog parameter in the tests has the same value as the database name
+        // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
         private const string DatabaseName = "sdktestsdb";
         private const int startId = 1;
         // Query parameter to get a single row where start and end are the same
@@ -163,10 +163,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             [NoAutomaticTrigger]
             public static void Outputs(
                 int id,
-                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object newItem,
-                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out string newItemString,
-                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object[] arrayItem,
-                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncCollector<object> asyncCollector)
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object newItem,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out string newItemString,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object[] arrayItem,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncCollector<object> asyncCollector)
             {
                 /*
                  Add an individual item-1
@@ -192,10 +192,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             [NoAutomaticTrigger]
             public static async Task Inputs(
                 int id,
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> itemOne,
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameter2ValuesInArray, Connection = KustoConstants.DefaultConnectionStringName)] JArray itemTwo,
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = KustoConstants.DefaultConnectionStringName)] string itemThree,
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemFour)
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> itemOne,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameter2ValuesInArray, Connection = KustoConstants.DefaultConnectionStringName)] JArray itemTwo,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = KustoConstants.DefaultConnectionStringName)] string itemThree,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemFour)
             {
                 int itemId = id;
                 // one item gets retrieved
@@ -224,7 +224,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             public static void InputFail(
                 int id,
 #pragma warning disable IDE0060
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringNoPermissions")] IEnumerable<Item> itemOne)
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringNoPermissions")] IEnumerable<Item> itemOne)
 #pragma warning restore IDE0060
             {
                 Assert.True(id > 0);
@@ -234,7 +234,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             public static void OutputFail(
             int id,
 #pragma warning disable IDE0060
-            [Kusto(database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringNoPermissions")] IAsyncCollector<object> asyncCollector)
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringNoPermissions")] IAsyncCollector<object> asyncCollector)
 #pragma warning restore IDE0060
             {
                 Assert.True(id > 0);

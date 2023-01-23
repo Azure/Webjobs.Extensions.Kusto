@@ -1,0 +1,202 @@
+{
+	"info": {
+		"_postman_id": "4233c0d6-e698-444a-ab1f-f7ae6467a491",
+		"name": "AzureFunctions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22000747"
+	},
+	"item": [
+		{
+			"name": "AddProduct",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ProductID\": 1,\r\n    \"Name\": \"prod1\",\r\n    \"Cost\": 100\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:7071/api/addproduct",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"addproduct"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddProductJson",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ProductID\": 1,\r\n    \"Name\": \"prod1\",\r\n    \"Cost\": 100\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:7071/api/addproductjson",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"addproductjson"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddProducts",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Products\": [\r\n        {\r\n            \"ProductID\": 104,\r\n            \"Name\": \"prod104\",\r\n            \"Cost\": 104\r\n        },\r\n        {\r\n            \"ProductID\": 204,\r\n            \"Name\": \"prod204\",\r\n            \"Cost\": 104\r\n        },\r\n        {\r\n            \"ProductID\": 304,\r\n            \"Name\": \"prod304\",\r\n            \"Cost\": 104\r\n        },\r\n        {\r\n            \"ProductID\": 404,\r\n            \"Name\": \"prod404\",\r\n            \"Cost\": 104\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:7071/api/addproducts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"addproducts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetProducts-Enumerable",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7071/api/getproducts-ae/prod1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"getproducts-ae",
+						"prod1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetProducts-AsyncEnumerable",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7071/api/getproducts-ae/sample-prod1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"getproducts-ae",
+						"sample-prod1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetProductsFunction-AsyncEnumerable",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7071/api/getproductsfunctions-ae/prod1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"getproductsfunctions-ae",
+						"prod1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetProducts-String",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7071/api/getproducts-string/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"getproducts-string",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetProducts-Json",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7071/api/getproducts-json/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"getproducts-json",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

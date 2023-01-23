@@ -277,11 +277,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         {
             [NoAutomaticTrigger]
             public static void Outputs(
-                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object newItem,
-                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out string newItemString,
-                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object[] arrayItem,
-                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncCollector<object> asyncCollector,
-                [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] ICollector<object> collector)
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object newItem,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out string newItemString,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object[] arrayItem,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncCollector<object> asyncCollector,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] ICollector<object> collector)
             {
                 newItem = new { };
                 newItemString = "{}";
@@ -300,11 +300,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             }
             [NoAutomaticTrigger]
             public static async Task Inputs(
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> itemOne,
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I2", Connection = KustoConstants.DefaultConnectionStringName)] JArray itemTwo,
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName)] string itemThree,
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemFour,
-                [Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I5", Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemFive
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> itemOne,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I2", Connection = KustoConstants.DefaultConnectionStringName)] JArray itemTwo,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName)] string itemThree,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemFour,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I5", Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemFive
             )
             {
                 Assert.NotNull(itemOne);
@@ -339,7 +339,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         private class NoConnectionString
         {
             [NoAutomaticTrigger]
-            public static void ErrBinding([Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1")] IEnumerable<Item> _)
+            public static void ErrBinding([Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1")] IEnumerable<Item> _)
             {
 
             }
@@ -348,7 +348,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         private class EmptyDatabase
         {
             [NoAutomaticTrigger]
-            public static void ErrBinding([Kusto(database: "", KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> _)
+            public static void ErrBinding([Kusto(Database: "", KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> _)
             {
 
             }
@@ -357,7 +357,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         private class NoCommandOrTable
         {
             [NoAutomaticTrigger]
-            public static void ErrBinding([Kusto(database: DatabaseName, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> _)
+            public static void ErrBinding([Kusto(Database: DatabaseName, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> _)
             {
 
             }
@@ -366,7 +366,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         private class InvalidBinding
         {
             [NoAutomaticTrigger]
-            public static void InvalidBindingType([Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] JObject _)
+            public static void InvalidBindingType([Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] JObject _)
             {
 
             }
@@ -375,7 +375,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         private class InvalidByteArrayEnumerable
         {
             [NoAutomaticTrigger]
-            public static void InvalidBindingType([Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] byte[] _)
+            public static void InvalidBindingType([Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] byte[] _)
             {
 
             }
@@ -385,7 +385,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         {
             [NoAutomaticTrigger]
             public static void InvalidCollector(
-            [Kusto(database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncCollector<byte[]> _)
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncCollector<byte[]> _)
             {
             }
         }
