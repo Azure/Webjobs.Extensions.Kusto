@@ -21,7 +21,7 @@ using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
+namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
 {
     public class KustoBindingE2EMockTests : IDisposable
     {
@@ -151,9 +151,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
         }
 
         [Theory]
-        [InlineData(typeof(NoConnectionString), nameof(NoConnectionString.ErrBinding))]
-        [InlineData(typeof(NoCommandOrTable), nameof(NoCommandOrTable.ErrBinding))]
-        public async Task InvalidBindingAttributesError(Type testType, string testName)
+        [InlineData(typeof(NoConnectionString), nameof(NoConnectionString.ErrBinding), typeof(ArgumentNullException))]
+        [InlineData(typeof(NoCommandOrTable), nameof(NoCommandOrTable.ErrBinding), typeof(InvalidOperationException))]
+        public async Task InvalidBindingAttributesError(Type testType, string testName, Type exceptionType)
         {
             //Arrange
             var mockQueryClient = new Mock<ICslQueryProvider>();
@@ -162,7 +162,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
             FunctionIndexingException ex = await Assert.ThrowsAsync<FunctionIndexingException>(
                 () => this.RunTestAsync(testType, queryClientFactory, testName));
             // Assert
-            Assert.IsType<InvalidOperationException>(ex.InnerException);
+            Assert.Equal(ex.InnerException.GetType(), exceptionType);
         }
 
         [Fact]
