@@ -18,7 +18,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
         public static void Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductjson")]
             HttpRequest req, ILogger log,
-            [Kusto(database:"sdktestsdb" ,
+            [Kusto(Database:"sdktestsdb" ,
             TableName ="Products" ,
             Connection = "KustoConnectionString")] out JObject json)
         {
