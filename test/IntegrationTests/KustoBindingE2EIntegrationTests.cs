@@ -27,7 +27,7 @@ using Xunit.Sdk;
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
 {
     // The EndToEnd tests require the KustoConnectionString environment variable to be set.
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    [Trait("Category", "E2E")]
     public class KustoBindingE2EIntegrationTests : BeforeAfterTestAttribute, IDisposable
     {
         // These have to be decared as consts for the Bindings attributes to use
@@ -76,9 +76,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 ["id"] = startId
             };
             // Output binding tests
-            //await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Outputs), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Outputs), parameter);
             // Validate all rows written in output bindings can be queries
-            //await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Inputs), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Inputs), parameter);
             // Fail scenario
             try
             {
@@ -87,7 +87,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             catch (Exception ex)
             {
                 // TODO validate this error
-                // string exceptionMessage = this._loggerProvider.GetAllLogMessages().Last().FormattedMessage;
+                Assert.IsType<FunctionInvocationException>(ex);
+            }
+
+            try
+            {
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputFail), parameter);
+            }
+            catch (Exception ex)
+            {
                 Assert.IsType<FunctionInvocationException>(ex);
             }
         }
@@ -100,6 +108,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             var locator = new ExplicitTypeLocator(testType);
 
             IHost host = new HostBuilder()
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddProvider(this._loggerProvider);
+                    logging.SetMinimumLevel(LogLevel.Debug);
+                })
                 .ConfigureWebJobs(builder =>
                 {
                     builder.Services.AddSingleton<IKustoClientFactory>(new KustoClient());
@@ -112,11 +126,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton<ITypeLocator>(locator);
-                })
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.AddProvider(this._loggerProvider);
                 })
                 .Build();
 
@@ -214,9 +223,23 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             [NoAutomaticTrigger]
             public static void InputFail(
                 int id,
+#pragma warning disable IDE0060
                 [Kusto(database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringNoPermissions")] IEnumerable<Item> itemOne)
+#pragma warning restore IDE0060
             {
                 Assert.True(id > 0);
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputFail(
+            int id,
+#pragma warning disable IDE0060
+            [Kusto(database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringNoPermissions")] IAsyncCollector<object> asyncCollector)
+#pragma warning restore IDE0060
+            {
+                Assert.True(id > 0);
+                // When we add an item it should fail with exception
+                asyncCollector.AddAsync(GetItem(id));
             }
 
             private static Item GetItem(int id)
