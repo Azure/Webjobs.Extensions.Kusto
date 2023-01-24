@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AssemblyName>Microsoft.Azure.Functions.Worker.Extensions.Kusto</AssemblyName>
+		<RootNamespace>Microsoft.Azure.Functions.Worker.Extensions.Kusto</RootNamespace>
+		<Description>Kusto extensions for .NET isolated Azure Functions</Description>
+		<Product>Kusto Binding Worker (.NET isolated Azure Functions)</Product>
+		<!-- Default Version for dev -->
+		<Version>1.0.0-Preview</Version>
+		<SupportedVersion>1.0.0</SupportedVersion>
+		<PackageId>Microsoft.Azure.Functions.Worker.Extensions.Kusto</PackageId>
+		<PackageTags>Microsoft Azure WebJobs;AzureFunctions Isolated Dotnet;Isolated Kusto Azure;Kusto Worker</PackageTags>
+		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+		<IsPackable>true</IsPackable>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Title>Microsoft.Azure.Functions.Worker.Extensions.Kusto</Title>
+		<Authors>Microsoft</Authors>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/Azure/Webjobs.Extensions.Kusto</RepositoryUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="pkgicon.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\Images\pkgicon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\LICENSE">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions.ExtensionInformationAttribute">
+      <_Parameter1>Microsoft.Azure.WebJobs.Extensions.Kusto</_Parameter1>
+      <_Parameter2>$(SupportedVersion)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

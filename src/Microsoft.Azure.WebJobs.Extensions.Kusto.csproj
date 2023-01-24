@@ -44,5 +44,4 @@
     </None>
     <None Include="pkgicon.png" Pack="true" PackagePath="" />
   </ItemGroup>
-
 </Project>

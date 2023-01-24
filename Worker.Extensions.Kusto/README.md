@@ -1,0 +1,1 @@
+### .NET isolated worker readme bindings for Kusto
