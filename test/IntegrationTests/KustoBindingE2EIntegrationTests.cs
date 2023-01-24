@@ -149,7 +149,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 }
             }
         }
-
+#pragma warning disable xUnit1013
         public override void After(MethodInfo methodUnderTest)
         {
             // Drop the tables once done
@@ -157,6 +157,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             this.KustoAdminClient.Dispose();
             this.KustoQueryClient.Dispose();
         }
+#pragma warning restore xUnit1013
 
         private class KustoEndToEndTestClass
         {

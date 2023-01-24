@@ -1,18 +1,14 @@
 <Project>
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFramework>net6</TargetFramework>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<RestoreLockedMode>true</RestoreLockedMode>
-		<DelaySign>True</DelaySign>
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/dev-key-public.snk</AssemblyOriginatorKeyFile>
-		<PackageOutputPath>$(MSBuildThisFileDirectory)local-packages</PackageOutputPath>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<IsPackable>false</IsPackable>
+		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/dev-key.snk</AssemblyOriginatorKeyFile>
 		<Company>Microsoft</Company>
 		<Authors>Microsoft</Authors>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -21,9 +17,12 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<DebugType>portable</DebugType>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<PackageOutputPath>$(MSBuildThisFileDirectory)local-packages</PackageOutputPath>
 		<PackageProjectUrl>https://github.com/Azure/Webjobs.Extensions.Kusto</PackageProjectUrl>
 		<PackageIcon>pkgicon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
