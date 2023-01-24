@@ -11,16 +11,16 @@ using Microsoft.Azure.WebJobs.Kusto;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
 {
-    public static class GetProductsAsyncEnumerable
+    public static class GetProductsFunctionAsyncEnumerable
     {
-        [FunctionName("GetProductsAsyncEnumerable")]
+        [FunctionName("GetProductsFunctionAsyncEnumerable")]
         public static async Task<IActionResult> RunAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts-ae/{name}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproductsfunctions-ae/{name}")]
 #pragma warning disable IDE0060 // Remove unused parameter
             HttpRequest req,
 #pragma warning restore IDE0060 // Remove unused parameter
             [Kusto(Database:"sdktestsdb" ,
-            KqlCommand = "declare query_parameters (name:string);Products | where Name == name" ,
+            KqlCommand = "declare query_parameters (name:string);GetProductsByName(name)" ,
             KqlParameters = "@name={name}",
             Connection = "KustoConnectionString")]
             IAsyncEnumerable<Product> products)

@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Xunit;
 
-namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
+namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
 {
     public class KustoBindingsStartupTests
     {
