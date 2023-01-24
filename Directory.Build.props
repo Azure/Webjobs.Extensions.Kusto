@@ -1,15 +1,31 @@
 <Project>
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <RestoreLockedMode>true</RestoreLockedMode>
-    <DelaySign>True</DelaySign>
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/dev-key-public.snk</AssemblyOriginatorKeyFile>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<RestoreLockedMode>true</RestoreLockedMode>
+		<DelaySign>True</DelaySign>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/dev-key-public.snk</AssemblyOriginatorKeyFile>
+		<PackageOutputPath>$(MSBuildThisFileDirectory)local-packages</PackageOutputPath>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<IsPackable>false</IsPackable>
+		<Company>Microsoft</Company>
+		<Authors>Microsoft</Authors>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<IsPackable>false</IsPackable>
+		<DebugSymbols>true</DebugSymbols>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<DebugType>portable</DebugType>
+		<Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<PackageProjectUrl>https://github.com/Azure/Webjobs.Extensions.Kusto</PackageProjectUrl>
+		<PackageIcon>pkgicon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
 </Project>
