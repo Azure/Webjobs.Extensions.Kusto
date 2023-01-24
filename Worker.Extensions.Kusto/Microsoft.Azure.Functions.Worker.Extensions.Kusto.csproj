@@ -6,7 +6,7 @@
 		<Description>Kusto extensions for .NET isolated Azure Functions</Description>
 		<Product>Kusto Binding Worker (.NET isolated Azure Functions)</Product>
 		<!-- Default Version for dev -->
-		<Version>1.0.0</Version>
+		<Version>1.0.0-Preview</Version>
 		<SupportedVersion>1.0.0</SupportedVersion>
 		<PackageId>Microsoft.Azure.Functions.Worker.Extensions.Kusto</PackageId>
 		<PackageTags>Microsoft Azure WebJobs;AzureFunctions Isolated Dotnet;Isolated Kusto Azure;Kusto Worker</PackageTags>
@@ -36,8 +36,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions" />
-    <PackageReference Include="Microsoft.Azure.Kusto.Data" />
-    <PackageReference Include="Microsoft.Azure.Kusto.Ingest" />
   </ItemGroup>
 
   <ItemGroup>

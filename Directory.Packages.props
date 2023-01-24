@@ -26,7 +26,6 @@
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.Http">
       <Version>3.2.0</Version>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.Kusto" Version="1.0.0" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="5.0.1" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Host.TestCommon">
       <Version>3.0.30</Version>
