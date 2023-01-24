@@ -9,6 +9,7 @@
     <!-- Default Version for dev -->
     <Version>1.0.0-Preview</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +26,9 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Title>Azure function bindings for Kusto</Title>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <AssemblyOriginatorKeyFile>$(MSBuildStartupDirectory)\dev-key.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>False</DelaySign>
+    <SignAssembly>True</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>

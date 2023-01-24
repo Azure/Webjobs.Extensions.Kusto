@@ -2,6 +2,12 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;xUnit1013</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;xUnit1013</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
