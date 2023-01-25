@@ -363,3 +363,4 @@ __azurite_db*__.json
 /coveragereport
 /build
 local-packages/
+extensions/
