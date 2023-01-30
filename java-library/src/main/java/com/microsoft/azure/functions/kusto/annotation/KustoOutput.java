@@ -27,7 +27,7 @@ public @interface KustoOutput {
     String mappingRef() default "";
 
     // The data format that is supported. Formats currently supported are CSV and JSON
-    String dataFormat() default "json";
+    String dataFormat() default "";
 
     // The connection string name that is used for referencing the Kusto connection string
     String connection();

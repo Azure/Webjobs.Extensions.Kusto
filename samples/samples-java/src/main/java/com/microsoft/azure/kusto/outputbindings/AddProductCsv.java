@@ -19,7 +19,7 @@ public class AddProductCsv {
     @FunctionName("AddProductCsv")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproduct-csv") HttpRequestMessage<Optional<String>> request,
-            @KustoOutput(name = "productCsv", database = "sdktestsdb", tableName = "Products", connection = "KustoConnectionString", dataFormat = "csv") OutputBinding<String> productString)
+            @KustoOutput(name = "productCsv", database = "sdktestsdb", tableName = "ProductsJson", connection = "KustoConnectionString") OutputBinding<String> productString)
             throws IOException {
         if (request.getBody().isPresent()) {
             String json = request.getBody().get();
