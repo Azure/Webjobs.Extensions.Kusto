@@ -7,7 +7,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindin
     {
         public int ProductID { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public int Cost { get; set; }
     }
