@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.METHOD})
-@CustomBinding(direction = "out", name = "", type = "Kusto")
+@CustomBinding(direction = "out", name = "outputParameterName", type = "Kusto")
 public @interface KustoOutput {
     // The database that contains the table to ingest
     String database();
@@ -27,10 +27,10 @@ public @interface KustoOutput {
     String mappingRef() default "";
 
     // The data format that is supported. Formats currently supported are CSV and JSON
-    String dataFormat() default "";
+    String dataFormat() default "json";
 
     // The connection string name that is used for referencing the Kusto connection string
-    String connection() default "KustoConnectionString";
+    String connection();
 
     // the name used in the function.json
     String name();

@@ -15,13 +15,13 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-@CustomBinding(direction = "in", name = "", type = "Kusto")
+@CustomBinding(direction = "in", name = "inputParameterName", type = "Kusto")
 public @interface KustoInput {
     // The database that contains the table to ingest
     String database();
 
     // The connection string name that is used for resolving connection to Kusto
-    String connection() default "KustoConnectionString";
+    String connection();
 
     // the name used in the function.json
     String name();
@@ -30,5 +30,5 @@ public @interface KustoInput {
     String kqlCommand();
 
     // The KQL Query parameters
-    String kqlParameters() default "";
+    String kqlParameters();
 }
