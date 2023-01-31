@@ -18,9 +18,11 @@ import com.microsoft.azure.kusto.common.Product;
 import java.io.IOException;
 import java.util.Optional;
 
+import static com.microsoft.azure.kusto.common.Constants.*;
+
 public class AddProductReturn {
     @FunctionName("AddJProductReturn")
-    @KustoOutput(name = "productReturn", database = "sdktestsdb", tableName = "Products", connection = "KustoConnectionString")
+    @KustoOutput(name = "productReturn", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR)
     public Product run(@HttpTrigger(name = "req", methods = {
             HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproduct-returnvalue") HttpRequestMessage<Optional<String>> request)
             throws IOException {

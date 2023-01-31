@@ -20,12 +20,13 @@ import com.microsoft.azure.kusto.common.Product;
 
 import java.io.IOException;
 import java.util.Optional;
+import static com.microsoft.azure.kusto.common.Constants.*;
 
 public class AddProductsArray {
     @FunctionName("AddJProducts")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproducts") HttpRequestMessage<Optional<String>> request,
-            @KustoOutput(name = "productArray", database = "sdktestsdb", tableName = "Products", connection = "KustoConnectionString") OutputBinding<Product[]> products)
+            @KustoOutput(name = "productArray", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR) OutputBinding<Product[]> products)
             throws IOException {
 
         if (request.getBody().isPresent()) {

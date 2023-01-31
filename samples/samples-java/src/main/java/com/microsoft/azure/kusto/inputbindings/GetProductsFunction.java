@@ -17,11 +17,13 @@ import com.microsoft.azure.kusto.common.Product;
 
 import java.util.Optional;
 
+import static com.microsoft.azure.kusto.common.Constants.*;
+
 public class GetProductsFunction {
     @FunctionName("GetJProductsFunction")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-getproductfn/{name}") HttpRequestMessage<Optional<String>> request,
-            @KustoInput(name = "getjproductsfn", kqlCommand = "declare query_parameters (name:string);GetProductsByName(name)", kqlParameters = "@name={name}", database = "sdktestsdb", connection = "KustoConnectionString") Product[] products) {
+            @KustoInput(name = "getjproductsfn", kqlCommand = "declare query_parameters (name:string);GetProductsByName(name)", kqlParameters = "@name={name}", database = SDKTESTSDB, connection = KUSTOCONNSTR) Product[] products) {
         return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/json").body(products)
                 .build();
     }

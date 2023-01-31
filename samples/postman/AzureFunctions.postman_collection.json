@@ -407,6 +407,28 @@
 					"response": []
 				},
 				{
+					"name": "GetProductMulti",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7102/api/j-getproductidorname/2006/j-prod2005",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7102",
+							"path": [
+								"api",
+								"j-getproductidorname",
+								"2006",
+								"j-prod2005"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "GetProductFunction",
 					"request": {
 						"method": "GET",
