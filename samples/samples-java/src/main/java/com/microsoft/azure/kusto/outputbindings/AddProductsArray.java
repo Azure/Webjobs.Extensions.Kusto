@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License. See License.txt in the project root for
+ * license information.
+ */
+
 package com.microsoft.azure.kusto.outputbindings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +25,7 @@ public class AddProductsArray {
     @FunctionName("AddJProducts")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproducts") HttpRequestMessage<Optional<String>> request,
-            @KustoOutput(name = "products", database = "sdktestsdb", tableName = "Products", connection = "KustoConnectionString") OutputBinding<Product[]> products)
+            @KustoOutput(name = "productArray", database = "sdktestsdb", tableName = "Products", connection = "KustoConnectionString") OutputBinding<Product[]> products)
             throws IOException {
 
         if (request.getBody().isPresent()) {

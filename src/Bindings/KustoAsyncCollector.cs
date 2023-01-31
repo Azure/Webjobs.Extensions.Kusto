@@ -112,7 +112,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
                 Format = format,
                 TableName = resolvedAttribute.TableName
             };
-            string dataToIngest = (format == DataSourceFormat.multijson || format == DataSourceFormat.json) ? this.SerializeToIngestData() : string.Join(Environment.NewLine, this._rows); ;
+            string dataToIngest = (format == DataSourceFormat.multijson || format == DataSourceFormat.json) ? this.SerializeToIngestData() : string.Join(Environment.NewLine, this._rows);
             if (!string.IsNullOrEmpty(resolvedAttribute.MappingRef))
             {
                 var ingestionMapping = new IngestionMapping

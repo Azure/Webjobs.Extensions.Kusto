@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.METHOD})
-@CustomBinding(direction = "out", name = "outputParameterName", type = "Kusto")
+@CustomBinding(direction = "out", name = "", type = "Kusto")
 public @interface KustoOutput {
     // The database that contains the table to ingest
     String database();

@@ -39,6 +39,35 @@
 					"response": []
 				},
 				{
+					"name": "AddProductCsv",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ProductID\": 2,\r\n    \"Name\": \"prod2\",\r\n    \"Cost\": 200\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7071/api/addproductcsv",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7071",
+							"path": [
+								"api",
+								"addproductcsv"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "AddProductJson",
 					"request": {
 						"method": "POST",
@@ -230,6 +259,169 @@
 							"path": [
 								"api",
 								"oop-addproduct"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Java",
+			"item": [
+				{
+					"name": "AddProduct",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ProductID\": 2001,\r\n    \"Name\": \"j-prod1\",\r\n    \"Cost\": 100\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7102/api/j-addproduct",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7102",
+							"path": [
+								"api",
+								"j-addproduct"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddProductReturn",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ProductID\": 2002,\r\n    \"Name\": \"j-prod-csv-1\",\r\n    \"Cost\": 20.02\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7102/api/j-addproduct-returnvalue",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7102",
+							"path": [
+								"api",
+								"j-addproduct-returnvalue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddProductCsv",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ProductID\": 2009,\r\n    \"Name\": \"j-prod-csv-9\",\r\n    \"Cost\": 90.09\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7102/api/j-addproduct-csv",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7102",
+							"path": [
+								"api",
+								"j-addproduct-csv"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddProducts",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"ProductID\": 2004,\r\n        \"Name\": \"j-prod2004\",\r\n        \"Cost\": 200.4\r\n    },\r\n    {\r\n        \"ProductID\": 2005,\r\n        \"Name\": \"j-prod2005\",\r\n        \"Cost\": 200.5\r\n    },\r\n    {\r\n        \"ProductID\": 2006,\r\n        \"Name\": \"j-prod2006\",\r\n        \"Cost\": 20.06\r\n    },\r\n    {\r\n        \"ProductID\": 2007,\r\n        \"Name\": \"j-prod2007\",\r\n        \"Cost\": 2.007\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7102/api/j-addproducts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7102",
+							"path": [
+								"api",
+								"j-addproducts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetProduct",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7102/api/j-getproduct/j-prod2005",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7102",
+							"path": [
+								"api",
+								"j-getproduct",
+								"j-prod2005"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetProductFunction",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7102/api/j-getproductfn/j-prod2005",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7102",
+							"path": [
+								"api",
+								"j-getproductfn",
+								"j-prod2005"
 							]
 						}
 					},

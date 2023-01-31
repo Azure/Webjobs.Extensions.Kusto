@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License. See License.txt in the project root for
+ * license information.
+ */
+
 package com.microsoft.azure.kusto.outputbindings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,11 +21,12 @@ import com.microsoft.azure.kusto.common.Product;
 import java.io.IOException;
 import java.util.Optional;
 
+//TODO needs revisiting as there are mapping issues and the ingestion of CSV is not working!
 public class AddProductCsv {
     @FunctionName("AddProductCsv")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproduct-csv") HttpRequestMessage<Optional<String>> request,
-            @KustoOutput(name = "productCsv", database = "sdktestsdb", tableName = "ProductsJson", connection = "KustoConnectionString") OutputBinding<String> productString)
+            @KustoOutput(name = "productCsv", database = "sdktestsdb", tableName = "Products", connection = "KustoConnectionString", dataFormat = "csv") OutputBinding<String> productString)
             throws IOException {
         if (request.getBody().isPresent()) {
             String json = request.getBody().get();

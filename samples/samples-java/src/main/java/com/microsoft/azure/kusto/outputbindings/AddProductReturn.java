@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License. See License.txt in the project root for
+ * license information.
+ */
+
 package com.microsoft.azure.kusto.outputbindings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +20,7 @@ import java.util.Optional;
 
 public class AddProductReturn {
     @FunctionName("AddJProductReturn")
-    @KustoOutput(name = "product", database = "sdktestsdb", tableName = "Products", connection = "KustoConnectionString")
+    @KustoOutput(name = "productReturn", database = "sdktestsdb", tableName = "Products", connection = "KustoConnectionString")
     public Product run(@HttpTrigger(name = "req", methods = {
             HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproduct-returnvalue") HttpRequestMessage<Optional<String>> request)
             throws IOException {
