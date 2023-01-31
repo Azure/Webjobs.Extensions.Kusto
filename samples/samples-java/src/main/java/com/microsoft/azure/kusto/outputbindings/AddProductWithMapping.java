@@ -16,7 +16,7 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.kusto.annotation.KustoOutput;
-import com.microsoft.azure.kusto.common.Product;
+import com.microsoft.azure.kusto.common.Item;
 
 import static com.microsoft.azure.kusto.common.Constants.KUSTOCONNSTR;
 import static com.microsoft.azure.kusto.common.Constants.SDKTESTSDB;
@@ -24,21 +24,19 @@ import static com.microsoft.azure.kusto.common.Constants.SDKTESTSDB;
 import java.io.IOException;
 import java.util.Optional;
 
-//TODO needs revisiting as there are mapping issues and the ingestion of CSV is not working!
-public class AddProductCsv {
-    @FunctionName("AddProductCsv")
+public class AddProductWithMapping {
+    @FunctionName("AddJProductMapping")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproduct-csv") HttpRequestMessage<Optional<String>> request,
-            @KustoOutput(name = "productCsv", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR, dataFormat = "csv") OutputBinding<String> productString)
+            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproduct-mapping") HttpRequestMessage<Optional<String>> request,
+            @KustoOutput(name = "product", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR, mappingRef = "item_to_product_json") OutputBinding<Item> item)
             throws IOException {
         if (request.getBody().isPresent()) {
             String json = request.getBody().get();
             ObjectMapper mapper = new ObjectMapper();
-            Product p = mapper.readValue(json, Product.class);
-            String productCsv = p.ProductID + "," + p.Name + "," + p.Cost;
-            productString.setValue(productCsv);
-            return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/text")
-                    .body(productString).build();
+            Item p = mapper.readValue(json, Item.class);
+            item.setValue(p);
+            return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/json").body(item)
+                    .build();
         } else {
             return request.createResponseBuilder(HttpStatus.NO_CONTENT).header("Content-Type", "application/json")
                     .build();

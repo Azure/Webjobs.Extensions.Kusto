@@ -1,0 +1,29 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "name": "req",
+      "direction": "in",
+      "type": "httpTrigger",
+      "methods": [
+        "post"
+      ],
+      "route": "js-addproduct-mapping"
+    },
+    {
+      "name": "$return",
+      "type": "http",
+      "direction": "out"
+    },
+    {
+      "name": "product",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "out",
+      "tableName": "Products",
+      "mappingRef": "item_to_product_json",
+      "connection": "KustoConnectionString"
+    }
+  ],
+  "disabled": false
+}

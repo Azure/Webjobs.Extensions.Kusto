@@ -16,8 +16,9 @@ import com.microsoft.azure.functions.kusto.annotation.KustoInput;
 import com.microsoft.azure.kusto.common.Constants;
 import com.microsoft.azure.kusto.common.Product;
 
+import static com.microsoft.azure.kusto.common.Constants.KUSTOCONNSTR;
+
 import java.util.Optional;
-import static com.microsoft.azure.kusto.common.Constants.*;
 
 public class GetProductMultiQuery {
 

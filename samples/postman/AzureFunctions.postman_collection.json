@@ -299,6 +299,35 @@
 					"response": []
 				},
 				{
+					"name": "AddProductMapping",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ItemID\": 2010,\r\n    \"ItemName\": \"j-item1\",\r\n    \"ItemCost\": 1.007\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7102/api/j-addproduct-mapping",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7102",
+							"path": [
+								"api",
+								"j-addproduct-mapping"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "AddProductReturn",
 					"request": {
 						"method": "POST",
@@ -444,6 +473,195 @@
 								"api",
 								"j-getproductfn",
 								"j-prod2005"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "JavaScript",
+			"item": [
+				{
+					"name": "AddProduct",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ProductID\": 3001,\r\n    \"Name\": \"js-prod1\",\r\n    \"Cost\": 30.03\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7103/api/js-addproduct",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7103",
+							"path": [
+								"api",
+								"js-addproduct"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddProductWithMapping",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ItemID\": 3002,\r\n    \"ItemName\": \"j-item-3002\",\r\n    \"ItemCost\": 32.007\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7103/api/js-addproduct-mapping",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7103",
+							"path": [
+								"api",
+								"js-addproduct-mapping"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddProductArray",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"ProductID\": 3004,\r\n        \"Name\": \"j-prod3004\",\r\n        \"Cost\": 300.4\r\n    },\r\n    {\r\n        \"ProductID\": 3005,\r\n        \"Name\": \"j-prod3005\",\r\n        \"Cost\": 300.5\r\n    },\r\n    {\r\n        \"ProductID\": 3006,\r\n        \"Name\": \"j-prod3006\",\r\n        \"Cost\": 20.06\r\n    },\r\n    {\r\n        \"ProductID\": 3007,\r\n        \"Name\": \"j-prod3007\",\r\n        \"Cost\": 2.007\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7103/api/js-addproduct",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7103",
+							"path": [
+								"api",
+								"js-addproduct"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAddProductParams",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7103/api/js-addproduct-params?productId=3010&name=js-3010&cost=11.22",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7103",
+							"path": [
+								"api",
+								"js-addproduct-params"
+							],
+							"query": [
+								{
+									"key": "productId",
+									"value": "3010"
+								},
+								{
+									"key": "name",
+									"value": "js-3010"
+								},
+								{
+									"key": "cost",
+									"value": "11.22"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSetProducts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7103/api/js-getset-product/2010",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7103",
+							"path": [
+								"api",
+								"js-getset-product",
+								"2010"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetProduct",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7103/api/js-get-products/2010",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7103",
+							"path": [
+								"api",
+								"js-get-products",
+								"2010"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetProductFunction",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7103/api/js-get-products-fn/j-item1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7103",
+							"path": [
+								"api",
+								"js-get-products-fn",
+								"j-item1"
 							]
 						}
 					},

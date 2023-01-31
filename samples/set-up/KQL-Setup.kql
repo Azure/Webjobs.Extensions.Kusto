@@ -4,3 +4,5 @@
 {
     Products | where Name == name
 }
+
+.create table Products ingestion json mapping "item_to_product_json" '[{"Column": "ProductID", "Properties": {"Path": "$.ItemID"}},{"Column": "Name", "Properties": {"Path": "$.ItemName"}},{"Column": "Cost", "Properties": {"Path": "$.ItemCost"}},]'

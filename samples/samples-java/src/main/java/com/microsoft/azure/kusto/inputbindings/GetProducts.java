@@ -15,7 +15,8 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.kusto.annotation.KustoInput;
 import com.microsoft.azure.kusto.common.Product;
 
-import static com.microsoft.azure.kusto.common.Constants.*;
+import static com.microsoft.azure.kusto.common.Constants.KUSTOCONNSTR;
+import static com.microsoft.azure.kusto.common.Constants.SDKTESTSDB;
 
 import java.util.Optional;
 

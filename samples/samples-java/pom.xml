@@ -26,7 +26,7 @@
         <maven.resources.plugin.version>3.3.0</maven.resources.plugin.version>
         <maven.dependency.plugin.version>3.3.0</maven.dependency.plugin.version>
         <maven.clean.plugin.version>3.2.0</maven.clean.plugin.version>
-        <functionAppName>kustojavafunctionssample-20230130111810291</functionAppName>
+        <functionAppName>kustojavafunctionssample-20230130111810292</functionAppName>
     </properties>
 
     <dependencies>

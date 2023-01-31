@@ -15,9 +15,10 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.kusto.annotation.KustoInput;
 import com.microsoft.azure.kusto.common.Product;
 
-import java.util.Optional;
+import static com.microsoft.azure.kusto.common.Constants.KUSTOCONNSTR;
+import static com.microsoft.azure.kusto.common.Constants.SDKTESTSDB;
 
-import static com.microsoft.azure.kusto.common.Constants.*;
+import java.util.Optional;
 
 public class GetProductsFunction {
     @FunctionName("GetJProductsFunction")
