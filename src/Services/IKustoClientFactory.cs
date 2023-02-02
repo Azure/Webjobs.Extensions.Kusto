@@ -40,6 +40,28 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 ClientVersionForTracing = KustoConstants.ClientDetailForTracing
             };
+
+            if (!string.IsNullOrEmpty(engineKcsb?.EmbeddedManagedIdentity))
+            {
+                string msi = engineKcsb.EmbeddedManagedIdentity;
+                // There exists a managed identity. Check if that is UserManaged or System identity
+                // Ref doc https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto:
+                // use "system" to indicate the system-assigned identity
+                if ("system".EqualsOrdinalIgnoreCase(msi))
+                {
+                    engineKcsb.WithAadSystemManagedIdentity();
+                    dmKcsb.WithAadSystemManagedIdentity();
+                }
+                else
+                {
+                    engineKcsb.WithAadUserManagedIdentity(msi);
+                    dmKcsb.WithAadUserManagedIdentity(msi);
+
+                }
+            }
+
+
+
             // Create a managed ingest connection
             return GetManagedStreamingClient(engineKcsb, dmKcsb);
         }
