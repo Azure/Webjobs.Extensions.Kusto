@@ -9,10 +9,10 @@ from Common.product import Product
 
 def main(req: func.HttpRequest, product: func.Out[str]) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
-    #body = json.loads(req.get_body())
-    product.set(req.get_body())
+    body = str(req.get_body(),'UTF-8')
+    product.set(body)
     return func.HttpResponse(
-        body=req.get_body(),
+        body=body,
         status_code=201,
         mimetype="application/json"
     )
