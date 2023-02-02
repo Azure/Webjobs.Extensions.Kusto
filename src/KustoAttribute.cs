@@ -26,21 +26,45 @@ namespace Microsoft.Azure.WebJobs.Kusto
             this.Database = AssignValue(Database, nameof(Database));
         }
 
+        /// <summary>
+        /// An option to set the ManagedServiceIdentity option. If set to "system" will use SystemManagedIdentity else use UserManagedIdentity
+        /// </summary>
+        [AutoResolve]
+        public string ManagedServiceIdentity { get; set; }
+
+        /// <summary>
+        /// The database name to use
+        /// </summary>
         [AutoResolve]
         public string Database { get; private set; }
 
+        /// <summary>
+        /// In case of Output binding, the name of the table to use
+        /// </summary>
         [AutoResolve]
         public string TableName { get; set; }
 
+        /// <summary>
+        /// References an existing mapping created that can be used during ingestion
+        /// </summary>
         [AutoResolve]
         public string MappingRef { get; set; }
 
+        /// <summary>
+        /// The dataformat to use JSON and CSV are currently supported
+        /// </summary>
         [AutoResolve]
         public string DataFormat { get; set; }
 
+        /// <summary>
+        /// In case of Input binding, the KqlCommand a.k.a KQL to execute
+        /// </summary>
         [AutoResolve]
         public string KqlCommand { get; set; }
 
+        /// <summary>
+        /// The parameter to use in the KqlCommand (@param1=value1,@param2=value2)
+        /// </summary>
         [AutoResolve]
         public string KqlParameters { get; set; }
 
@@ -50,8 +74,8 @@ namespace Microsoft.Azure.WebJobs.Kusto
             get
             {
                 {
-                    return string.Format(CultureInfo.InvariantCulture, "{0}(Mapping={1}, DataFormat={2})",
-                        this.TableName, this.MappingRef, this.DataFormat);
+                    return string.Format(CultureInfo.InvariantCulture, "{0}(MappingRef={1}, DataFormat={2}, MSI={3}, KqlCommand={4}, KqlParameters={5})",
+                        this.TableName, this.MappingRef, this.DataFormat, this.ManagedServiceIdentity, this.KqlCommand, this.KqlParameters);
                 }
             }
         }

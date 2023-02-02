@@ -106,7 +106,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
             }
             string cacheKey = BuildCacheKey(engineConnectionString);
-            return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString));
+            return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity));
         }
 
 
@@ -129,7 +129,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
             }
             string cacheKey = BuildCacheKey(engineConnectionString);
-            return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString));
+            return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity));
         }
 
         internal string GetConnectionString(string connectionStringSetting)
