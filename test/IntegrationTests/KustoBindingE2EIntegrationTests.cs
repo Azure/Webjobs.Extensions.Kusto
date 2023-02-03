@@ -46,6 +46,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         // Query parameter to get a single row where start and end are the same
         private const string KqlParameterSingleItem = "@startId=1,@endId=1";
         private const string KqlParameter2ValuesInArray = "@startId=6,@endId=7";
+        private const string KqlParameterMSIItem = "@startId=1000,@endId=1000";
         // A client to perform all the assertions
         protected ICslQueryProvider KustoQueryClient { get; private set; }
         protected ICslAdminProvider KustoAdminClient { get; private set; }
@@ -55,6 +56,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         [Fact]
         public async Task KustoFunctionsE2E()
         {
+            ILogger logger = this._loggerFactory.CreateLogger<KustoBindingE2EIntegrationTests>();
             IHost jobHost = await this.StartHostAsync(typeof(KustoEndToEndTestClass));
             IConfiguration hostConfiguration = jobHost.Services.GetRequiredService<IConfiguration>();
             // The environment variable 'KustoConnectionString' has to be defined for the E2E Tests to work
@@ -98,6 +100,28 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             {
                 Assert.IsType<FunctionInvocationException>(ex);
             }
+            // Tests for managed service identity
+            string tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
+            string appId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
+            string appSecret = Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
+            if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(appId) || string.IsNullOrEmpty(appSecret))
+            {
+                logger.LogWarning("Environment variables AZURE_TENANT_ID/AZURE_CLIENT_ID/AZURE_CLIENT_SECRET are not set. MSI tests will not be run");
+            }
+            else
+            {
+                try
+                {
+                    await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputMSI), parameter);
+                    await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputMSI), parameter);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("Exception executing MSI tests", ex);
+                    Assert.Fail(ex.Message);
+                }
+
+            }
         }
 
         /*
@@ -107,7 +131,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         {
             var locator = new ExplicitTypeLocator(testType);
 
-            IHost host = new HostBuilder()
+            IHost host = new HostBuilder().UseEnvironment("Development")
                 .ConfigureLogging(logging =>
                 {
                     logging.ClearProviders();
@@ -243,6 +267,27 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 asyncCollector.AddAsync(GetItem(id));
             }
 
+
+            [NoAutomaticTrigger]
+            public static void InputMSI(
+                int id,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterMSIItem, Connection = "KustoConnectionStringMSI", ManagedServiceIdentity = "system")] IEnumerable<Item> itemOne)
+            {
+                // one item gets retrieved
+                Assert.NotNull(itemOne);
+                Assert.Single(itemOne);
+                // There is only one item
+                Assert.Equal(GetItem(id + 999), itemOne.First());
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputMSI(
+                int id,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringMSI", ManagedServiceIdentity = "system")] out object newItem)
+            {
+                newItem = GetItem(id + 999);
+            }
+
             private static Item GetItem(int id)
             {
                 DateTime now = DateTime.UtcNow;
@@ -252,7 +297,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Cost = id * 42.42,
                     Name = "Item-" + id,
                     // To be finite and check for precision
-                    Timestamp = new DateTime(now.Year, now.Month, now.Day, id, id, id, id)
+                    Timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999))
                 };
             }
         }
