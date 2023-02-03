@@ -30,10 +30,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             public KustoCslQueryConverter(KustoExtensionConfigProvider configProvider)
             {
                 this._configProvider = configProvider;
-
             }
 
             /// <summary>
+            /// Convert the KustoAttribute to the KustoQueryContext
             /// </summary>
             /// <param name="attribute">
             /// Contains the KQL , Database and Connection to query the data from

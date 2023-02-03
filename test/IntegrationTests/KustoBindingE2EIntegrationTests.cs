@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -120,7 +121,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     logger.LogError("Exception executing MSI tests", ex);
                     Assert.Fail(ex.Message);
                 }
-
+            }
+            try
+            {
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), parameter);
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<FunctionInvocationException>(ex);
+                Assert.Equal("Kusto Connection String Builder has some invalid or conflicting properties: Specified 'AAD application key' authentication method has some incorrect properties. Missing: [Application Key,Authority Id].. ',\r\nPlease consult Kusto Connection String documentation at https://docs.microsoft.com/en-us/azure/kusto/api/connection-strings/kusto", ex.GetBaseException().Message);
             }
         }
 
@@ -254,6 +263,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             {
                 Assert.True(id > 0);
             }
+
+            [NoAutomaticTrigger]
+            public static void InputFailInvalidConnectionString(
+                int id,
+#pragma warning disable IDE0060
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringInvalidAttributes")] IEnumerable<Item> itemOne)
+#pragma warning restore IDE0060
+            {
+                Assert.True(id > 0);
+            }
+
 
             [NoAutomaticTrigger]
             public static void OutputFail(

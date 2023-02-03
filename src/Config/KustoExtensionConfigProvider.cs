@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Description;
+using Microsoft.Azure.WebJobs.Extensions.Kusto.Config;
 using Microsoft.Azure.WebJobs.Host.Bindings;
 using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Azure.WebJobs.Kusto;
@@ -29,6 +30,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         private readonly IConfiguration _configuration;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IKustoClientFactory _kustoClientFactory;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KustoBindingConfigProvider/>"/> class.
@@ -40,6 +42,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             this._configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this._loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            this._logger = this._loggerFactory.CreateLogger(LogCategories.Bindings);
             this._kustoClientFactory = kustoClientFactory ?? throw new ArgumentNullException(nameof(kustoClientFactory));
         }
 
@@ -56,18 +59,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 throw new ArgumentNullException(nameof(context));
             }
-            ILogger logger = this._loggerFactory.CreateLogger(LogCategories.Bindings);
 #pragma warning disable CS0618 // Cannot use var. FluentBindingRule is in Beta
             FluentBindingRule<KustoAttribute> inputOutputRule = context.AddBindingRule<KustoAttribute>();
             // Validate the attributes we have
             inputOutputRule.AddValidator(this.ValidateConnection);
             // Bind to the types
-            inputOutputRule.BindToCollector<KustoOpenType>(typeof(KustoAsyncCollectorBuilder<>), logger, this);
+            inputOutputRule.BindToCollector<KustoOpenType>(typeof(KustoAsyncCollectorBuilder<>), this._logger, this);
             var converter = new KustoCslQueryConverter(this);
             inputOutputRule.BindToInput(converter);
-            inputOutputRule.BindToInput<string>(typeof(KustoGenericsConverter<string>), logger, this);
-            inputOutputRule.BindToInput<JArray>(typeof(KustoGenericsConverter<JArray>), logger, this);
-            inputOutputRule.BindToInput<OpenType>(typeof(KustoGenericsConverter<>), logger, this);
+            inputOutputRule.BindToInput<string>(typeof(KustoGenericsConverter<string>), this._logger, this);
+            inputOutputRule.BindToInput<JArray>(typeof(KustoGenericsConverter<JArray>), this._logger, this);
+            inputOutputRule.BindToInput<OpenType>(typeof(KustoGenericsConverter<>), this._logger, this);
         }
         internal void ValidateConnection(KustoAttribute attribute, Type paramType)
         {
@@ -101,12 +103,25 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? KustoConstants.DefaultConnectionStringName : kustoAttribute.Connection;
             string engineConnectionString = this.GetConnectionString(connection);
-            if (string.IsNullOrEmpty(engineConnectionString))
+            try
             {
-                throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
+                if (string.IsNullOrEmpty(engineConnectionString))
+                {
+                    throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
+                }
+                string cacheKey = BuildCacheKey(engineConnectionString);
+                return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity));
             }
-            string cacheKey = BuildCacheKey(engineConnectionString);
-            return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity));
+            catch (Exception e)
+            {
+                string logContext = $"Error creating ingest connection : TableName='{kustoAttribute?.TableName}',Database='{kustoAttribute?.Database}'," +
+                    $"MappingRef='{kustoAttribute?.MappingRef}'," +
+                    $"DataFormat='{kustoAttribute?.DataFormat}'" +
+                    $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
+                    $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
+                this._logger.LogError(logContext, e);
+                throw;
+            }
         }
 
 
@@ -124,12 +139,24 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? KustoConstants.DefaultConnectionStringName : kustoAttribute.Connection;
             string engineConnectionString = this.GetConnectionString(connection);
-            if (string.IsNullOrEmpty(engineConnectionString))
+            try
             {
-                throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
+                if (string.IsNullOrEmpty(engineConnectionString))
+                {
+                    throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
+                }
+                string cacheKey = BuildCacheKey(engineConnectionString);
+                return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity));
             }
-            string cacheKey = BuildCacheKey(engineConnectionString);
-            return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity));
+            catch (Exception e)
+            {
+                string logContext = $"Error creating query connection : KqlCommand='{kustoAttribute?.KqlCommand}',Database='{kustoAttribute?.Database}'," +
+                    $"KqlParameters='{kustoAttribute?.KqlParameters}'," +
+                    $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
+                    $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
+                this._logger.LogError(logContext, e);
+                throw;
+            }
         }
 
         internal string GetConnectionString(string connectionStringSetting)
