@@ -84,21 +84,25 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             // Fail scenario
             try
             {
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFail), parameter);
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFailForUserWithNoIngestPrivileges), parameter);
             }
             catch (Exception ex)
             {
-                // TODO validate this error
                 Assert.IsType<FunctionInvocationException>(ex);
+                string actualExceptionCause = ex.GetBaseException().Message;
+                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
             }
 
             try
             {
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputFail), parameter);
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges), parameter);
             }
             catch (Exception ex)
             {
                 Assert.IsType<FunctionInvocationException>(ex);
+                Assert.NotEmpty(ex.GetBaseException().Message);
+                string actualExceptionCause = ex.GetBaseException().Message;
+                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
             }
             // Tests for managed service identity
             string tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
@@ -254,7 +258,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             }
 
             [NoAutomaticTrigger]
-            public static void InputFail(
+            public static void InputFailForUserWithNoIngestPrivileges(
                 int id,
 #pragma warning disable IDE0060
                 [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringNoPermissions")] IEnumerable<Item> itemOne)
@@ -275,7 +279,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
 
 
             [NoAutomaticTrigger]
-            public static void OutputFail(
+            public static void OutputFailForUserWithNoReadPrivileges(
             int id,
 #pragma warning disable IDE0060
             [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringNoPermissions")] IAsyncCollector<object> asyncCollector)
