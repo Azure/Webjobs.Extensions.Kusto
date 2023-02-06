@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -32,8 +33,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
     {
         // These have to be decared as consts for the Bindings attributes to use
         private const string TableName = "kusto_functions_e2e_tests";
+        private const string MappingName = "product_to_item_json_mapping";
         // Create the table
         private readonly string CreateItemTable = $".create-merge table {TableName}(ID:int,Name:string, Cost:double,Timestamp:datetime)";
+        private readonly string CreateTableMappings = $".create-or-alter table {TableName} ingestion json mapping \"{MappingName}\" '[{{\"column\":\"ID\",\"path\":\"$.ProductID\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Name\",\"path\":\"$.ProductName\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Cost\",\"path\":\"$.UnitCost\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Timestamp\",\"path\":\"$.Timestamp\",\"datatype\":\"\",\"transform\":null}}]'";
+        private readonly string DropTableMappings = $".drop table {TableName} ingestion json mapping \"{MappingName}\"";
         private readonly string ClearItemTable = $".clear table {TableName} data";
         private readonly string DropTable = $".drop table {TableName}";
         // Queries for input binding with parameters
@@ -47,6 +51,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private const string KqlParameterSingleItem = "@startId=1,@endId=1";
         private const string KqlParameter2ValuesInArray = "@startId=6,@endId=7";
         private const string KqlParameterMSIItem = "@startId=1000,@endId=1000";
+        private const string KqlParameterSingleCsv = "@startId=2000,@endId=2000";
+        private const string KqlParameterCSVItems = "@startId=2000,@endId=2010";
+        private const string KqlParameterMappedProducts = "@startId=3000,@endId=3000";
         // A client to perform all the assertions
         protected ICslQueryProvider KustoQueryClient { get; private set; }
         protected ICslAdminProvider KustoAdminClient { get; private set; }
@@ -72,6 +79,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             System.Data.IDataReader tableCreationResult = this.KustoAdminClient.ExecuteControlCommand(DatabaseName, this.CreateItemTable);
             // Since this is a merge , if there is another table get it cleared for tests
             this.KustoAdminClient.ExecuteControlCommand(this.ClearItemTable);
+            // Create mappings
+            this.KustoAdminClient.ExecuteControlCommand(this.CreateTableMappings);
             Assert.NotNull(tableCreationResult);
             var parameter = new Dictionary<string, object>
             {
@@ -114,16 +123,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             }
             else
             {
-                try
-                {
-                    await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputMSI), parameter);
-                    await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputMSI), parameter);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError("Exception executing MSI tests", ex);
-                    Assert.Fail(ex.Message);
-                }
+                // Tests for managed service identity
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputMSI), parameter);
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputMSI), parameter);
             }
             try
             {
@@ -134,6 +136,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.IsType<FunctionInvocationException>(ex);
                 Assert.Equal("Kusto Connection String Builder has some invalid or conflicting properties: Specified 'AAD application key' authentication method has some incorrect properties. Missing: [Application Key,Authority Id].. ',\r\nPlease consult Kusto Connection String documentation at https://docs.microsoft.com/en-us/azure/kusto/api/connection-strings/kusto", ex.GetBaseException().Message);
             }
+            // Tests for managed CSV
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsCSV), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsCSV), parameter);
+
+            // Tests for records with mapping
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMapping), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputWithMapping), parameter);
         }
 
         /*
@@ -189,7 +198,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         public override void After(MethodInfo methodUnderTest)
         {
             // Drop the tables once done
-            _ = this.KustoAdminClient.ExecuteControlCommand(DatabaseName, this.DropTable);
+            _ = this.KustoAdminClient.ExecuteControlCommandAsync(DatabaseName, this.DropTableMappings);
+            _ = this.KustoAdminClient.ExecuteControlCommandAsync(DatabaseName, this.DropTable);
             this.KustoAdminClient.Dispose();
             this.KustoQueryClient.Dispose();
         }
@@ -311,6 +321,74 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 newItem = GetItem(id + 999);
             }
 
+
+            [NoAutomaticTrigger]
+            public static void OutputsCSV(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, DataFormat = "csv")] out object csvItem,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, DataFormat = "csv")] IAsyncCollector<object> csvItemsCollector)
+            {
+                /*
+                 Add an individual item-1 csv
+                 */
+                int csvNextId = id + 1999;
+                csvItem = GetItemCsv(csvNextId);
+                csvNextId++;
+                Task.WaitAll(new[]
+                {
+                    csvItemsCollector.AddAsync(GetItemCsv(csvNextId)),
+                    csvItemsCollector.AddAsync(GetItemCsv(csvNextId++)),
+                    csvItemsCollector.AddAsync(GetItemCsv(csvNextId++))
+                });
+            }
+
+            [NoAutomaticTrigger]
+            public static async Task InputsCSV(
+            int id,
+            [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleCsv, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> csvItemOne,
+            [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterCSVItems, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> csvItemCollection)
+            {
+                // Validate all the CSV records
+                int csvNextId = id + 1999;
+                // one item gets retrieved
+                Assert.NotNull(csvItemOne);
+                Assert.Single(csvItemOne);
+                // There is only one item
+                Assert.Equal(GetItem(csvNextId), csvItemOne.First());
+                // Get all the values for 4
+                Assert.NotNull(csvItemCollection);
+                await foreach (Item actualItem in csvItemCollection.ConfigureAwait(false))
+                {
+                    // starting at 1 ensure we get all the items we need to get
+                    Assert.NotNull(actualItem);
+                    // All attributes based on ID should match
+                    Assert.Equal(GetItem(actualItem.ID), actualItem);
+                }
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputsWithMapping(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, MappingRef = MappingName)] out string product)
+            {
+                int productId = id + 2999;
+                product = GetProductJson(productId);
+            }
+
+            [NoAutomaticTrigger]
+            public static void InputWithMapping(
+            int id,
+            [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterMappedProducts, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> productOne)
+            {
+                int productId = id + 2999;
+                // Validate all the retrieved records
+                // one item gets retrieved
+                Assert.NotNull(productOne);
+                Assert.Single(productOne);
+                // There is only one item
+                Assert.Equal(GetItem(productId), productOne.First());
+            }
+
             private static Item GetItem(int id)
             {
                 DateTime now = DateTime.UtcNow;
@@ -322,6 +400,26 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     // To be finite and check for precision
                     Timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999))
                 };
+            }
+
+            private static string GetProductJson(int id)
+            {
+                DateTime now = DateTime.UtcNow;
+                dynamic product = new JObject();
+                product.ProductID = id;
+                product.ProductName = "Item-" + id;
+                product.UnitCost = id * 42.42;
+                product.Timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999));
+                string result = product.ToString(Formatting.None);
+                return result;
+            }
+
+            private static string GetItemCsv(int id)
+            {
+                DateTime now = DateTime.UtcNow;
+                string timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999)).ToUtcString(CultureInfo.InvariantCulture);
+                // is ordinal based in the table with this order
+                return $"{id},Item-{id},{id * 42.42},{timestamp}";
             }
         }
     }

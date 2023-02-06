@@ -22,7 +22,9 @@ namespace Microsoft.Azure.WebJobs.Kusto
     /// <typeparam name="T"></typeparam>
     internal class KustoAsyncCollector<T> : IAsyncCollector<T>, IDisposable
     {
+        //A list of rows to ingest
         private readonly List<T> _rows = new List<T>();
+        // Used to co-ordinate writes and flushes.
         private readonly SemaphoreSlim _rowLock = new SemaphoreSlim(1, 1);
         private readonly KustoIngestContext _kustoIngestContext;
         private readonly ILogger _logger;
@@ -36,7 +38,8 @@ namespace Microsoft.Azure.WebJobs.Kusto
             this._contextdetail = new Lazy<string>(() => $"TableName='{kustoContext.ResolvedAttribute?.TableName}'," +
             $"Database='{kustoContext.ResolvedAttribute?.Database}', " +
             $"MappingRef='{kustoContext.ResolvedAttribute?.MappingRef}', " +
-            $"DataFormat='{this.GetDataFormat()}'");
+            $"DataFormat='{this.GetDataFormat()}'" +
+            $"ManagedIdentity='{kustoContext.ResolvedAttribute?.ManagedServiceIdentity}'");
         }
 
         /// <summary>
@@ -135,6 +138,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
         {
             IKustoIngestionResult ingestionResult = await this._kustoIngestContext.IngestService.IngestFromStreamAsync(KustoBindingUtilities.StreamFromString(dataToIngest), kustoIngestionProperties, streamSourceOptions);
             IngestionStatus ingestionStatus = ingestionResult.GetIngestionStatusBySourceId(streamSourceOptions.SourceId);
+            this._logger.LogDebug("Ingestion status for {IngestSourceId}. Ingest detail {IngestDetail}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value);
             return ingestionStatus;
         }
 
