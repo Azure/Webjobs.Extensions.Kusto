@@ -33,8 +33,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
     {
         // These have to be decared as consts for the Bindings attributes to use
         private const string TableName = "kusto_functions_e2e_tests";
+        private const string MappingName = "product_to_item_json_mapping";
         // Create the table
         private readonly string CreateItemTable = $".create-merge table {TableName}(ID:int,Name:string, Cost:double,Timestamp:datetime)";
+        private readonly string CreateTableMappings = $".create-or-alter table {TableName} ingestion json mapping \"{MappingName}\" '[{{\"column\":\"ID\",\"path\":\"$.ProductID\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Name\",\"path\":\"$.ProductName\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Cost\",\"path\":\"$.UnitCost\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Timestamp\",\"path\":\"$.Timestamp\",\"datatype\":\"\",\"transform\":null}}]'";
+        private readonly string DropTableMappings = $".drop table {TableName} ingestion json mapping \"{MappingName}\"";
         private readonly string ClearItemTable = $".clear table {TableName} data";
         private readonly string DropTable = $".drop table {TableName}";
         // Queries for input binding with parameters
@@ -48,6 +51,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private const string KqlParameterSingleItem = "@startId=1,@endId=1";
         private const string KqlParameterSingleItemCsv = "@startId=8,@endId=8";
         private const string KqlParameter2ValuesInArray = "@startId=6,@endId=7";
+        private const string KqlParameterMSIItem = "@startId=1000,@endId=1000";
+        private const string KqlParameterSingleCsv = "@startId=2000,@endId=2000";
+        private const string KqlParameterCSVItems = "@startId=2000,@endId=2010";
+        private const string KqlParameterMappedProducts = "@startId=3000,@endId=3000";
         // A client to perform all the assertions
         protected ICslQueryProvider KustoQueryClient { get; private set; }
         protected ICslAdminProvider KustoAdminClient { get; private set; }
@@ -57,6 +64,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         [Fact]
         public async Task KustoFunctionsE2E()
         {
+            ILogger logger = this._loggerFactory.CreateLogger<KustoBindingE2EIntegrationTests>();
             IHost jobHost = await this.StartHostAsync(typeof(KustoEndToEndTestClass));
             IConfiguration hostConfiguration = jobHost.Services.GetRequiredService<IConfiguration>();
             // The environment variable 'KustoConnectionString' has to be defined for the E2E Tests to work
@@ -72,6 +80,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             System.Data.IDataReader tableCreationResult = this.KustoAdminClient.ExecuteControlCommand(DatabaseName, this.CreateItemTable);
             // Since this is a merge , if there is another table get it cleared for tests
             this.KustoAdminClient.ExecuteControlCommand(this.ClearItemTable);
+            // Create mappings
+            this.KustoAdminClient.ExecuteControlCommand(this.CreateTableMappings);
             Assert.NotNull(tableCreationResult);
             var parameter = new Dictionary<string, object>
             {
@@ -84,22 +94,86 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             // Fail scenario
             try
             {
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFail), parameter);
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFailForUserWithNoIngestPrivileges), parameter);
             }
             catch (Exception ex)
             {
-                // TODO validate this error
                 Assert.IsType<FunctionInvocationException>(ex);
+                string actualExceptionCause = ex.GetBaseException().Message;
+                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
             }
 
             try
             {
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputFail), parameter);
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges), parameter);
             }
             catch (Exception ex)
             {
                 Assert.IsType<FunctionInvocationException>(ex);
+                Assert.NotEmpty(ex.GetBaseException().Message);
+                string actualExceptionCause = ex.GetBaseException().Message;
+                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
             }
+            // Tests for managed service identity
+            string tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
+            string appId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
+            string appSecret = Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
+            if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(appId) || string.IsNullOrEmpty(appSecret))
+            {
+                logger.LogWarning("Environment variables AZURE_TENANT_ID/AZURE_CLIENT_ID/AZURE_CLIENT_SECRET are not set. MSI tests will not be run");
+            }
+            else
+            {
+                // Tests for managed service identity
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputMSI), parameter);
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputMSI), parameter);
+            }
+            // Tests where the exceptions are caused due to invalid strings
+            string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString) };
+            foreach (string test in testsToExecute)
+            {
+                try
+                {
+                    await jobHost.GetJobHost().CallAsync(test, parameter);
+                }
+                catch (Exception ex)
+                {
+                    Assert.IsType<FunctionInvocationException>(ex);
+                    Assert.Equal("Kusto Connection String Builder has some invalid or conflicting properties: Specified 'AAD application key' authentication method has some incorrect properties. Missing: [Application Key,Authority Id].. ',\r\nPlease consult Kusto Connection String documentation at https://docs.microsoft.com/en-us/azure/kusto/api/connection-strings/kusto", ex.GetBaseException().Message);
+                }
+            }
+            // Tests for managed CSV
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsCSV), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsCSV), parameter);
+
+            // Tests for records with mapping
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMapping), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputWithMapping), parameter);
+
+            // Tests for the case where this is a bad JSON. This will cause an ingest failure
+            try
+            {
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), parameter);
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<FunctionInvocationException>(ex);
+                var actualExceptionMessageJson = JObject.Parse(ex.GetBaseException().Message);
+                string actualMessage = (string)actualExceptionMessageJson["error"]["message"];
+                string actualType = (string)actualExceptionMessageJson["error"]["@type"];
+                bool isPermanent = (bool)actualExceptionMessageJson["error"]["@permanent"];
+                Assert.Equal("Request is invalid and cannot be executed.", actualMessage);
+                Assert.Equal("Kusto.DataNode.Exceptions.StreamingIngestionRequestException", actualType);
+                Assert.True(isPermanent);
+            }
+            /*
+            // To debug further, uncomment the following lines. The logs would be available in test\bin\Debug\netcoreapp3.1
+            IEnumerable<LogMessage> allLoggedMessages = this._loggerProvider.GetAllLogMessages();
+            foreach (LogMessage logMessage in allLoggedMessages)
+            {
+                System.IO.File.AppendAllText("logs-created.txt", logMessage.FormattedMessage + Environment.NewLine);
+            }
+            */
         }
 
         /*
@@ -109,12 +183,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         {
             var locator = new ExplicitTypeLocator(testType);
 
-            IHost host = new HostBuilder()
+            IHost host = new HostBuilder().UseEnvironment("Development")
                 .ConfigureLogging(logging =>
                 {
                     logging.ClearProviders();
                     logging.AddProvider(this._loggerProvider);
-                    logging.SetMinimumLevel(LogLevel.Debug);
+                    logging.SetMinimumLevel(LogLevel.Trace);
                 })
                 .ConfigureWebJobs(builder =>
                 {
@@ -155,7 +229,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         public override void After(MethodInfo methodUnderTest)
         {
             // Drop the tables once done
-            _ = this.KustoAdminClient.ExecuteControlCommand(DatabaseName, this.DropTable);
+            _ = this.KustoAdminClient.ExecuteControlCommandAsync(DatabaseName, this.DropTableMappings);
+            _ = this.KustoAdminClient.ExecuteControlCommandAsync(DatabaseName, this.DropTable);
             this.KustoAdminClient.Dispose();
             this.KustoQueryClient.Dispose();
         }
@@ -236,7 +311,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             }
 
             [NoAutomaticTrigger]
-            public static void InputFail(
+            public static void InputFailForUserWithNoIngestPrivileges(
                 int id,
 #pragma warning disable IDE0060
                 [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringNoPermissions")] IEnumerable<Item> itemOne)
@@ -246,7 +321,31 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             }
 
             [NoAutomaticTrigger]
-            public static void OutputFail(
+            public static void InputFailInvalidConnectionString(
+                int id,
+#pragma warning disable IDE0060
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringInvalidAttributes")] IEnumerable<Item> itemOne)
+#pragma warning restore IDE0060
+            {
+                Assert.True(id > 0);
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputFailInvalidConnectionString(
+            int id,
+#pragma warning disable IDE0060
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringInvalidAttributes")] out object itemOne)
+#pragma warning restore IDE0060
+            {
+                Assert.True(id > 0);
+                itemOne = GetItem(id + 999);
+                // one item gets retrieved
+                Assert.Null(itemOne);
+            }
+
+
+            [NoAutomaticTrigger]
+            public static void OutputFailForUserWithNoReadPrivileges(
             int id,
 #pragma warning disable IDE0060
             [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringNoPermissions")] IAsyncCollector<object> asyncCollector)
@@ -255,6 +354,95 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.True(id > 0);
                 // When we add an item it should fail with exception
                 asyncCollector.AddAsync(GetItem(id));
+            }
+
+
+            [NoAutomaticTrigger]
+            public static void InputMSI(
+                int id,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterMSIItem, Connection = "KustoConnectionStringMSI", ManagedServiceIdentity = "system")] IEnumerable<Item> itemOne)
+            {
+                // one item gets retrieved
+                Assert.NotNull(itemOne);
+                Assert.Single(itemOne);
+                // There is only one item
+                Assert.Equal(GetItem(id + 999), itemOne.First());
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputMSI(
+                int id,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringMSI", ManagedServiceIdentity = "system")] out object newItem)
+            {
+                newItem = GetItem(id + 999);
+            }
+
+
+            [NoAutomaticTrigger]
+            public static void OutputsCSV(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, DataFormat = "csv")] out object csvItem,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, DataFormat = "csv")] IAsyncCollector<object> csvItemsCollector)
+            {
+                /*
+                 Add an individual item-1 csv
+                 */
+                int csvNextId = id + 1999;
+                csvItem = GetItemCsv(csvNextId);
+                csvNextId++;
+                Task.WaitAll(new[]
+                {
+                    csvItemsCollector.AddAsync(GetItemCsv(csvNextId)),
+                    csvItemsCollector.AddAsync(GetItemCsv(csvNextId++)),
+                    csvItemsCollector.AddAsync(GetItemCsv(csvNextId++))
+                });
+            }
+
+            [NoAutomaticTrigger]
+            public static async Task InputsCSV(
+            int id,
+            [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleCsv, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> csvItemOne,
+            [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterCSVItems, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> csvItemCollection)
+            {
+                // Validate all the CSV records
+                int csvNextId = id + 1999;
+                // one item gets retrieved
+                Assert.NotNull(csvItemOne);
+                Assert.Single(csvItemOne);
+                // There is only one item
+                Assert.Equal(GetItem(csvNextId), csvItemOne.First());
+                // Get all the values for 4
+                Assert.NotNull(csvItemCollection);
+                await foreach (Item actualItem in csvItemCollection.ConfigureAwait(false))
+                {
+                    // starting at 1 ensure we get all the items we need to get
+                    Assert.NotNull(actualItem);
+                    // All attributes based on ID should match
+                    Assert.Equal(GetItem(actualItem.ID), actualItem);
+                }
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputsWithMapping(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, MappingRef = MappingName)] out string product)
+            {
+                int productId = id + 2999;
+                product = GetProductJson(productId);
+            }
+
+            [NoAutomaticTrigger]
+            public static void InputWithMapping(
+            int id,
+            [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterMappedProducts, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> productOne)
+            {
+                int productId = id + 2999;
+                // Validate all the retrieved records
+                // one item gets retrieved
+                Assert.NotNull(productOne);
+                Assert.Single(productOne);
+                // There is only one item
+                Assert.Equal(GetItem(productId), productOne.First());
             }
 
             private static Item GetItem(int id)
@@ -266,8 +454,39 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Cost = id * 42.42,
                     Name = "Item-" + id,
                     // To be finite and check for precision
-                    Timestamp = new DateTime(now.Year, now.Month, now.Day, id, id, id, id)
+                    Timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999))
                 };
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputsWithInvalidJson(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, MappingRef = MappingName)] out string product)
+            {
+                int productId = id + 2999;
+                string productJson = GetProductJson(productId);
+                // Create a JSON that is invalid! This should throw a payload exception
+                product = productJson[1..];
+            }
+
+            private static string GetProductJson(int id)
+            {
+                DateTime now = DateTime.UtcNow;
+                dynamic product = new JObject();
+                product.ProductID = id;
+                product.ProductName = "Item-" + id;
+                product.UnitCost = id * 42.42;
+                product.Timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999));
+                string result = product.ToString(Formatting.None);
+                return result;
+            }
+
+            private static string GetItemCsv(int id)
+            {
+                DateTime now = DateTime.UtcNow;
+                string timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999)).ToUtcString(CultureInfo.InvariantCulture);
+                // is ordinal based in the table with this order
+                return $"{id},Item-{id},{id * 42.42},{timestamp}";
             }
         }
     }

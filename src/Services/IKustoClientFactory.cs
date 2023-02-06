@@ -15,8 +15,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     /// </summary>
     internal interface IKustoClientFactory
     {
-        IKustoIngestClient IngestClientFactory(string engineConnectionString);
-        ICslQueryProvider QueryProviderFactory(string engineConnectionString);
+        IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity);
+        ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity);
     }
     internal class KustoClient : IKustoClientFactory
     {
@@ -24,22 +24,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// Given the engine connection string, return a managed ingest client
         /// </summary>
         /// <param name="engineConnectionString">The engine connection string. The ingest URL will be derieved from this for the managed ingest</param>
+        /// <param name="managedIdentity">MSI string to use Managed service identity</param>
         /// <returns>A managed ingest client. Attempts ingestion through streaming and then fallsback to Queued ingest mode</returns>
-        public IKustoIngestClient IngestClientFactory(string engineConnectionString)
+        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity)
         {
-            var engineKcsb = new KustoConnectionStringBuilder(engineConnectionString)
-            {
-                ClientVersionForTracing = KustoConstants.ClientDetailForTracing
-            };
+            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity);
             /*
                 We expect minimal input from the user.The end user can just pass a connection string, we need to decipher the DM
                 ingest endpoint as well from this. Both the engine and DM endpoint are needed for the managed ingest to happen
              */
             string dmConnectionStringEndpoint = engineKcsb.Hostname.Contains(KustoConstants.IngestPrefix) ? engineConnectionString : engineConnectionString.ReplaceFirstOccurrence(KustoConstants.ProtocolSuffix, KustoConstants.ProtocolSuffix + KustoConstants.IngestPrefix);
-            var dmKcsb = new KustoConnectionStringBuilder(dmConnectionStringEndpoint)
-            {
-                ClientVersionForTracing = KustoConstants.ClientDetailForTracing
-            };
+            KustoConnectionStringBuilder dmKcsb = GetKustoConnectionString(dmConnectionStringEndpoint, managedIdentity);
             // Create a managed ingest connection
             return GetManagedStreamingClient(engineKcsb, dmKcsb);
         }
@@ -52,15 +47,35 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// Given the engine connection string, return a query client
         /// </summary>
         /// <param name="engineConnectionString">The engine connection string</param>
+        /// <param name="managedIdentity">MSI string to use Managed service identity</param>
         /// <returns>A query client to execute KQL</returns>
 
-        public ICslQueryProvider QueryProviderFactory(string engineConnectionString)
+        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity)
         {
-            var engineKcsb = new KustoConnectionStringBuilder(engineConnectionString)
+            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity);
+            return KustoClientFactory.CreateCslQueryProvider(engineKcsb);
+        }
+
+        private static KustoConnectionStringBuilder GetKustoConnectionString(string connectionString, string managedIdentity)
+        {
+            var kcsb = new KustoConnectionStringBuilder(connectionString)
             {
                 ClientVersionForTracing = KustoConstants.ClientDetailForTracing
             };
-            return KustoClientFactory.CreateCslQueryProvider(engineKcsb);
+            if (!string.IsNullOrEmpty(managedIdentity))
+            {
+                // There exists a managed identity. Check if that is UserManaged or System identity
+                // use "system" to indicate the system-assigned identity
+                if ("system".EqualsOrdinalIgnoreCase(managedIdentity))
+                {
+                    kcsb.WithAadSystemManagedIdentity();
+                }
+                else
+                {
+                    kcsb.WithAadUserManagedIdentity(managedIdentity);
+                }
+            }
+            return kcsb;
         }
     }
 }

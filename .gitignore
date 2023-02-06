@@ -93,7 +93,7 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
-*.snk
+#*.snk
 # Chutzpah Test files
 _Chutzpah*
 
@@ -364,3 +364,4 @@ __azurite_db*__.json
 /build
 local-packages/
 extensions/
+/samples/samples-java/.idea

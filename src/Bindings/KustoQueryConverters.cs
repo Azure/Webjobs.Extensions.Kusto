@@ -30,10 +30,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             public KustoCslQueryConverter(KustoExtensionConfigProvider configProvider)
             {
                 this._configProvider = configProvider;
-
             }
 
             /// <summary>
+            /// Convert the KustoAttribute to the KustoQueryContext
             /// </summary>
             /// <param name="attribute">
             /// Contains the KQL , Database and Connection to query the data from
@@ -65,12 +65,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 try
                 {
-                    List<T> results = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider)).ToObject<List<T>>();
+                    List<T> results = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider, this._logger)).ToObject<List<T>>();
                     return results;
                 }
                 catch (Exception ex)
                 {
-                    string logMessage = $"Error in Query/Conversion. Attributes [DB='{attribute?.Database}', Query='{attribute?.KqlCommand}',DataFormat='{attribute?.KqlParameters}']";
+                    string logMessage = $"Error in Query/Conversion. Attributes [DB='{attribute?.Database}', Query='{attribute?.KqlCommand}',Parameters='{attribute?.KqlParameters}']";
                     this._logger.LogError(ex, logMessage);
                     throw new InvalidOperationException(logMessage, ex);
                 }
@@ -83,7 +83,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             /// <returns>A string (array) that contains the string representation</returns>
             async Task<string> IAsyncConverter<KustoAttribute, string>.ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
             {
-                string result = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider)).ToString();
+                string result = (await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider, this._logger)).ToString();
                 return result;
             }
             /// <summary>
@@ -94,7 +94,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             /// <returns>A JSON Array that contains the list of retrieved records</returns>
             async Task<JArray> IAsyncConverter<KustoAttribute, JArray>.ConvertAsync(KustoAttribute attribute, CancellationToken cancellationToken)
             {
-                JArray result = await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider);
+                JArray result = await BuildJsonArrayFromAttributeAsync(attribute, this._configProvider, this._logger);
                 return result;
             }
             /// <summary>
@@ -108,7 +108,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 return new KustoAsyncEnumerable<T>(context);
             }
         }
-        private static async Task<JArray> BuildJsonArrayFromAttributeAsync(KustoAttribute attribute, KustoExtensionConfigProvider configProvider)
+        private static async Task<JArray> BuildJsonArrayFromAttributeAsync(KustoAttribute attribute, KustoExtensionConfigProvider configProvider, ILogger logger)
         {
             KustoQueryContext kustoQueryContext = configProvider.CreateQueryContext(attribute);
             string tracingRequestId = Guid.NewGuid().ToString();
@@ -141,6 +141,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                         queryReader.ToJObjects().ForEach(jObject => jArray.Add(jObject));
                     }
                 }
+            }
+            if (logger.IsEnabled(LogLevel.Trace))
+            {
+                string logContext = $"Query executionContext : KqlCommand='{attribute?.KqlCommand}'," +
+                                    $"Database='{attribute?.Database}'," +
+                                    $"KqlParameters='{attribute?.KqlParameters}'," +
+                                    $"ManagedIdentity='{attribute?.ManagedServiceIdentity}'," +
+                                    $"Query TraceId='{tracingRequestId}'," +
+                                    $"Results size='{jArray?.Count}'";
+                logger.LogTrace(logContext);
             }
             return jArray;
         }

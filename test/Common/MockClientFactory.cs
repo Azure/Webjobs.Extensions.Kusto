@@ -20,12 +20,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
             this._queryClient = queryClient;
         }
 
-        public IKustoIngestClient IngestClientFactory(string engineConnectionString)
+        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity)
         {
             return this._ingestClient;
         }
 
-        public ICslQueryProvider QueryProviderFactory(string engineConnectionString)
+        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity)
         {
             return this._queryClient;
         }
