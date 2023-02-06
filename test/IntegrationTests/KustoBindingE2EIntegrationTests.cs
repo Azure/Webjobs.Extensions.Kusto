@@ -127,14 +127,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputMSI), parameter);
                 await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputMSI), parameter);
             }
-            try
+            // Tests where the exceptions are caused due to invalid strings
+            string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString) };
+            foreach (string test in testsToExecute)
             {
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), parameter);
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType<FunctionInvocationException>(ex);
-                Assert.Equal("Kusto Connection String Builder has some invalid or conflicting properties: Specified 'AAD application key' authentication method has some incorrect properties. Missing: [Application Key,Authority Id].. ',\r\nPlease consult Kusto Connection String documentation at https://docs.microsoft.com/en-us/azure/kusto/api/connection-strings/kusto", ex.GetBaseException().Message);
+                try
+                {
+                    await jobHost.GetJobHost().CallAsync(test, parameter);
+                }
+                catch (Exception ex)
+                {
+                    Assert.IsType<FunctionInvocationException>(ex);
+                    Assert.Equal("Kusto Connection String Builder has some invalid or conflicting properties: Specified 'AAD application key' authentication method has some incorrect properties. Missing: [Application Key,Authority Id].. ',\r\nPlease consult Kusto Connection String documentation at https://docs.microsoft.com/en-us/azure/kusto/api/connection-strings/kusto", ex.GetBaseException().Message);
+                }
             }
             // Tests for managed CSV
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsCSV), parameter);
@@ -143,6 +148,23 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             // Tests for records with mapping
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMapping), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputWithMapping), parameter);
+
+            // Tests for the case where this is a bad JSON. This will cause an ingest failure
+            try
+            {
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), parameter);
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<FunctionInvocationException>(ex);
+                var actualExceptionMessageJson = JObject.Parse(ex.GetBaseException().Message);
+                string actualMessage = (string)actualExceptionMessageJson["error"]["message"];
+                string actualType = (string)actualExceptionMessageJson["error"]["@type"];
+                bool isPermanent = (bool)actualExceptionMessageJson["error"]["@permanent"];
+                Assert.Equal("Request is invalid and cannot be executed.", actualMessage);
+                Assert.Equal("Kusto.DataNode.Exceptions.StreamingIngestionRequestException", actualType);
+                Assert.True(isPermanent);
+            }
         }
 
         /*
@@ -287,6 +309,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.True(id > 0);
             }
 
+            [NoAutomaticTrigger]
+            public static void OutputFailInvalidConnectionString(
+            int id,
+#pragma warning disable IDE0060
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringInvalidAttributes")] out object itemOne)
+#pragma warning restore IDE0060
+            {
+                Assert.True(id > 0);
+                itemOne = GetItem(id + 999);
+                // one item gets retrieved
+                Assert.Null(itemOne);
+            }
+
 
             [NoAutomaticTrigger]
             public static void OutputFailForUserWithNoReadPrivileges(
@@ -400,6 +435,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     // To be finite and check for precision
                     Timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999))
                 };
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputsWithInvalidJson(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, MappingRef = MappingName)] out string product)
+            {
+                int productId = id + 2999;
+                string productJson = GetProductJson(productId);
+                // Create a JSON that is invalid! This should throw a payload exception
+                product = productJson[1..];
             }
 
             private static string GetProductJson(int id)
