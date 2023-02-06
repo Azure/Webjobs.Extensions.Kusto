@@ -187,7 +187,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 {
                     logging.ClearProviders();
                     logging.AddProvider(this._loggerProvider);
-                    logging.SetMinimumLevel(LogLevel.Debug);
+                    logging.SetMinimumLevel(LogLevel.Trace);
                 })
                 .ConfigureWebJobs(builder =>
                 {

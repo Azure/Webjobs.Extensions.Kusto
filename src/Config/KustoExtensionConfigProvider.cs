@@ -158,11 +158,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 throw;
             }
         }
-
+        /// <summary>
+        /// Resolves the connection string with environment variables or from the settings passed
+        /// </summary>
+        /// <param name="connectionStringSetting">The name of the env-var or setting that has to be resolved</param>
+        /// <returns>A connection string that can be used to connect to Kusto</returns>
         internal string GetConnectionString(string connectionStringSetting)
         {
+            string resolvedConnectionString = this._configuration.GetConnectionStringOrSetting(connectionStringSetting);
+            this._logger.LogTrace($"Resolved connection string for execution : {KustoBindingUtils.ToSecureString(resolvedConnectionString)}");
             // Already validated upfront in Validate that ConnectionString setting is passed in and not null
-            return this._configuration.GetConnectionStringOrSetting(connectionStringSetting);
+            return resolvedConnectionString;
         }
         internal static string BuildCacheKey(string connectionString)
         {

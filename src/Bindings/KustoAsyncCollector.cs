@@ -138,7 +138,10 @@ namespace Microsoft.Azure.WebJobs.Kusto
         {
             IKustoIngestionResult ingestionResult = await this._kustoIngestContext.IngestService.IngestFromStreamAsync(KustoBindingUtilities.StreamFromString(dataToIngest), kustoIngestionProperties, streamSourceOptions);
             IngestionStatus ingestionStatus = ingestionResult.GetIngestionStatusBySourceId(streamSourceOptions.SourceId);
-            this._logger.LogDebug("Ingestion status for source id: {IngestSourceId}. Ingest detail {IngestDetail}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value);
+            if (this._logger.IsEnabled(LogLevel.Trace))
+            {
+                this._logger.LogTrace("Ingestion status for source id: {IngestSourceId}. Ingest detail {IngestDetail}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value);
+            }
             return ingestionStatus;
         }
 
