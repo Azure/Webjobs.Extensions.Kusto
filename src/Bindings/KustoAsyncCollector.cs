@@ -38,7 +38,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
             this._contextdetail = new Lazy<string>(() => $"TableName='{kustoContext.ResolvedAttribute?.TableName}'," +
             $"Database='{kustoContext.ResolvedAttribute?.Database}', " +
             $"MappingRef='{kustoContext.ResolvedAttribute?.MappingRef}', " +
-            $"DataFormat='{this.GetDataFormat()}'" +
+            $"DataFormat='{this.GetDataFormat()}', " +
             $"ManagedIdentity='{kustoContext.ResolvedAttribute?.ManagedServiceIdentity}'");
         }
 
@@ -138,7 +138,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
         {
             IKustoIngestionResult ingestionResult = await this._kustoIngestContext.IngestService.IngestFromStreamAsync(KustoBindingUtilities.StreamFromString(dataToIngest), kustoIngestionProperties, streamSourceOptions);
             IngestionStatus ingestionStatus = ingestionResult.GetIngestionStatusBySourceId(streamSourceOptions.SourceId);
-            this._logger.LogDebug("Ingestion status for {IngestSourceId}. Ingest detail {IngestDetail}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value);
+            this._logger.LogDebug("Ingestion status for source id: {IngestSourceId}. Ingest detail {IngestDetail}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value);
             return ingestionStatus;
         }
 

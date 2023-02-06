@@ -165,6 +165,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.Equal("Kusto.DataNode.Exceptions.StreamingIngestionRequestException", actualType);
                 Assert.True(isPermanent);
             }
+            /*
+            // To debug further, uncomment the following lines. The logs would be available in test\bin\Debug\netcoreapp3.1
+            IEnumerable<LogMessage> allLoggedMessages = this._loggerProvider.GetAllLogMessages();
+            foreach (LogMessage logMessage in allLoggedMessages)
+            {
+                System.IO.File.AppendAllText("logs-created.txt", logMessage.FormattedMessage + Environment.NewLine);
+            }
+            */
         }
 
         /*

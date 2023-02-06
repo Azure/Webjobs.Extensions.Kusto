@@ -70,7 +70,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 }
                 catch (Exception ex)
                 {
-                    string logMessage = $"Error in Query/Conversion. Attributes [DB='{attribute?.Database}', Query='{attribute?.KqlCommand}',DataFormat='{attribute?.KqlParameters}']";
+                    string logMessage = $"Error in Query/Conversion. Attributes [DB='{attribute?.Database}', Query='{attribute?.KqlCommand}',Parameters='{attribute?.KqlParameters}']";
                     this._logger.LogError(ex, logMessage);
                     throw new InvalidOperationException(logMessage, ex);
                 }
