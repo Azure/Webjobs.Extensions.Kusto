@@ -49,6 +49,10 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Kusto
         /// </summary>
         public string Connection { get; set; }
 
+        /// <summary>
+        /// An option to set the ManagedServiceIdentity option. If set to "system" will use SystemManagedIdentity else use UserManagedIdentity
+        /// </summary>
+        public string ManagedServiceIdentity { get; set; }
 
     }
 }
