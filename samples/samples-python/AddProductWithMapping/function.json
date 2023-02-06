@@ -9,7 +9,7 @@
       "methods": [
         "post"
       ],
-      "route": "py-get-product"
+      "route": "py-addproduct-mapping"
     },
     {
       "type": "http",
@@ -22,6 +22,7 @@
       "database": "sdktestsdb",
       "direction": "out",
       "tableName": "Products",
+      "mappingRef":"item_to_product_json",
       "connection": "KustoConnectionString"
     }
   ]

@@ -5,11 +5,9 @@ import azure.functions as func
 from Common.product import Product
 
 
-def main(req: func.HttpRequest, product: func.Out[str]) -> func.HttpResponse:
-    body = str(req.get_body(),'UTF-8')
-    product.set(body)
+def main(req: func.HttpRequest, products: str) -> func.HttpResponse:
     return func.HttpResponse(
-        body=body,
-        status_code=201,
+        products,
+        status_code=200,
         mimetype="application/json"
     )

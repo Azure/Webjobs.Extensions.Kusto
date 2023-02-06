@@ -7,9 +7,9 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "post"
+        "get"
       ],
-      "route": "py-get-product"
+      "route": "py-get-product/{productId}"
     },
     {
       "type": "http",
@@ -17,11 +17,12 @@
       "name": "$return"
     },
     {
-      "name": "product",
+      "name": "products",
       "type": "kusto",
       "database": "sdktestsdb",
-      "direction": "out",
-      "tableName": "Products",
+      "direction": "in",
+      "kqlCommand": "declare query_parameters (productId:long);Products | where ProductID == productId",
+      "kqlParameters": "@productId={productId}",
       "connection": "KustoConnectionString"
     }
   ]
