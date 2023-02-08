@@ -8,7 +8,7 @@
       "methods": [
         "post"
       ],
-      "route": "js-addproduct-mapping"
+      "route": "addproductswithmapping"
     },
     {
       "name": "$return",

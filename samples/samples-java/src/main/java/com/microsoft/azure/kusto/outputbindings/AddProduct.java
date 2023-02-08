@@ -27,7 +27,7 @@ import java.util.Optional;
 public class AddProduct {
     @FunctionName("AddProduct")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproduct") HttpRequestMessage<Optional<String>> request,
+            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproduct") HttpRequestMessage<Optional<String>> request,
             @KustoOutput(name = "product", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR) OutputBinding<Product> product)
             throws IOException {
 

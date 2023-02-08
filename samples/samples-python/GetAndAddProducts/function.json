@@ -8,7 +8,7 @@
       "methods": [
         "get"
       ],
-      "route": "py-get-addproducts/{name}"
+      "route": "getaddproducts/{name}"
     },
     {
       "name": "$return",
