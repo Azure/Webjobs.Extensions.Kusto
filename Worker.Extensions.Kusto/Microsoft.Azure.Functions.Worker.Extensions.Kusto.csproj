@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<AssemblyName>Microsoft.Azure.Functions.Worker.Extensions.Kusto</AssemblyName>
 		<RootNamespace>Microsoft.Azure.Functions.Worker.Extensions.Kusto</RootNamespace>
