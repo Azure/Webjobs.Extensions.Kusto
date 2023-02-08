@@ -29,7 +29,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Config
             {
                 if (builder.ContainsKey(qualifier))
                 {
-                    builder[qualifier] = "********";
+                    builder[qualifier] = "*";
                 }
             }
             return builder.ConnectionString;
