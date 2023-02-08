@@ -21,7 +21,7 @@ public @interface KustoInput {
     String database();
 
     // The connection string name that is used for resolving connection to Kusto
-    String connection() default "KustoConnectionString";
+    String connection();
 
     // the name used in the function.json
     String name();
@@ -30,5 +30,5 @@ public @interface KustoInput {
     String kqlCommand();
 
     // The KQL Query parameters
-    String kqlParameters() default "";
+    String kqlParameters();
 }

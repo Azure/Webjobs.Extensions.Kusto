@@ -1,0 +1,37 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "name": "req",
+      "type": "httpTrigger",
+      "direction": "in",
+      "methods": [
+        "get"
+      ],
+      "route": "py-get-addproducts/{name}"
+    },
+    {
+      "name": "$return",
+      "type": "http",
+      "direction": "out"
+    },
+    {
+      "name": "products",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "in",
+      "kqlCommand": "declare query_parameters (name:string);GetProductsByName(name)",
+      "kqlParameters": "@name={name}",
+      "connection": "KustoConnectionString"
+    },
+    {
+      "name": "productWithRename",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "out",
+      "tableName": "Products",
+      "connection": "KustoConnectionString"
+    }
+  ],
+  "disabled": false
+}

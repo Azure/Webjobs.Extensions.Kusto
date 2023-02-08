@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Extensions.Kusto;
+using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -81,9 +82,11 @@ namespace Microsoft.Azure.WebJobs.Kusto
                 if (this._rows.Count != 0)
                 {
                     IngestionStatus ingestionStatus = await this.IngestRowsAsync(ingestSourceId);
-                    if (ingestionStatus.Status == Status.Failed)
+                    if (ingestionStatus.Status == Status.Failed || ingestionStatus.Status == Status.PartiallySucceeded)
                     {
-                        this._logger.LogError("Ingestion status reported failure for {IngestSourceId}. Ingest detail {IngestDetail}", ingestSourceId.ToString(), this._contextdetail.Value);
+                        string errorMessage = $"Ingestion status reported failure/partial success for {ingestSourceId}. Ingest detail {this._contextdetail.Value}, and status reported was {ingestionStatus.Status}";
+                        this._logger.LogError(errorMessage);
+                        throw new FunctionInvocationException(errorMessage);
                     }
                     this._rows.Clear();
                 }
@@ -115,7 +118,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
                 Format = format,
                 TableName = resolvedAttribute.TableName
             };
-            string dataToIngest = (format == DataSourceFormat.multijson || format == DataSourceFormat.json) ? this.SerializeToIngestData() : string.Join(Environment.NewLine, this._rows); ;
+            string dataToIngest = (format == DataSourceFormat.multijson || format == DataSourceFormat.json) ? this.SerializeToIngestData() : string.Join(Environment.NewLine, this._rows);
             if (!string.IsNullOrEmpty(resolvedAttribute.MappingRef))
             {
                 var ingestionMapping = new IngestionMapping
@@ -140,7 +143,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
             IngestionStatus ingestionStatus = ingestionResult.GetIngestionStatusBySourceId(streamSourceOptions.SourceId);
             if (this._logger.IsEnabled(LogLevel.Trace))
             {
-                this._logger.LogTrace("Ingestion status for source id: {IngestSourceId}. Ingest detail {IngestDetail}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value);
+                this._logger.LogTrace("Ingestion status for source id: {IngestSourceId}. Ingest detail {IngestDetail} and ingestion status {IngestionStatus}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value, ingestionStatus.Status);
             }
             return ingestionStatus;
         }

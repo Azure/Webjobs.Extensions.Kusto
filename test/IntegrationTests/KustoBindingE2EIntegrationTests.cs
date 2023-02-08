@@ -49,6 +49,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private const int startId = 1;
         // Query parameter to get a single row where start and end are the same
         private const string KqlParameterSingleItem = "@startId=1,@endId=1";
+        private const string KqlParameterSingleItemCsv = "@startId=8,@endId=8";
         private const string KqlParameter2ValuesInArray = "@startId=6,@endId=7";
         private const string KqlParameterMSIItem = "@startId=1000,@endId=1000";
         private const string KqlParameterSingleCsv = "@startId=2000,@endId=2000";
@@ -243,6 +244,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object newItem,
                 [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out string newItemString,
                 [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object[] arrayItem,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, DataFormat = "csv")] out object newItemCsv,
                 [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncCollector<object> asyncCollector)
             {
                 /*
@@ -263,6 +265,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     asyncCollector.AddAsync(GetItem(nextId++)),
                     asyncCollector.AddAsync(GetItem(nextId++))
                 });
+
+                /*
+                    Csv test for the data
+                */
+                Item csvItem = GetItem(nextId++);
+                newItemCsv = $"{csvItem.ID},{csvItem.Name},{csvItem.Cost},{csvItem.Timestamp.ToUtcString(CultureInfo.InvariantCulture)}";
             }
 
 
@@ -272,6 +280,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> itemOne,
                 [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameter2ValuesInArray, Connection = KustoConstants.DefaultConnectionStringName)] JArray itemTwo,
                 [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = KustoConstants.DefaultConnectionStringName)] string itemThree,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItemCsv, Connection = KustoConstants.DefaultConnectionStringName)] string itemEight,
                 [Kusto(Database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemFour)
             {
                 int itemId = id;
@@ -295,6 +304,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     // All attributes based on ID should match
                     Assert.Equal(GetItem(actualItem.ID), actualItem);
                 }
+                // Special CSV - Item number 8
+                Assert.NotNull(itemEight);
+                Assert.Equal(GetItem(8), JsonConvert.DeserializeObject<List<Item>>(itemEight).First());
+
             }
 
             [NoAutomaticTrigger]

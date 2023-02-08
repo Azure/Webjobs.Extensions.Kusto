@@ -30,7 +30,7 @@ public @interface KustoOutput {
     String dataFormat() default "";
 
     // The connection string name that is used for referencing the Kusto connection string
-    String connection() default "KustoConnectionString";
+    String connection();
 
     // the name used in the function.json
     String name();

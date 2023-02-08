@@ -1,0 +1,29 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "name": "req",
+      "direction": "in",
+      "type": "httpTrigger",
+      "methods": [
+        "get"
+      ],
+      "route": "js-get-products-fn/{name}"
+    },
+    {
+      "name": "$return",
+      "type": "http",
+      "direction": "out"
+    },
+    {
+      "name": "productfnget",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "in",
+      "kqlCommand": "declare query_parameters (name:string);GetProductsByName(name)",
+      "kqlParameters": "@name={name}",
+      "connection": "KustoConnectionString"
+    }
+  ],
+  "disabled": false
+}

@@ -21,7 +21,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Config
                 "AppKey", "Application Key", "ApplicationKey",
                 "UserID", "User ID", "UID", "User",
                 "User Token", "UsrToken", "UserToken", "UserToken",
-                "Application Token", "AppToken", "ApplicationToken"
+                "Application Token", "AppToken", "ApplicationToken",
+                "Authority Id", "TenantId", "Authority",
+                "Application Client Id", "AppClientId", "ApplicationClientId"
             };
             foreach (string qualifier in securityQualifiers)
             {
