@@ -21,9 +21,9 @@ import static com.microsoft.azure.kusto.common.Constants.SDKTESTSDB;
 import java.util.Optional;
 
 public class GetProducts {
-    @FunctionName("GetJProducts")
+    @FunctionName("GetProducts")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-getproduct/{productId}") HttpRequestMessage<Optional<String>> request,
+            HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "getproducts/{productId}") HttpRequestMessage<Optional<String>> request,
             @KustoInput(name = "getjproducts", kqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId", kqlParameters = "@productId={productId}", database = SDKTESTSDB, connection = KUSTOCONNSTR) Product[] products) {
         return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/json").body(products)
                 .build();

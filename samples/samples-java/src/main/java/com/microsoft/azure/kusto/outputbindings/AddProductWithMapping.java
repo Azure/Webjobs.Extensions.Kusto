@@ -25,9 +25,9 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class AddProductWithMapping {
-    @FunctionName("AddJProductMapping")
+    @FunctionName("AddProductMapping")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproduct-mapping") HttpRequestMessage<Optional<String>> request,
+            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproductswithmapping") HttpRequestMessage<Optional<String>> request,
             @KustoOutput(name = "product", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR, mappingRef = "item_to_product_json") OutputBinding<Item> item)
             throws IOException {
         if (request.getBody().isPresent()) {

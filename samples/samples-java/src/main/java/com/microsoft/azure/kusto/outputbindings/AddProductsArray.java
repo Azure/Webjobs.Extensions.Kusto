@@ -25,9 +25,9 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class AddProductsArray {
-    @FunctionName("AddJProducts")
+    @FunctionName("AddProducts")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproducts") HttpRequestMessage<Optional<String>> request,
+            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproducts") HttpRequestMessage<Optional<String>> request,
             @KustoOutput(name = "productArray", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR) OutputBinding<Product[]> products)
             throws IOException {
 

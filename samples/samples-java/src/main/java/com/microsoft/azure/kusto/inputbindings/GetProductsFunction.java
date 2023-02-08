@@ -23,7 +23,7 @@ import java.util.Optional;
 public class GetProductsFunction {
     @FunctionName("GetJProductsFunction")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-getproductfn/{name}") HttpRequestMessage<Optional<String>> request,
+            HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "getproductsfn/{name}") HttpRequestMessage<Optional<String>> request,
             @KustoInput(name = "getjproductsfn", kqlCommand = "declare query_parameters (name:string);GetProductsByName(name)", kqlParameters = "@name={name}", database = SDKTESTSDB, connection = KUSTOCONNSTR) Product[] products) {
         return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/json").body(products)
                 .build();

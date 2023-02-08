@@ -24,7 +24,7 @@ public class GetProductMultiQuery {
 
     @FunctionName("GetJProductsIdOrName")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-getproductidorname/{productId}/{name}") HttpRequestMessage<Optional<String>> request,
+            HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "getproductsmq/{productId}/{name}") HttpRequestMessage<Optional<String>> request,
             @KustoInput(name = "getjproductsidorname", kqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId", kqlParameters = "@productId={productId}", database = Constants.SDKTESTSDB, connection = KUSTOCONNSTR) Product[] productsQuery,
             @KustoInput(name = "getjproductsidornamefn", kqlCommand = "declare query_parameters (name:string);GetProductsByName(name)", kqlParameters = "@name={name}", database = Constants.SDKTESTSDB, connection = KUSTOCONNSTR) Product[] productsFunction) {
         Product[] allProducts = new Product[productsQuery.length + productsFunction.length];
