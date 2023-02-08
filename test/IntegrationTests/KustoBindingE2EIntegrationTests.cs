@@ -34,6 +34,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         // These have to be decared as consts for the Bindings attributes to use
         private const string TableName = "kusto_functions_e2e_tests";
         private const string MappingName = "product_to_item_json_mapping";
+        private const string NonExistingMappingName = "a_mapping_that_does_not_exist";
         // Create the table
         private readonly string CreateItemTable = $".create-merge table {TableName}(ID:int,Name:string, Cost:double,Timestamp:datetime)";
         private readonly string CreateTableMappings = $".create-or-alter table {TableName} ingestion json mapping \"{MappingName}\" '[{{\"column\":\"ID\",\"path\":\"$.ProductID\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Name\",\"path\":\"$.ProductName\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Cost\",\"path\":\"$.UnitCost\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Timestamp\",\"path\":\"$.Timestamp\",\"datatype\":\"\",\"transform\":null}}]'";
@@ -151,20 +152,37 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputWithMapping), parameter);
 
             // Tests for the case where this is a bad JSON. This will cause an ingest failure
+            string[] invalidJsonTests = { nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), nameof(KustoEndToEndTestClass.OutputMixedJsonFailure) };
+            foreach (string test in invalidJsonTests)
+            {
+                try
+                {
+                    await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), parameter);
+                }
+                catch (Exception ex)
+                {
+                    Assert.IsType<FunctionInvocationException>(ex);
+                    var actualExceptionMessageJson = JObject.Parse(ex.GetBaseException().Message);
+                    string actualMessage = (string)actualExceptionMessageJson["error"]["message"];
+                    string actualMessageValue = (string)actualExceptionMessageJson["error"]["@message"];
+                    string actualType = (string)actualExceptionMessageJson["error"]["@type"];
+                    bool isPermanent = (bool)actualExceptionMessageJson["error"]["@permanent"];
+                    Assert.Equal("Request is invalid and cannot be executed.", actualMessage);
+                    Assert.Equal("Kusto.DataNode.Exceptions.StreamingIngestionRequestException", actualType);
+                    Assert.Equal($"Bad streaming ingestion request to {DatabaseName}.{TableName} : The input stream is empty after processing, tip:check stream validity", actualMessageValue);
+                    Assert.True(isPermanent);
+                }
+            }
+            // A case where ingestion is done , but there exists no such mapping causing ingestion failure
             try
             {
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), parameter);
+                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), parameter);
             }
             catch (Exception ex)
             {
                 Assert.IsType<FunctionInvocationException>(ex);
-                var actualExceptionMessageJson = JObject.Parse(ex.GetBaseException().Message);
-                string actualMessage = (string)actualExceptionMessageJson["error"]["message"];
-                string actualType = (string)actualExceptionMessageJson["error"]["@type"];
-                bool isPermanent = (bool)actualExceptionMessageJson["error"]["@permanent"];
-                Assert.Equal("Request is invalid and cannot be executed.", actualMessage);
-                Assert.Equal("Kusto.DataNode.Exceptions.StreamingIngestionRequestException", actualType);
-                Assert.True(isPermanent);
+                string baseMessage = ex.GetBaseException().Message;
+                Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
             }
             /*
             // To debug further, uncomment the following lines. The logs would be available in test\bin\Debug\netcoreapp3.1
@@ -443,6 +461,31 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.Single(productOne);
                 // There is only one item
                 Assert.Equal(GetItem(productId), productOne.First());
+            }
+
+
+            [NoAutomaticTrigger]
+            public static void OutputsWithMappingFailIngestion(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, MappingRef = NonExistingMappingName)] out string product)
+            {
+                int productId = id + 2999;
+                product = GetProductJson(productId);
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputMixedJsonFailure(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName)] out object mixedJson)
+            {
+                /*
+                 Add a mixed case where we have a product and Item
+                 */
+                int nextItemId = id + 3999;
+                string product = GetProductJson(nextItemId);
+                nextItemId++;
+                string item = JsonConvert.SerializeObject(GetItem(nextItemId));
+                mixedJson = $"[{product},{item}]";
             }
 
             private static Item GetItem(int id)
