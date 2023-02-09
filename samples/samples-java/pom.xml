@@ -4,7 +4,7 @@
 
     <groupId>com.microsoft.azure.kusto</groupId>
     <artifactId>samples-java</artifactId>
-    <version>1.0.0-Preview</version>
+    <version>1.0.2-Preview</version>
     <packaging>jar</packaging>
     <name>Microsoft Azure Functions Java Kusto Samples</name>
     <description>This package contains samples that indicate the usage of ADX bindings (for Azure functions)</description>
