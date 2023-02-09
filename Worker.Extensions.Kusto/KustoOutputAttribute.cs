@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
+
+
 using System;
 using Microsoft.Azure.Functions.Worker.Extensions.Abstractions;
 
@@ -10,14 +12,14 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Kusto
         /// <summary>
         /// Initializes a new instance of the <see cref="KustoAttribute"/> class.
         /// </summary>
-        /// <param name="database">The name of the database</param>
-        public KustoOutputAttribute(string database)
+        /// <param name="Database">The name of the Database</param>
+        public KustoOutputAttribute(string Database)
         {
-            this.Database = database ?? throw new ArgumentNullException(nameof(database));
+            this.Database = Database ?? throw new ArgumentNullException(nameof(Database));
         }
 
         /// <summary>
-        /// The database name where the table resides into which data has to be written
+        /// The Database name where the table resides into which data has to be written
         /// </summary>
         public string Database { get; private set; }
 
@@ -44,7 +46,7 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Kusto
         /// Defaults to KustoConnectionString
         /// The attributes specified in the connection string are listed here
         /// https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto
-        /// An example on the settings file could be the following : Using the AAD Credentials in the string , a connection will be attempted to the cluster Cluster and database DBName
+        /// An example on the settings file could be the following : Using the AAD Credentials in the string , a connection will be attempted to the cluster Cluster and Database DBName
         /// "KustoConnectionString": "Data Source=https://<Cluster>.kusto.windows.net;Database=<DBName>;Fed=True;AppClientId=<AppId>;AppKey=<AppKey>;Authority Id=<Tenant>"
         /// </summary>
         public string Connection { get; set; }

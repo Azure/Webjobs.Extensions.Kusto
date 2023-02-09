@@ -8,7 +8,7 @@
       "methods": [
         "get"
       ],
-      "route": "js-get-products/{productId}"
+      "route": "getproducts/{productId}"
     },
     {
       "name": "$return",

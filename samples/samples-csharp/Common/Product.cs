@@ -9,6 +9,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common
 
         public string Name { get; set; }
 
-        public int Cost { get; set; }
+        public double Cost { get; set; }
+    }
+
+    public class Item
+    {
+        public int ItemID { get; set; }
+#nullable enable
+        public string? ItemName { get; set; }
+        public int ItemCost { get; set; }
     }
 }

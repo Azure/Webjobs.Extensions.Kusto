@@ -9,7 +9,7 @@
       "methods": [
         "post"
       ],
-      "route": "py-add-product"
+      "route": "addproduct"
     },
     {
       "type": "http",

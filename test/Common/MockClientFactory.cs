@@ -3,6 +3,7 @@
 
 using Kusto.Data.Common;
 using Kusto.Ingest;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 {
@@ -20,12 +21,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
             this._queryClient = queryClient;
         }
 
-        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity)
+        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, ILogger logger)
         {
             return this._ingestClient;
         }
 
-        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity)
+        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, ILogger logger)
         {
             return this._queryClient;
         }

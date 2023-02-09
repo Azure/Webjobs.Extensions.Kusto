@@ -92,29 +92,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Outputs), parameter);
             // Validate all rows written in output bindings can be queries
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.Inputs), parameter);
-            // Fail scenario
-            try
-            {
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFailForUserWithNoIngestPrivileges), parameter);
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType<FunctionInvocationException>(ex);
-                string actualExceptionCause = ex.GetBaseException().Message;
-                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
-            }
+            // Fail scenario for no read privileges
+            Exception readPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFailForUserWithNoIngestPrivileges), parameter));
+            Assert.IsType<FunctionInvocationException>(readPrivilegeException);
+            Assert.Contains("Forbidden (403-Forbidden)", readPrivilegeException.GetBaseException().Message);
 
-            try
-            {
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges), parameter);
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType<FunctionInvocationException>(ex);
-                Assert.NotEmpty(ex.GetBaseException().Message);
-                string actualExceptionCause = ex.GetBaseException().Message;
-                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
-            }
+            // Fail scenario for no ingest privileges
+            Exception ingestPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges), parameter));
+            Assert.IsType<FunctionInvocationException>(ingestPrivilegeException);
+            Assert.NotEmpty(ingestPrivilegeException.GetBaseException().Message);
+            string actualExceptionCause = ingestPrivilegeException.GetBaseException().Message;
+            Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
+
             // Tests for managed service identity
             string tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
             string appId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
@@ -133,15 +122,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString) };
             foreach (string test in testsToExecute)
             {
-                try
-                {
-                    await jobHost.GetJobHost().CallAsync(test, parameter);
-                }
-                catch (Exception ex)
-                {
-                    Assert.IsType<FunctionInvocationException>(ex);
-                    Assert.Equal("Kusto Connection String Builder has some invalid or conflicting properties: Specified 'AAD application key' authentication method has some incorrect properties. Missing: [Application Key,Authority Id].. ',\r\nPlease consult Kusto Connection String documentation at https://docs.microsoft.com/en-us/azure/kusto/api/connection-strings/kusto", ex.GetBaseException().Message);
-                }
+                Exception invalidConnectionStringException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(test, parameter));
+                Assert.IsType<FunctionInvocationException>(invalidConnectionStringException);
+                Assert.Equal("Kusto Connection String Builder has some invalid or conflicting properties: Specified 'AAD application key' authentication method has some incorrect properties. Missing: [Application Key,Authority Id].. ',\r\nPlease consult Kusto Connection String documentation at https://docs.microsoft.com/en-us/azure/kusto/api/connection-strings/kusto", invalidConnectionStringException.GetBaseException().Message);
             }
             // Tests for managed CSV
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsCSV), parameter);
@@ -155,35 +138,23 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             string[] invalidJsonTests = { nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), nameof(KustoEndToEndTestClass.OutputMixedJsonFailure) };
             foreach (string test in invalidJsonTests)
             {
-                try
-                {
-                    await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), parameter);
-                }
-                catch (Exception ex)
-                {
-                    Assert.IsType<FunctionInvocationException>(ex);
-                    var actualExceptionMessageJson = JObject.Parse(ex.GetBaseException().Message);
-                    string actualMessage = (string)actualExceptionMessageJson["error"]["message"];
-                    string actualMessageValue = (string)actualExceptionMessageJson["error"]["@message"];
-                    string actualType = (string)actualExceptionMessageJson["error"]["@type"];
-                    bool isPermanent = (bool)actualExceptionMessageJson["error"]["@permanent"];
-                    Assert.Equal("Request is invalid and cannot be executed.", actualMessage);
-                    Assert.Equal("Kusto.DataNode.Exceptions.StreamingIngestionRequestException", actualType);
-                    Assert.Equal($"Bad streaming ingestion request to {DatabaseName}.{TableName} : The input stream is empty after processing, tip:check stream validity", actualMessageValue);
-                    Assert.True(isPermanent);
-                }
+                Exception invalidOutputsException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), parameter));
+                Assert.IsType<FunctionInvocationException>(invalidOutputsException);
+                var actualExceptionMessageJson = JObject.Parse(invalidOutputsException.GetBaseException().Message);
+                string actualMessage = (string)actualExceptionMessageJson["error"]["message"];
+                string actualMessageValue = (string)actualExceptionMessageJson["error"]["@message"];
+                string actualType = (string)actualExceptionMessageJson["error"]["@type"];
+                bool isPermanent = (bool)actualExceptionMessageJson["error"]["@permanent"];
+                Assert.Equal("Request is invalid and cannot be executed.", actualMessage);
+                Assert.Equal("Kusto.DataNode.Exceptions.StreamingIngestionRequestException", actualType);
+                Assert.Equal($"Bad streaming ingestion request to {DatabaseName}.{TableName} : The input stream is empty after processing, tip:check stream validity", actualMessageValue);
+                Assert.True(isPermanent);
             }
             // A case where ingestion is done , but there exists no such mapping causing ingestion failure
-            try
-            {
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), parameter);
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType<FunctionInvocationException>(ex);
-                string baseMessage = ex.GetBaseException().Message;
-                Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
-            }
+            Exception noSuchMappingException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), parameter));
+            Assert.IsType<FunctionInvocationException>(noSuchMappingException);
+            string baseMessage = noSuchMappingException.GetBaseException().Message;
+            Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
             /*
             // To debug further, uncomment the following lines. The logs would be available in test\bin\Debug\netcoreapp3.1
             IEnumerable<LogMessage> allLoggedMessages = this._loggerProvider.GetAllLogMessages();

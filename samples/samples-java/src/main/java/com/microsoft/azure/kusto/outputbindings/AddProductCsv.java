@@ -28,7 +28,7 @@ import java.util.Optional;
 public class AddProductCsv {
     @FunctionName("AddProductCsv")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "j-addproduct-csv") HttpRequestMessage<Optional<String>> request,
+            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproductcsv") HttpRequestMessage<Optional<String>> request,
             @KustoOutput(name = "productCsv", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR, dataFormat = "csv") OutputBinding<String> productString)
             throws IOException {
         if (request.getBody().isPresent()) {
