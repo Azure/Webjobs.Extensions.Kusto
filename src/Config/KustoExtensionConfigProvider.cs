@@ -75,10 +75,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             if (string.IsNullOrEmpty(attribute.Connection))
             {
-                string attributeProperty = $"{nameof(KustoAttribute)}.{nameof(KustoAttribute.Connection)}";
-                throw new ArgumentNullException(attributeProperty, $"Parameter {attributeProperty} should be passed as an environment variable. This value resolved to null");
+                this._logger.LogDebug($"ConnectionString attribute not passed explicitly, will be defaulted to {KustoConstants.DefaultConnectionStringName}");
             }
-
+            string resolvedConnectionString = this._configuration.GetConnectionStringOrSetting(attribute.Connection);
+            if (string.IsNullOrEmpty(resolvedConnectionString))
+            {
+                string attributeProperty = $"{nameof(KustoAttribute)}.{nameof(KustoAttribute.Connection)}";
+                throw new InvalidOperationException($"Parameter {attributeProperty} should be passed as an environment variable. This value resolved to null");
+            }
             // Empty database check is added right when the KustoAttribute is constructed. This however is deferred here. 
             // TODO : Add check based on parameters and parameter indexes ?
             if (string.IsNullOrEmpty(attribute.TableName) && string.IsNullOrEmpty(attribute.KqlCommand))
@@ -101,16 +105,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 
         internal IKustoIngestClient GetIngestClient(KustoAttribute kustoAttribute)
         {
+            // If the connection string attribute is not custom, use the default
             string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? KustoConstants.DefaultConnectionStringName : kustoAttribute.Connection;
             string engineConnectionString = this.GetConnectionString(connection);
             try
             {
-                if (string.IsNullOrEmpty(engineConnectionString))
-                {
-                    throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
-                }
                 string cacheKey = BuildCacheKey(engineConnectionString);
-                return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity));
+                return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, this._logger));
             }
             catch (Exception e)
             {
@@ -146,7 +147,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
                 }
                 string cacheKey = BuildCacheKey(engineConnectionString);
-                return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity));
+                return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, this._logger));
             }
             catch (Exception e)
             {
@@ -166,7 +167,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         internal string GetConnectionString(string connectionStringSetting)
         {
             string resolvedConnectionString = this._configuration.GetConnectionStringOrSetting(connectionStringSetting);
-            this._logger.LogTrace($"Resolved connection string for execution : {KustoBindingUtils.ToSecureString(resolvedConnectionString)}");
             // Already validated upfront in Validate that ConnectionString setting is passed in and not null
             return resolvedConnectionString;
         }

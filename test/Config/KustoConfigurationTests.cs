@@ -36,6 +36,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Config
             Assert.NotNull(asyncBuilder);
             Assert.Single(kustoExtensionConfigProvider.IngestClientCache);
         }
+        [Fact]
+        public void FailsWhenConnectionStringIsNotResolvable()
+        {
+            // Given
+            KustoExtensionConfigProvider kustoExtensionConfigProvider = InitializeCreatesClients();
+            var invalidAttribute = new KustoAttribute("unittestdb")
+            {
+                TableName = "Items",
+                Connection = "InvalidConnectionString"
+            };
+            Exception functionIndexingException = Record.Exception(() => kustoExtensionConfigProvider.ValidateConnection(invalidAttribute, typeof(KustoAttribute)));
+            string parameterNullException = functionIndexingException.GetBaseException().Message;
+            Assert.Equal("Parameter KustoAttribute.Connection should be passed as an environment variable. This value resolved to null", parameterNullException);
+        }
+
         private static KustoExtensionConfigProvider InitializeCreatesClients()
         {
             var nameResolver = new KustoNameResolver();

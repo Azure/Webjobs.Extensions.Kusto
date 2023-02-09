@@ -143,7 +143,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
             IngestionStatus ingestionStatus = ingestionResult.GetIngestionStatusBySourceId(streamSourceOptions.SourceId);
             if (this._logger.IsEnabled(LogLevel.Trace))
             {
-                this._logger.LogTrace("Ingestion status for source id: {IngestSourceId}. Ingest detail {IngestDetail} and ingestion status {IngestionStatus}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value, ingestionStatus.Status);
+                this._logger.LogTrace("Ingestion status for source id: {IngestSourceId} , Ingest detail {IngestDetail} was {IngestionStatus}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value, ingestionStatus.Status);
             }
             return ingestionStatus;
         }

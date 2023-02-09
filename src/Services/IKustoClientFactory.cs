@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System.Diagnostics;
 using Kusto.Cloud.Platform.Utils;
 using Kusto.Data;
 using Kusto.Data.Common;
 using Kusto.Data.Net.Client;
 using Kusto.Ingest;
+using Microsoft.Azure.WebJobs.Extensions.Kusto.Config;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {
@@ -15,8 +18,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     /// </summary>
     internal interface IKustoClientFactory
     {
-        IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity);
-        ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity);
+        IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, ILogger logger);
+        ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, ILogger logger);
     }
     internal class KustoClient : IKustoClientFactory
     {
@@ -26,7 +29,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// <param name="engineConnectionString">The engine connection string. The ingest URL will be derieved from this for the managed ingest</param>
         /// <param name="managedIdentity">MSI string to use Managed service identity</param>
         /// <returns>A managed ingest client. Attempts ingestion through streaming and then fallsback to Queued ingest mode</returns>
-        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity)
+        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, ILogger logger)
         {
             KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity);
             /*
@@ -35,8 +38,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
              */
             string dmConnectionStringEndpoint = engineKcsb.Hostname.Contains(KustoConstants.IngestPrefix) ? engineConnectionString : engineConnectionString.ReplaceFirstOccurrence(KustoConstants.ProtocolSuffix, KustoConstants.ProtocolSuffix + KustoConstants.IngestPrefix);
             KustoConnectionStringBuilder dmKcsb = GetKustoConnectionString(dmConnectionStringEndpoint, managedIdentity);
-            // Create a managed ingest connection
-            return GetManagedStreamingClient(engineKcsb, dmKcsb);
+            // Measure the time it takes for a connection
+            var ingestClientInitialize = new Stopwatch();
+            ingestClientInitialize.Start();
+            // Create a managed ingest connection , needed to debug connection issues
+            IKustoIngestClient managedIngestClient = GetManagedStreamingClient(engineKcsb, dmKcsb);
+            ingestClientInitialize.Stop();
+            logger.LogDebug($"Initializing ingest client with the connection string : {KustoBindingUtils.ToSecureString(engineConnectionString)}  took {ingestClientInitialize.ElapsedMilliseconds} milliseconds");
+            return managedIngestClient;
         }
         private static IKustoIngestClient GetManagedStreamingClient(KustoConnectionStringBuilder engineKcsb, KustoConnectionStringBuilder dmKcsb)
         {
@@ -50,10 +59,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// <param name="managedIdentity">MSI string to use Managed service identity</param>
         /// <returns>A query client to execute KQL</returns>
 
-        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity)
+        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, ILogger logger)
         {
             KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity);
-            return KustoClientFactory.CreateCslQueryProvider(engineKcsb);
+            var timer = new Stopwatch();
+            timer.Start();
+            // Create a query client connection. This is needed in cases to debug any connection issues
+            ICslQueryProvider queryProvider = KustoClientFactory.CreateCslQueryProvider(engineKcsb);
+            timer.Stop();
+            logger.LogDebug($"Initializing query client with the connection string : {KustoBindingUtils.ToSecureString(engineConnectionString)}  took {timer.ElapsedMilliseconds} milliseconds");
+            return queryProvider;
         }
 
         private static KustoConnectionStringBuilder GetKustoConnectionString(string connectionString, string managedIdentity)
