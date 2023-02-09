@@ -21,8 +21,7 @@ import static com.microsoft.azure.kusto.common.Constants.KUSTOCONNSTR;
 import java.util.Optional;
 
 public class GetProductMultiQuery {
-
-    @FunctionName("GetJProductsIdOrName")
+    @FunctionName("GetProductsIdOrName")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "getproductsmq/{productId}/{name}") HttpRequestMessage<Optional<String>> request,
             @KustoInput(name = "getjproductsidorname", kqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId", kqlParameters = "@productId={productId}", database = Constants.SDKTESTSDB, connection = KUSTOCONNSTR) Product[] productsQuery,

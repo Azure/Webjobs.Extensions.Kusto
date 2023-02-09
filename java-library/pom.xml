@@ -31,6 +31,19 @@
     <stagingDirectory>${project.build.directory}/azure-functions/${functionAppName}</stagingDirectory>
   </properties>
 
+  <distributionManagement>
+    <repository>
+        <id>azure-sdk-for-java</id>
+        <url>https://pkgs.dev.azure.com/azure-sdk/public/_packaging/azure-sdk-for-java/maven/v1</url>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+  </distributionManagement> 
+
   <repositories>
     <repository>
       <id>maven.snapshots</id>
@@ -42,6 +55,16 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+    </repository>
+      <repository>
+        <id>azure-sdk-for-java</id>
+        <url>https://pkgs.dev.azure.com/azure-sdk/public/_packaging/azure-sdk-for-java/maven/v1</url>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
     </repository>
   </repositories>
 
