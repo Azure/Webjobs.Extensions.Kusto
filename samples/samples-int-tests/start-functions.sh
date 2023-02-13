@@ -3,5 +3,4 @@ echo "Entering entry point"
 cd /src/
 ExtensionBundlePath=$(func GetExtensionBundlePath)
 unzip -o /src/Microsoft.Azure.Functions.ExtensionBundle.zip -d $ExtensionBundlePath
-func extensions sync
-func start --no-build --node --verbose --port 7103
+cp /src/Microsoft.Azure.WebJobs.Extensions.Kusto.dll $ExtensionBundlePath/bin/Microsoft.Azure.WebJobs.Extensions.Kusto.dll

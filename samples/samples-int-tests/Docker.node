@@ -1,5 +1,5 @@
 # This image additionally contains function core tools – useful when using custom extensions
-FROM imagename AS installer-env
+FROM mcr.microsoft.com/azure-functions/node:4-node16-core-tools AS installer-env
 # The host file for all the defaults
 COPY ./samples/samples-int-tests/host.json /src/host.json
 # Copy the DLL to the target use this for the tests
