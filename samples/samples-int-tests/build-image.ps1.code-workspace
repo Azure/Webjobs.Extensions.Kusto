@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "../samples-js"
+		}
+	],
+	"settings": {
+		"debug.internalConsoleOptions": "neverOpen"
+	}
+}
