@@ -365,3 +365,11 @@ __azurite_db*__.json
 local-packages/
 extensions/
 /samples/samples-java/.idea
+
+samples/samples-int-tests/Docker.node
+samples/samples-int-tests/Docker.java
+samples/samples-int-tests/Docker.powershell
+samples/samples-int-tests/Docker.dotnet
+samples/samples-int-tests/Docker.dotnet-isolated
+samples/samples-int-tests/Docker.python
+func-logs.txt

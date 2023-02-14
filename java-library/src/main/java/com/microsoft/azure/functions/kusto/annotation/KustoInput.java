@@ -31,4 +31,9 @@ public @interface KustoInput {
 
     // The KQL Query parameters
     String kqlParameters();
+
+    // An option to set the ManagedServiceIdentity option. If set to "system" will use SystemManagedIdentity
+    // else use UserManagedIdentity
+    String managedServiceIdentity();
+
 }

@@ -37,3 +37,4 @@ hs_err_pid*
 local.settings.json
 bin/
 obj/
+/Docker.java

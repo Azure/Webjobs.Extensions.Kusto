@@ -18,17 +18,16 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.kusto.annotation.KustoOutput;
 import com.microsoft.azure.kusto.common.Product;
 
-import static com.microsoft.azure.kusto.common.Constants.KUSTOCONNSTR;
-import static com.microsoft.azure.kusto.common.Constants.SDKTESTSDB;
-
 import java.io.IOException;
 import java.util.Optional;
+
+import static com.microsoft.azure.kusto.common.Constants.*;
 
 public class AddProductsArray {
     @FunctionName("AddProducts")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproducts") HttpRequestMessage<Optional<String>> request,
-            @KustoOutput(name = "productArray", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR) OutputBinding<Product[]> products)
+            @KustoOutput(name = "productArray", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR) OutputBinding<Product[]> products)
             throws IOException {
 
         if (request.getBody().isPresent()) {

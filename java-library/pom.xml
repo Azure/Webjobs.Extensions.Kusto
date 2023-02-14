@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>com.microsoft.azure.functions</groupId>
   <artifactId>azure-functions-java-library-kusto</artifactId>
-  <version>1.0.0-Preview</version>
+  <version>1.0.2-Preview</version>
   <packaging>jar</packaging>
-
   <name>Microsoft Azure Functions Java Kusto Types</name>
   <description>This package contains all Java annotations to interact with Microsoft Azure Functions runtime for Kusto (ADX) Bindings.</description>
   <url>https://aka.ms/kustobindings</url>
@@ -14,7 +12,6 @@
       <name>Microsoft Azure</name>
       <url>https://azure.microsoft.com</url>
   </organization>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -31,6 +28,19 @@
     <stagingDirectory>${project.build.directory}/azure-functions/${functionAppName}</stagingDirectory>
   </properties>
 
+  <distributionManagement>
+    <repository>
+        <id>azure-sdk-for-java</id>
+        <url>https://pkgs.dev.azure.com/azure-sdk/public/_packaging/azure-sdk-for-java/maven/v1</url>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+  </distributionManagement> 
+
   <repositories>
     <repository>
       <id>maven.snapshots</id>
@@ -42,6 +52,16 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+    </repository>
+      <repository>
+        <id>azure-sdk-for-java</id>
+        <url>https://pkgs.dev.azure.com/azure-sdk/public/_packaging/azure-sdk-for-java/maven/v1</url>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
     </repository>
   </repositories>
 

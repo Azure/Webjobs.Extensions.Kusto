@@ -18,17 +18,16 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.kusto.annotation.KustoOutput;
 import com.microsoft.azure.kusto.common.Item;
 
-import static com.microsoft.azure.kusto.common.Constants.KUSTOCONNSTR;
-import static com.microsoft.azure.kusto.common.Constants.SDKTESTSDB;
-
 import java.io.IOException;
 import java.util.Optional;
+
+import static com.microsoft.azure.kusto.common.Constants.*;
 
 public class AddProductWithMapping {
     @FunctionName("AddProductMapping")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproductswithmapping") HttpRequestMessage<Optional<String>> request,
-            @KustoOutput(name = "product", database = SDKTESTSDB, tableName = "Products", connection = KUSTOCONNSTR, mappingRef = "item_to_product_json") OutputBinding<Item> item)
+            @KustoOutput(name = "product", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR, mappingRef = "item_to_product_json") OutputBinding<Item> item)
             throws IOException {
         if (request.getBody().isPresent()) {
             String json = request.getBody().get();
