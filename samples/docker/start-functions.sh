@@ -7,7 +7,18 @@ do
         p) port=${OPTARG};;
     esac
 done
-echo "Language: $language"
-echo "Port: $port"
+echo "Using language: $language & Port: $port"
 cd /src/samples-$language
-func start --no-build --$language --verbose --port $port >> func-logs.txt &
+if [[ $language  -eq  "node" ]]
+then
+  echo "Running node functions samples"
+  func start --no-build --$language --verbose --port $port >> func-logs.txt &
+elif [[ $language  -eq  "node" ]]
+then
+  echo "Running JAVA functions samples"
+  mvn clean package azure-functions:package
+  mvn azure-functions:run >> func-logs.txt &
+else
+  echo "You are not welcome here."
+  exit 1;
+fi

@@ -372,3 +372,4 @@ samples/samples-int-tests/Docker.powershell
 samples/samples-int-tests/Docker.dotnet
 samples/samples-int-tests/Docker.dotnet-isolated
 samples/samples-int-tests/Docker.python
+func-logs.txt
