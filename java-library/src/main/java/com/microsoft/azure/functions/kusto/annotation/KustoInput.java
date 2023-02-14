@@ -34,6 +34,6 @@ public @interface KustoInput {
 
     // An option to set the ManagedServiceIdentity option. If set to "system" will use SystemManagedIdentity
     // else use UserManagedIdentity
-    String managedServiceIdentity();
+    String managedServiceIdentity() default "";
 
 }
