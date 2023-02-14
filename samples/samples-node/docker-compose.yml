@@ -1,0 +1,7 @@
+version: '3'
+services:
+  node:
+    image: sdktestsacr.azurecr.io/func-az-kusto-node:latest
+    hostname: func-az-kusto-node
+    ports:
+      - 7103:7103

@@ -4,7 +4,7 @@
  * license information.
  */
 
-package com.microsoft.azure.kusto.common;
+package com.microsoft.azure.kusto.functions.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

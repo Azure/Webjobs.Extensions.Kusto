@@ -4,7 +4,7 @@
  * license information.
  */
 
-package com.microsoft.azure.kusto.common;
+package com.microsoft.azure.kusto.functions.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -15,4 +15,10 @@ public class Item {
     public String ItemName;
     @JsonProperty("ItemCost")
     public double ItemCost;
+
+    public Item(long itemID, String itemName, double itemCost) {
+        ItemID = itemID;
+        ItemName = itemName;
+        ItemCost = itemCost;
+    }
 }
