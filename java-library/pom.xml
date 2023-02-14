@@ -12,6 +12,23 @@
       <name>Microsoft Azure</name>
       <url>https://azure.microsoft.com</url>
   </organization>
+  <licenses>
+      <license>
+          <name>The MIT License (MIT)</name>
+          <url>http://opensource.org/licenses/MIT</url>
+          <distribution>repo</distribution>
+      </license>
+  </licenses>
+  <scm>
+      <url>https://github.com/Azure/Webjobs.Extensions.Kusto</url>
+      <connection>scm:git://github.com/Azure/Webjobs.Extensions.Kusto.git</connection>
+  </scm>
+  <developers>
+      <developer>
+          <id>microsoft</id>
+          <name>Microsoft</name>
+      </developer>
+  </developers>  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
