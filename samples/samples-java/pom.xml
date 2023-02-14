@@ -33,10 +33,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <jackson.version>2.13.4.1</jackson.version>
-        <formatter.version>2.21.0</formatter.version>
+        <formatter.version>2.22.0</formatter.version>
         <azure.functions.maven.plugin.version>1.22.0</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>3.0.0</azure.functions.java.library.version>
-        <azure.functions.java.library.kusto.version>1.0.0-Preview</azure.functions.java.library.kusto.version>
+        <azure.functions.java.library.kusto.version>1.0.2-Preview</azure.functions.java.library.kusto.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
         <maven.resources.plugin.version>3.3.0</maven.resources.plugin.version>
         <maven.dependency.plugin.version>3.3.0</maven.dependency.plugin.version>
@@ -64,18 +64,18 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>${formatter.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>net.revelc.code.formatter</groupId>-->
+<!--                <artifactId>formatter-maven-plugin</artifactId>-->
+<!--                <version>${formatter.version}</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>format</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -144,8 +144,8 @@
     </build>
     <repositories>
         <repository>
-            <id>azure-sdk-for-java</id>
-            <url>https://pkgs.dev.azure.com/azure-sdk/public/_packaging/azure-sdk-for-java/maven/v1</url>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
