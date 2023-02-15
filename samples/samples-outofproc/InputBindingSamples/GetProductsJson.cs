@@ -10,7 +10,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
 {
     public static class GetProductsJson
     {
-        [Function("GetProducts")]
+        [Function("GetProductsJson")]
         public static Task<List<Product>> Run(
 #pragma warning disable 
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproductsjson/{productId}")] HttpRequestData req,
