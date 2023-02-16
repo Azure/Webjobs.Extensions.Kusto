@@ -36,13 +36,13 @@ function ReBuildSampleImages {
     #If an override on the ExtensionBundlePath is specified then use this in the image on the docker file.    
     if (!$ExtensionBundlePath) {
         Write-Host "Creating docker file to build with tag 'func-az-kusto-${Language}:$BuildDate'" -ForegroundColor Green
-        ((Get-Content -path .\samples\docker\Docker-template.dockerfile -Raw) -creplace 'imagename', "mcr.microsoft.com/azure-functions/${Language}:${BaseImagePath}" -creplace 'bundlepath', $ExtensionBundlePath) | Set-Content -Path $TargetDockerFile
+        ((Get-Content -path .\samples\docker\Docker-template.dockerfile -Raw) -creplace 'imagename', "mcr.microsoft.com/azure-functions/node:4-node16-core-tools" -creplace 'bundlepath', $ExtensionBundlePath) | Set-Content -Path $TargetDockerFile
     }
     else {
         $EscapedPath = (Get-Item $ExtensionBundlePath | Resolve-Path -Relative) -replace "\\", "/"
         Copy-Item -Path $EscapedPath $TargetFileLocation/Microsoft.Azure.Functions.ExtensionBundle.zip
         Write-Host "Creating docker file to build with tag 'func-az-kusto-${Language}:$BuildDate' with extension bundle copy on path $EscapedPath" -ForegroundColor Green -BackgroundColor White
-        ((Get-Content -path .\samples\docker\Docker-template.dockerfile -Raw) -creplace 'imagename', "mcr.microsoft.com/azure-functions/${Language}:${BaseImagePath}" -creplace 'bundlepath', $EscapedPath -replace '#COPY', "COPY ${TargetFileLocation}/Microsoft.Azure.Functions.ExtensionBundle.zip ") | Set-Content -Path $TargetDockerFile
+        ((Get-Content -path .\samples\docker\Docker-template.dockerfile -Raw) -creplace 'imagename', "mcr.microsoft.com/azure-functions/node:4-node16-core-tools" -creplace 'bundlepath', $EscapedPath -replace '#COPY', "COPY ${TargetFileLocation}/Microsoft.Azure.Functions.ExtensionBundle.zip ") | Set-Content -Path $TargetDockerFile
     }
     if(!$Acr)
     {

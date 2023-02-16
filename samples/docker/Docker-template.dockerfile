@@ -30,6 +30,13 @@ RUN mkdir -p ${JAVA_HOME} \
 ENV MAVEN_HOME /usr/share/maven
 ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 ENV JAVA_HOME=${JAVA_HOME}
+#Java installation complete
+RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3.9-dev python3.9-venv python3-pip python3-wheel build-essential && \
+   apt-get clean && rm -rf /var/lib/apt/lists/*
+# create and activate virtual environment
+RUN python3.9 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+#Python installation complete
 COPY ./samples/docker/host.json /src/host.json
 # Copy the DLL to the target use this for the tests
 COPY ./src/bin/Release/netstandard2.1/Microsoft.Azure.WebJobs.Extensions.Kusto.dll /src/Microsoft.Azure.WebJobs.Extensions.Kusto.dll

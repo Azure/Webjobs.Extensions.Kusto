@@ -157,6 +157,11 @@ public class FunctionsMultiLangTests extends Simulation {
 
     @Override
     public void after() {
+        try{
+            Thread.sleep(300000);
+        }catch (Exception ignored){
+
+        }
         environment.stop();
         logger.info("Simulation run finished!");
     }
