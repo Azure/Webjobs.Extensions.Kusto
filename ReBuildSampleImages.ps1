@@ -21,10 +21,10 @@ function ReBuildSampleImages {
         [Parameter(Mandatory = $false, HelpMessage = "If the tagged image needs to be pushed to the docker hub")][bool]$DockerPush = $false
     ) #end param
     Write-Host "------------------------------------------------------------------------------------------------------------------------------"
-    Write-Host "Using base image mcr.microsoft.com/azure-functions/${Language}:${BaseImagePath}" -ForegroundColor Green -BackgroundColor White
+    Write-Host "Using base image mcr.microsoft.com/azure-functions/${Language}:${BaseImagePath}" -ForegroundColor Green
     # build the DLL so that we can use this when we do the rebuild
     Write-Host "------------------------------------------------------------------------------------------------------------------------------"
-    Write-Host "Cleaning and building Project" -ForegroundColor Green -BackgroundColor White
+    Write-Host "Cleaning and building Project" -ForegroundColor Green
     dotnet clean
     dotnet build /p:Configuration=Release
     $BuildDate = (Get-Date).ToString("yyyyMMdd")
@@ -35,7 +35,7 @@ function ReBuildSampleImages {
     #If a locally built extension bundle is specified , add it
     #If an override on the ExtensionBundlePath is specified then use this in the image on the docker file.    
     if (!$ExtensionBundlePath) {
-        Write-Host "Creating docker file to build with tag 'func-az-kusto-${Language}:$BuildDate'" -ForegroundColor Green -BackgroundColor White
+        Write-Host "Creating docker file to build with tag 'func-az-kusto-${Language}:$BuildDate'" -ForegroundColor Green
         ((Get-Content -path .\samples\docker\Docker-template.dockerfile -Raw) -creplace 'imagename', "mcr.microsoft.com/azure-functions/${Language}:${BaseImagePath}" -creplace 'bundlepath', $ExtensionBundlePath) | Set-Content -Path $TargetDockerFile
     }
     else {
@@ -47,12 +47,12 @@ function ReBuildSampleImages {
     if(!$Acr)
     {
         $TagCreated = "${Language}:${BuildDate}"
-        Write-Host "Creating docker tag $TagCreated" -ForegroundColor Green -BackgroundColor White
+        Write-Host "Creating docker tag $TagCreated" -ForegroundColor Green
         docker build -t func-az-kusto-$TagCreated -t func-az-kusto-${Language}:latest -f $TargetDockerFile .
     }
     else {
         $TagCreated = "$Acr/func-az-kusto-${Language}:$BuildDate"
-        Write-Host "Creating docker tag $TagCreated" -ForegroundColor Green -BackgroundColor White
+        Write-Host "Creating docker tag $TagCreated" -ForegroundColor Green
         docker build -t $TagCreated -t $Acr/func-az-kusto-${Language}:latest -f $TargetDockerFile .
         if($true -eq $DockerPush)
         {
@@ -61,10 +61,10 @@ function ReBuildSampleImages {
     }
     
     if ($?) {
-        Write-Host "Image build for $Language complete 'func-az-kusto-${Language}:$BuildDate'" -ForegroundColor Green -BackgroundColor White
+        Write-Host "Image build for $Language complete 'func-az-kusto-${Language}:$BuildDate'" -ForegroundColor Green
     }
     else {
-        Write-Host "Image build for $Language complete 'func-az-kusto-${Language}:$BuildDate' failed. Is docker running ?" -ForegroundColor Red -BackgroundColor White
+        Write-Host "Image build for $Language complete 'func-az-kusto-${Language}:$BuildDate' failed. Is docker running ?" -ForegroundColor Red
     }
     Remove-Item  $TargetFileLocation/Microsoft.Azure.Functions.ExtensionBundle.zip -ErrorAction Ignore
 }

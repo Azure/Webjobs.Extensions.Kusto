@@ -42,7 +42,7 @@ public class FunctionsMultiLangTests extends Simulation {
             .collect(Collectors.collectingAndThen(Collectors.toMap(data -> data[0], data -> Integer.parseInt(data[1])),
                     Collections::<String, Integer> unmodifiableMap));
     private static final int hostPort = Integer.getInteger("port", 7103);
-    private final ObjectMapper dataMapper = new ObjectMapper();
+    private static final ObjectMapper dataMapper = new ObjectMapper();
     private String language = System.getProperty("language", "node");
 
     public FunctionsMultiLangTests() throws JsonProcessingException {
@@ -71,7 +71,8 @@ public class FunctionsMultiLangTests extends Simulation {
             logger.info("Starting compose from file {}", path);
             environment = new DockerComposeContainer<>(new File(path));
             environment.start();
-            environment.getContainerByServiceName(language).ifPresent(containerState -> runContainerCommands(pathToLanguageFolder, language, hostPort, containerState));
+            environment.getContainerByServiceName(language).ifPresent(
+                    containerState -> runContainerCommands(pathToLanguageFolder, language, hostPort, containerState));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -117,7 +118,7 @@ public class FunctionsMultiLangTests extends Simulation {
             exec(http("AddProduct").post("/addproduct")
                     .body(StringBody(dataMapper.writeValueAsString(addProductsArray))).check(status().in(200, 201)))
                             .pause(5)
-                            .exec(http("AddProduct").post("/addproductswithmapping")
+                            .exec(http("AddProductWithMapping").post("/addproductswithmapping")
                                     .body(StringBody(dataMapper.writeValueAsString(addItemWithMapping)))
                                     .check(status().in(200, 201)))
                             .pause(5)
@@ -133,16 +134,29 @@ public class FunctionsMultiLangTests extends Simulation {
             .exec(inputAndOutputBindings);
     {
         // setUp(inputAndOutputBindingScenario.injectOpen(rampUsers(10).during(10))).protocols(httpProtocol);
-        setUp(inputAndOutputBindingScenario.injectOpen(nothingFor(Duration.of(10, ChronoUnit.SECONDS)),
-                rampUsers(25).during(10))).protocols(httpProtocol)
-                        .assertions(global().successfulRequests().percent().is(100.0));
+        /*
+         * setUp(inputAndOutputBindingScenario.injectOpen(nothingFor(Duration.of(10, ChronoUnit.SECONDS)),
+         * rampUsers(40).during(20))).protocols(httpProtocol)
+         * .assertions(global().successfulRequests().percent().is(100.0));
+         *
+         */
+        setUp(
+                // generate a closed workload injection profile
+                // with levels of 10, 15, 20, 25 and 30 concurrent users
+                // each level lasting 10 seconds
+                // separated by linear ramps lasting 10 seconds
+                inputAndOutputBindingScenario.injectClosed(
+                        incrementConcurrentUsers(5)
+                                .times(5)
+                                .eachLevelLasting(10)
+                                .separatedByRampsLasting(10)
+                                .startingFrom(10) // Int
+                ).protocols(httpProtocol)
+        );
     }
 
     @Override
     public void after() {
-        /*
-         * try { Thread.sleep(300000); } catch (InterruptedException e) { throw new RuntimeException(e); }
-         */
         environment.stop();
         logger.info("Simulation run finished!");
     }
