@@ -1,0 +1,7 @@
+version: '3'
+services:
+  python:
+    image: sdktestsacr.azurecr.io/func-az-kusto-python:latest
+    hostname: func-az-kusto-python
+    ports:
+      - "7104:7104"

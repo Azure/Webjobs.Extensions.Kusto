@@ -9,7 +9,7 @@
       "methods": [
         "get"
       ],
-      "route": "py-get-product/{productId}"
+      "route": "getproducts/{productId}"
     },
     {
       "type": "http",

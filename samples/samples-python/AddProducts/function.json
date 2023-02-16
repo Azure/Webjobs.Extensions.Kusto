@@ -9,7 +9,7 @@
       "methods": [
         "post"
       ],
-      "route": "addproducts"
+      "route": "addproduct"
     },
     {
       "type": "http",
