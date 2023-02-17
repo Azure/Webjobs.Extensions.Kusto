@@ -21,7 +21,7 @@ import static com.microsoft.azure.kusto.common.Constants.SDKTESTSDB;
 import java.util.Optional;
 
 public class GetProductsFunction {
-    @FunctionName("GetJProductsFunction")
+    @FunctionName("GetProductsFunction")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "getproductsfn/{name}") HttpRequestMessage<Optional<String>> request,
             @KustoInput(name = "getjproductsfn", kqlCommand = "declare query_parameters (name:string);GetProductsByName(name)", kqlParameters = "@name={name}", database = SDKTESTSDB, connection = KUSTOCONNSTR) Product[] products) {

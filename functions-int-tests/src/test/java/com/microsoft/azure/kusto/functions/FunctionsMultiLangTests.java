@@ -136,6 +136,12 @@ public class FunctionsMultiLangTests extends Simulation {
                                     jsonPath("$[*].Name").ofString().find()
                                             .is(String.format("Item-%s-%d", language, itemId)),
                                     jsonPath("$[*].Cost").ofDouble().find().shouldBe(itemId / 1000999.999)))
+                            .exec(http("GetProductsFunction")
+                                    .get(String.format("/getproductsfn/Item-%s-%d", language, itemId))
+                                    .check(status().in(200), jsonPath("$[*].ProductID").ofLong().find().is(itemId),
+                                            jsonPath("$[*].Name").ofString().find()
+                                                    .is(String.format("Item-%s-%d", language, itemId)),
+                                            jsonPath("$[*].Cost").ofDouble().find().shouldBe(itemId / 1000999.999)))
                             .exitHereIfFailed();
 
     HttpProtocolBuilder httpProtocol = http.baseUrl(baseUrl).acceptHeader("application/json");
@@ -143,26 +149,14 @@ public class FunctionsMultiLangTests extends Simulation {
     ScenarioBuilder inputAndOutputBindingOpenScenario = scenario("BasicInputAndOutputBindings-Open")
             .exec(inputAndOutputBindings);
     {
-        /*
-         * setUp(inputAndOutputBindingOpenScenario.injectOpen( nothingFor(Duration.of(10,ChronoUnit.SECONDS)), // warm
-         * up and functions start time incrementUsersPerSec(5) .times(10)
-         * .eachLevelLasting(Duration.of(10,ChronoUnit.SECONDS))
-         * .separatedByRampsLasting(Duration.of(10,ChronoUnit.SECONDS)) .startingFrom(10)
-         * ).protocols(httpProtocol)).assertions(global().successfulRequests().percent().is(100.0));
-         */
         setUp(inputAndOutputBindingOpenScenario.injectOpen(nothingFor(Duration.of(10, ChronoUnit.SECONDS)),
-                rampUsers(50).during(25))).protocols(httpProtocol)
-                        .assertions(global().successfulRequests().percent().gt(90.0));
+                rampUsers(50).during(30))).protocols(httpProtocol)
+                        .assertions(global().successfulRequests().percent().shouldBe(100.0));
 
     }
 
     @Override
     public void after() {
-        try {
-            Thread.sleep(150000);
-        } catch (Exception ignored) {
-
-        }
         String containerPath;
         if ("java".equalsIgnoreCase(language)) {
             containerPath = String.format(
