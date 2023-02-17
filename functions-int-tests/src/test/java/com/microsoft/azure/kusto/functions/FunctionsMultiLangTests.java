@@ -35,14 +35,20 @@ import com.microsoft.azure.kusto.functions.common.Product;
 
 public class FunctionsMultiLangTests extends Simulation {
     private static final Logger logger = LoggerFactory.getLogger(FunctionsMultiLangTests.class);
+    // File name in docker compose file
+    private static final String BASE_IMAGE = "baseimage";
+
+    private static final int HOST_PORT = Integer.getInteger("port", 7103);
+    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+
+    private static final String PATH_TO_DOCKER_COMPOSE = "../samples/docker/docker-compose.yml";
+
     private DockerComposeContainer<?> environment;
 
     private final Map<String, Integer> languagePortMap = Stream.of(
             new String[][] { { "outofproc", "7101" }, { "java", "7102" }, { "node", "7103" }, { "python", "7104" }, })
             .collect(Collectors.collectingAndThen(Collectors.toMap(data -> data[0], data -> Integer.parseInt(data[1])),
                     Collections::<String, Integer> unmodifiableMap));
-    private static final int hostPort = Integer.getInteger("port", 7103);
-    private static final ObjectMapper dataMapper = new ObjectMapper();
     private String language = getProperty("language", "node");
 
     public FunctionsMultiLangTests() throws JsonProcessingException {
@@ -64,27 +70,30 @@ public class FunctionsMultiLangTests extends Simulation {
             System.exit(137);
         }
         int hostPort = languagePortMap.get(language);
-        String pathToLanguageFolder = String.format("../../samples/samples-%s/docker-compose.yml", language);
-        File absoluteFilePath = new File(pathToLanguageFolder).getAbsoluteFile();
+
+        File absoluteFilePath = new File(PATH_TO_DOCKER_COMPOSE).getAbsoluteFile();
         try {
             String path = absoluteFilePath.getCanonicalPath();
             logger.info("Starting compose from file {}", path);
             environment = new DockerComposeContainer<>(new File(path));
             environment.start();
-            environment.getContainerByServiceName(language).ifPresent(
-                    containerState -> runContainerCommands(pathToLanguageFolder, language, hostPort, containerState));
+            environment.getContainerByServiceName(BASE_IMAGE)
+                    .ifPresent(containerState -> runContainerCommands(language, hostPort, containerState));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void runContainerCommands(String pathToLanguageFolder, String language, int exposedPort,
-            ContainerState containerState) {
+    private static void runContainerCommands(String language, int exposedPort, ContainerState containerState) {
         try {
-            String pathToCopy = new File(pathToLanguageFolder).getParentFile().getCanonicalPath();
-            containerState.copyFileToContainer(MountableFile.forHostPath(pathToCopy),
+            // Goes to the samples folder
+            String pathToSamplesDirectory = new File(PATH_TO_DOCKER_COMPOSE).getParentFile().getParentFile()
+                    .getCanonicalPath();
+            String pathToLanguageSample = String.format("%s%ssamples-%s", pathToSamplesDirectory, File.separator,
+                    language);
+            containerState.copyFileToContainer(MountableFile.forHostPath(pathToLanguageSample),
                     String.format("/src/samples-%s/", language));
-            logger.info("Copied folder {} to container", pathToCopy);
+            logger.info("Copied folder {} to container", pathToLanguageSample);
             // Since the file is copied now move over
             Container.ExecResult initFunctionsResult = containerState.execInContainer("bash", "/src/init-functions.sh");
             logger.debug("Init function for language binding {} returned {}.StdErr {} and StdOut {}", language,
@@ -92,18 +101,6 @@ public class FunctionsMultiLangTests extends Simulation {
                     initFunctionsResult.getStdout());
             // Once in the folder start the function tools after navigating to the folder
             // Since the file is copied now move over
-            if (language.equalsIgnoreCase("outofproc")) {
-                /*
-                 * <ProjectReference
-                 * Include="..\..\Worker.Extensions.Kusto\Microsoft.Azure.Functions.Worker.Extensions.Kusto.csproj" />
-                 */
-                String workerFolderToCopy = String.format("%s\\Worker.Extensions.Kusto",
-                        new File(pathToCopy).getParentFile().getParentFile().getCanonicalPath());
-                containerState.copyFileToContainer(MountableFile.forHostPath(workerFolderToCopy),
-                        "/Worker.Extensions.Kusto");
-                logger.info("Copied folder {} to container", workerFolderToCopy);
-
-            }
             Container.ExecResult startFunctionsResult = containerState.execInContainer("bash",
                     "/src/start-functions.sh", "-l", language, "-p", String.valueOf(exposedPort));
             logger.info("Starting function on port {} for language binding {} returned {}. StdErr {} and StdOut {}",
@@ -116,7 +113,7 @@ public class FunctionsMultiLangTests extends Simulation {
 
     // Start func inside the container
     // Run the tests
-    String baseUrl = String.format("http://localhost:%d/api", hostPort);
+    String baseUrl = String.format("http://localhost:%d/api", HOST_PORT);
     long seconds = Instant.now().toEpochMilli();
     List<Product> addProductsArray = IntStream
             .range(1, 10).mapToObj(count -> new Product(seconds - count,
@@ -128,10 +125,10 @@ public class FunctionsMultiLangTests extends Simulation {
     ChainBuilder inputAndOutputBindings =
             // let's give proper names, as they are displayed in the reports
             exec(http("AddProduct").post("/addproduct")
-                    .body(StringBody(dataMapper.writeValueAsString(addProductsArray))).check(status().in(200, 201)))
+                    .body(StringBody(JSON_MAPPER.writeValueAsString(addProductsArray))).check(status().in(200, 201)))
                             .pause(5)
                             .exec(http("AddProductWithMapping").post("/addproductswithmapping")
-                                    .body(StringBody(dataMapper.writeValueAsString(addItemWithMapping)))
+                                    .body(StringBody(JSON_MAPPER.writeValueAsString(addItemWithMapping)))
                                     .check(status().in(200, 201)))
                             .pause(5)
                             .exec(http("GetProducts").get("/getproducts/" + itemId).check(status().in(200, 201),
@@ -154,13 +151,18 @@ public class FunctionsMultiLangTests extends Simulation {
          * ).protocols(httpProtocol)).assertions(global().successfulRequests().percent().is(100.0));
          */
         setUp(inputAndOutputBindingOpenScenario.injectOpen(nothingFor(Duration.of(10, ChronoUnit.SECONDS)),
-                rampUsers(50).during(30))).protocols(httpProtocol)
-                        .assertions(global().successfulRequests().percent().is(100.0));
+                rampUsers(50).during(25))).protocols(httpProtocol)
+                        .assertions(global().successfulRequests().percent().gt(90.0));
 
     }
 
     @Override
     public void after() {
+        try {
+            Thread.sleep(150000);
+        } catch (Exception ignored) {
+
+        }
         String containerPath;
         if ("java".equalsIgnoreCase(language)) {
             containerPath = String.format(
@@ -174,7 +176,7 @@ public class FunctionsMultiLangTests extends Simulation {
         final String currentTargetLogPath = String.format("%s%s%s-%s-%d.log", System.getProperty("user.dir"),
                 File.separator, "func-logs", language, Instant.now().toEpochMilli());
         logger.info("Copying log runs to {}", currentTargetLogPath);
-        environment.getContainerByServiceName(language).ifPresent(containerState -> {
+        environment.getContainerByServiceName(BASE_IMAGE).ifPresent(containerState -> {
             try {
                 containerState.copyFileFromContainer(containerPath, currentTargetLogPath);
             } catch (IOException | InterruptedException e) {

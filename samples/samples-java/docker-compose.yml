@@ -1,7 +1,0 @@
-version: '3'
-services:
-  java:
-    image: sdktestsacr.azurecr.io/func-az-kusto-java:latest
-    hostname: func-az-kusto-java
-    ports:
-      - "7102:7102"

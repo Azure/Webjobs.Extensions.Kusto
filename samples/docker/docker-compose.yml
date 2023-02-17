@@ -1,0 +1,10 @@
+version: '3'
+services:
+  baseimage:
+    image: sdktestsacr.azurecr.io/func-az-kusto-base:latest
+    hostname: func-az-kusto-base
+    ports:
+      - "7101:7101"
+      - "7102:7102"
+      - "7103:7103"
+      - "7104:7104"
