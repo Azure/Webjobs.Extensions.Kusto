@@ -13,7 +13,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindin
         [Function("AddProducts")]
         [KustoOutput(Database: "sdktestsdb", Connection = "KustoConnectionString", TableName = "Products")]
         public static async Task<Product[]> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproducts")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproduct")]
             HttpRequestData req)
         {
             Product[]? products = await req.ReadFromJsonAsync<Product[]>();

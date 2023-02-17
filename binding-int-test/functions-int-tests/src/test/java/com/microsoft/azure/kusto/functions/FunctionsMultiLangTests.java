@@ -10,6 +10,7 @@ import org.testcontainers.utility.MountableFile;
 import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
+import static java.lang.System.getProperty;
 
 import io.gatling.javaapi.core.ChainBuilder;
 import io.gatling.javaapi.core.ScenarioBuilder;
@@ -36,14 +37,13 @@ public class FunctionsMultiLangTests extends Simulation {
     private static final Logger logger = LoggerFactory.getLogger(FunctionsMultiLangTests.class);
     private DockerComposeContainer<?> environment;
 
-    private final Map<String, Integer> languagePortMap = Stream
-            .of(new String[][] { { "java", "7102" }, { "node", "7103" }, { "python", "7104" },
-                    { "dotnet-isolated", "7101" }, })
+    private final Map<String, Integer> languagePortMap = Stream.of(
+            new String[][] { { "outofproc", "7101" }, { "java", "7102" }, { "node", "7103" }, { "python", "7104" }, })
             .collect(Collectors.collectingAndThen(Collectors.toMap(data -> data[0], data -> Integer.parseInt(data[1])),
                     Collections::<String, Integer> unmodifiableMap));
     private static final int hostPort = Integer.getInteger("port", 7103);
     private static final ObjectMapper dataMapper = new ObjectMapper();
-    private String language = System.getProperty("language", "node");
+    private String language = getProperty("language", "node");
 
     public FunctionsMultiLangTests() throws JsonProcessingException {
 
@@ -56,7 +56,7 @@ public class FunctionsMultiLangTests extends Simulation {
         // Start the test container based on the language passed
         // Copy the project into the container
         // Replace the DLL file
-        language = System.getProperty("language", "node");
+        language = getProperty("language", "node");
         if (!languagePortMap.containsKey(language)) {
             logger.warn(
                     "Language " + language + " is not in the list of accepted languages for test. Accepted languages - "
@@ -92,6 +92,18 @@ public class FunctionsMultiLangTests extends Simulation {
                     initFunctionsResult.getStdout());
             // Once in the folder start the function tools after navigating to the folder
             // Since the file is copied now move over
+            if (language.equalsIgnoreCase("outofproc")) {
+                /*
+                 * <ProjectReference
+                 * Include="..\..\Worker.Extensions.Kusto\Microsoft.Azure.Functions.Worker.Extensions.Kusto.csproj" />
+                 */
+                String workerFolderToCopy = String.format("%s\\Worker.Extensions.Kusto",
+                        new File(pathToCopy).getParentFile().getParentFile().getCanonicalPath());
+                containerState.copyFileToContainer(MountableFile.forHostPath(workerFolderToCopy),
+                        "/Worker.Extensions.Kusto");
+                logger.info("Copied folder {} to container", workerFolderToCopy);
+
+            }
             Container.ExecResult startFunctionsResult = containerState.execInContainer("bash",
                     "/src/start-functions.sh", "-l", language, "-p", String.valueOf(exposedPort));
             logger.info("Starting function on port {} for language binding {} returned {}. StdErr {} and StdOut {}",
@@ -130,40 +142,45 @@ public class FunctionsMultiLangTests extends Simulation {
                             .exitHereIfFailed();
 
     HttpProtocolBuilder httpProtocol = http.baseUrl(baseUrl).acceptHeader("application/json");
-    ScenarioBuilder inputAndOutputBindingScenario = scenario("BasicInputAndOutputBindings")
+    // Open systems, where you control the arrival rate of users
+    ScenarioBuilder inputAndOutputBindingOpenScenario = scenario("BasicInputAndOutputBindings-Open")
             .exec(inputAndOutputBindings);
     {
-        // setUp(inputAndOutputBindingScenario.injectOpen(rampUsers(10).during(10))).protocols(httpProtocol);
         /*
-         * setUp(inputAndOutputBindingScenario.injectOpen(nothingFor(Duration.of(10, ChronoUnit.SECONDS)),
-         * rampUsers(40).during(20))).protocols(httpProtocol)
-         * .assertions(global().successfulRequests().percent().is(100.0));
-         *
+         * setUp(inputAndOutputBindingOpenScenario.injectOpen( nothingFor(Duration.of(10,ChronoUnit.SECONDS)), // warm
+         * up and functions start time incrementUsersPerSec(5) .times(10)
+         * .eachLevelLasting(Duration.of(10,ChronoUnit.SECONDS))
+         * .separatedByRampsLasting(Duration.of(10,ChronoUnit.SECONDS)) .startingFrom(10)
+         * ).protocols(httpProtocol)).assertions(global().successfulRequests().percent().is(100.0));
          */
-        setUp(
-                // generate a closed workload injection profile
-                // with levels of 10, 15, 20, 25 and 30 concurrent users
-                // each level lasting 10 seconds
-                // separated by linear ramps lasting 10 seconds
-                inputAndOutputBindingScenario.injectClosed(
-                        incrementConcurrentUsers(5)
-                                .times(5)
-                                .eachLevelLasting(10)
-                                .separatedByRampsLasting(10)
-                                .startingFrom(10) // Int
-                ).protocols(httpProtocol)
-        );
+        setUp(inputAndOutputBindingOpenScenario.injectOpen(nothingFor(Duration.of(10, ChronoUnit.SECONDS)),
+                rampUsers(50).during(30))).protocols(httpProtocol)
+                        .assertions(global().successfulRequests().percent().is(100.0));
+
     }
 
     @Override
     public void after() {
-        /*
-        try{
-            Thread.sleep(300000);
-        }catch (Exception ignored){
-
+        String containerPath;
+        if ("java".equalsIgnoreCase(language)) {
+            containerPath = String.format(
+                    "/src/samples-%s/target/azure-functions/kustojavafunctionssample-20230130111810292/func-logs.txt",
+                    language);
+        } else if ("outofproc".equalsIgnoreCase(language)) {
+            containerPath = String.format("/src/samples-%s/bin/Debug/net6.0/func-logs.txt", language);
+        } else {
+            containerPath = String.format("/src/samples-%s/func-logs.txt", language);
         }
-         */
+        final String currentTargetLogPath = String.format("%s%s%s-%s-%d.log", System.getProperty("user.dir"),
+                File.separator, "func-logs", language, Instant.now().toEpochMilli());
+        logger.info("Copying log runs to {}", currentTargetLogPath);
+        environment.getContainerByServiceName(language).ifPresent(containerState -> {
+            try {
+                containerState.copyFileFromContainer(containerPath, currentTargetLogPath);
+            } catch (IOException | InterruptedException e) {
+                logger.warn("Could not copy run logs, this should not affect the run", e);
+            }
+        });
         environment.stop();
         logger.info("Simulation run finished!");
     }

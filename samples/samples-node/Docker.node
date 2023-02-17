@@ -1,6 +1,42 @@
 # This image additionally contains function core tools – useful when using custom extensions
 FROM mcr.microsoft.com/azure-functions/node:4-node16-core-tools AS installer-env
 # The host file for all the defaults
+ARG MAVEN_VERSION=3.8.5
+ARG USER_HOME_DIR="/root"
+ARG SHA=89ab8ece99292476447ef6a6800d9842bbb60787b9b8a45c103aa61d2f205a971d8c3ddfb8b03e514455b4173602bd015e82958c0b3ddc1728a57126f773c743
+ARG BASE_MAVEN_URL=https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries
+ARG JAVA_VERSION=8u322b06
+ARG JDK_NAME=jdk8u322-b06
+ARG BASE_JDK_URL=https://github.com/adoptium/temurin8-binaries/releases/download/${JDK_NAME}
+ARG JAVA_HOME=/usr/lib/jvm/adoptium-8-x64
+
+RUN apt-get -qq update \
+    && apt-get -qqy install curl \
+    && apt-get install -y libfreetype6 fontconfig fonts-dejavu \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /usr/share/maven /usr/share/maven/ref \
+  && curl -fsSL -o /tmp/apache-maven.tar.gz ${BASE_MAVEN_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
+  && echo "${SHA}  /tmp/apache-maven.tar.gz" | sha512sum -c - \
+  && tar -xzf /tmp/apache-maven.tar.gz -C /usr/share/maven --strip-components=1 \
+  && rm -f /tmp/apache-maven.tar.gz \
+  && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
+
+RUN mkdir -p ${JAVA_HOME} \
+    && curl -fsSL -o /tmp/jdk.tar.gz ${BASE_JDK_URL}/OpenJDK8U-jdk_x64_linux_hotspot_${JAVA_VERSION}.tar.gz \
+    && tar -xzf /tmp/jdk.tar.gz -C ${JAVA_HOME} --strip-components=1 \
+    && rm -f /tmp/jdk.tar.gz
+
+ENV MAVEN_HOME /usr/share/maven
+ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
+ENV JAVA_HOME=${JAVA_HOME}
+#Java installation complete
+RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3.9-dev python3.9-venv python3-pip python3-wheel build-essential && \
+   apt-get clean && rm -rf /var/lib/apt/lists/*
+# create and activate virtual environment
+RUN python3.9 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+#Python installation complete
 COPY ./samples/docker/host.json /src/host.json
 # Copy the DLL to the target use this for the tests
 COPY ./src/bin/Release/netstandard2.1/Microsoft.Azure.WebJobs.Extensions.Kusto.dll /src/Microsoft.Azure.WebJobs.Extensions.Kusto.dll

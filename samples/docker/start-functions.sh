@@ -8,12 +8,17 @@ do
   esac
 done
 echo "Using language: $language & Port: $port"
-cd /src/samples-$language
 echo "Running $language functions samples"
-# the compiled functions are in this location
-if [[ $language  -eq  "java" ]]
-then
-  echo "Changing to Java functions directory"
-  cd target/azure-functions/kustojavafunctionssample-20230130111810292
+cd /src/samples-$language
+if [ $language == "outofproc" ]; then
+  echo "Changing language to c-sharp for out of process worker"
+  cd  bin/Debug/net6.0
+  func start --csharp --verbose --port $port >> func-logs.txt &
+else
+  # the compiled functions are in this location
+  if [[ $language == "java" ]]; then
+    echo "Changing to Java functions directory"
+    cd target/azure-functions/kustojavafunctionssample-20230130111810292
+  fi 
+  func start --$language --verbose --port $port >> func-logs.txt &
 fi
-func start --$language --verbose --port $port >> func-logs.txt &
