@@ -26,7 +26,7 @@ import static com.microsoft.azure.kusto.common.Constants.*;
 public class AddProduct {
     @FunctionName("AddProduct")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproduct") HttpRequestMessage<Optional<String>> request,
+            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproductuni") HttpRequestMessage<Optional<String>> request,
             @KustoOutput(name = "product", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR) OutputBinding<Product> product)
             throws IOException {
 

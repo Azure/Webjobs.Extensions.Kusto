@@ -26,7 +26,7 @@ import static com.microsoft.azure.kusto.common.Constants.*;
 public class AddProductsArray {
     @FunctionName("AddProducts")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproducts") HttpRequestMessage<Optional<String>> request,
+            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproduct") HttpRequestMessage<Optional<String>> request,
             @KustoOutput(name = "productArray", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR) OutputBinding<Product[]> products)
             throws IOException {
 

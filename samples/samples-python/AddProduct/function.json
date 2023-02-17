@@ -9,7 +9,7 @@
       "methods": [
         "post"
       ],
-      "route": "addproduct"
+      "route": "addproductuni"
     },
     {
       "type": "http",
