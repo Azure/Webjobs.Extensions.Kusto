@@ -8,3 +8,10 @@ services:
       - "7102:7102"
       - "7103:7103"
       - "7104:7104"
+      - "7105:7105"
+  rabbitmq:
+    image: rabbitmq:3.11.9-management-alpine
+    hostname: rabbitmq
+    ports:
+      - "7000:15672"
+      - "7001:5672"

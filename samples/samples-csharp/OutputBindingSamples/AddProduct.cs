@@ -15,9 +15,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
 {
     public static class AddProduct
     {
-        [FunctionName("AddProduct")]
+        [FunctionName("AddProductUni")]
         public static void Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproduct")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductuni")]
             HttpRequest req, ILogger log,
             [Kusto(Database:"sdktestsdb" ,
             TableName ="Products" ,

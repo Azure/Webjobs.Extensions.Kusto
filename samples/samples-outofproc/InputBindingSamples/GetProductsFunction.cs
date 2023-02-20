@@ -11,15 +11,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
     public static class GetProductsFunction
     {
         [Function("GetProductsFunction")]
-        public static Task<List<Product>> Run(
+        public static IEnumerable<Product> Run(
 #pragma warning disable
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproductsfn/{name}")] HttpRequestData req,
 #pragma warning disable
             [KustoInput(Database: "sdktestsdb",
             KqlCommand = "declare query_parameters (name:string);GetProductsByName(name)",
-            KqlParameters = "@name={name}",Connection = "KustoConnectionString")] List<Product> products)
+            KqlParameters = "@name={name}",Connection = "KustoConnectionString")] IEnumerable<Product> products)
         {
-            return Task.FromResult(products);
+            return products;
         }
     }
 }

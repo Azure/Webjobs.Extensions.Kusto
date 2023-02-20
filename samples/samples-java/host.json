@@ -1,8 +1,15 @@
 {
   "version": "2.0",
+  "extensions": {
+    "rabbitMQ": {
+        "prefetchCount": 100,
+        "queueName": "bindings.queue",
+        "connectionString": "amqp://guest:guest@rabbitmq:15672"
+    }
+  },
   "logging": {
     "logLevel": {
-      "default": "Debug"
+      "default": "Trace"
     }
   },
   "extensionBundle": {

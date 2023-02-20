@@ -10,17 +10,17 @@ using Microsoft.Azure.WebJobs.Kusto;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
 {
-    public static class GetProductsList
+    public static class GetProductsFunction
     {
-        [FunctionName("GetProductsList")]
+        [FunctionName("GetProductsFunction")]
         public static IActionResult Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts-list/{productId}/name/{name}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproductsfn/{name}")]
 #pragma warning disable IDE0060 // Remove unused parameter
             HttpRequest req,
 #pragma warning restore IDE0060 // Remove unused parameter
             [Kusto(Database:"sdktestsdb" ,
-            KqlCommand = "declare query_parameters (productId:long,name:string);Products | where ProductID == productId and Name == name" ,
-            KqlParameters = "@productId={productId},@name={name}",
+            KqlCommand = "declare query_parameters (name:string);GetProductsByName(name)" ,
+            KqlParameters = "@name={name}",
             Connection = "KustoConnectionString")]
             IEnumerable<Product> products)
         {

@@ -42,6 +42,7 @@
         <maven.dependency.plugin.version>3.3.0</maven.dependency.plugin.version>
         <maven.clean.plugin.version>3.2.0</maven.clean.plugin.version>
         <functionAppName>kustojavafunctionssample-20230130111810292</functionAppName>
+        <rabbit.mq.trigger.version>2.0.3</rabbit.mq.trigger.version>
     </properties>
 
     <dependencies>
@@ -49,6 +50,11 @@
             <groupId>com.microsoft.azure.functions</groupId>
             <artifactId>azure-functions-java-library</artifactId>
             <version>${azure.functions.java.library.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.functions</groupId>
+            <artifactId>azure-functions-java-library-rabbitmq</artifactId>
+            <version>${rabbit.mq.trigger.version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.functions</groupId>

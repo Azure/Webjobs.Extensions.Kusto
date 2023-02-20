@@ -1,11 +1,18 @@
 {
-    "version": "2.0",
-    "logging": {
-        "applicationInsights": {
-            "samplingExcludedTypes": "Request",
-            "samplingSettings": {
-                "isEnabled": true
-            }
-        }
+  "version": "2.0",
+  "extensions": {
+    "rabbitMQ": {
+      "prefetchCount": 100,
+      "queueName": "trigger.bindings.queue",
+      "connectionString": "amqp://guest:guest@rabbitmq:15672"
     }
+  },
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      }
+    }
+  }
 }
