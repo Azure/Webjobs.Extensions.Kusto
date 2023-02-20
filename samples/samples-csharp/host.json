@@ -4,7 +4,7 @@
     "rabbitMQ": {
       "prefetchCount": 100,
       "queueName": "trigger.bindings.queue",
-      "connectionString": "amqp://guest:guest@rabbitmq:15672"
+      "connectionString": "amqp://guest:guest@rabbitmq:5672"
     }
   },
   "logging": {

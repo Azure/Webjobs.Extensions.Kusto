@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,9 +19,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples.T
         [return: RabbitMQ(QueueName = "bindings.test.queue", ConnectionStringSetting = "rabbitMQConnectionAppSetting")]
         public static async Task<List<Product>> RunAsync([TimerTrigger("*/5 * * * * *")] TimerInfo exportTimer, IBinder binder, ILogger log)
         {
-            string startTime = exportTimer.ScheduleStatus.LastUpdated.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+            DateTime? dateOfRun = exportTimer?.ScheduleStatus?.Last;
+            DateTime runTime = dateOfRun == null ? DateTime.UtcNow : exportTimer.ScheduleStatus.Last.ToUniversalTime();
+            string startTime = runTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
             // Runs every one min, so query this every one min
-            string endTime = exportTimer.ScheduleStatus.LastUpdated.ToUniversalTime().AddMinutes(1).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+            string endTime = runTime.AddMinutes(1).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
             var kustoAttribute = new KustoAttribute("sdktestsdb")
             {
                 Connection = "KustoConnectionString",

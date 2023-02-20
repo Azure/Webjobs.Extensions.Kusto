@@ -140,7 +140,7 @@ public class FunctionsMultiLangTests extends Simulation {
             .range(1, 10).mapToObj(count -> new Product(seconds - count,
                     String.format("Product-%s-%d", language, seconds - count), (seconds - count) / 1000999.999))
             .collect(Collectors.toList());
-
+    int noActionTime = RUN_TRIGGER ? 60 : 20;
     long itemId = seconds + 10;
     Item addItemWithMapping = new Item(itemId, String.format("Item-%s-%d", language, itemId), itemId / 1000999.999);
     ChainBuilder inputAndOutputBindings = exec(session ->
@@ -171,7 +171,7 @@ public class FunctionsMultiLangTests extends Simulation {
     // Open systems, where you control the arrival rate of users
     ScenarioBuilder inputAndOutputScenario = scenario("BasicInputAndOutputBindings-Open").exec(inputAndOutputBindings);
     {
-        setUp(inputAndOutputScenario.injectOpen(nothingFor(Duration.of(20, ChronoUnit.SECONDS)),
+        setUp(inputAndOutputScenario.injectOpen(nothingFor(Duration.of(noActionTime, ChronoUnit.SECONDS)),
                 rampUsers(50).during(40))).protocols(httpProtocol)
                         .assertions(global().successfulRequests().percent().shouldBe(100.0));
     }
