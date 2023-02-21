@@ -15,7 +15,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
     {
         [FunctionName("GetProductsAsyncEnumerable")]
         public static async Task<IActionResult> RunAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts-ae/{name}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts-ae?name={name}")]
 #pragma warning disable IDE0060 // Remove unused parameter
             HttpRequest req,
 #pragma warning restore IDE0060 // Remove unused parameter
