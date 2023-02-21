@@ -161,7 +161,7 @@ public class FunctionsMultiLangTests extends Simulation {
                     status().in(200), jsonPath("$[*].ProductID").ofLong().find().is(itemId),
                     jsonPath("$[*].Name").ofString().find().is(String.format("Item-%s-%d", language, itemId)),
                     jsonPath("$[*].Cost").ofDouble().find().shouldBe(itemId / 1000999.999)))
-            .doIf(session -> session.getBoolean("runTrigger"))
+            .pause(Duration.of(10, ChronoUnit.SECONDS)).doIf(session -> session.getBoolean("runTrigger"))
             .then(exec(http("RetrieveTriggerMessages").get(String.format("/getproductsfn/R-MQ-%d", itemId)).check(
                     status().in(200), jsonPath("$[*].ProductID").ofLong().find().is(itemId),
                     jsonPath("$[*].Name").ofString().find().is(String.format("R-MQ-%d", itemId)),

@@ -20,8 +20,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
             HttpRequest req,
 #pragma warning restore IDE0060 // Remove unused parameter
             [Kusto(Database:"sdktestsdb" ,
-            KqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId" ,
-            KqlParameters = "@productId={productId}",
+            KqlCommand = "declare query_parameters (productId:long,rmqPrefix:string);Products | where ProductID == productId and Name !has rmqPrefix" ,
+            KqlParameters = "@productId={productId},@rmqPrefix=R-MQ", // Exclude any parameters that have this prefix
             Connection = "KustoConnectionString")]
             IAsyncEnumerable<Product> products)
         {
