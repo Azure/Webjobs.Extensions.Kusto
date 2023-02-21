@@ -82,9 +82,7 @@ public class FunctionsMultiLangTests extends Simulation {
             logger.info("Starting compose from file {}", path);
             environment = new DockerComposeContainer<>(new File(path));
             environment.start();
-            if (RUN_TRIGGER) {
-                environment.getContainerByServiceName("rabbitmq").ifPresent(FunctionsMultiLangTests::createQueue);
-            }
+            environment.getContainerByServiceName("rabbitmq").ifPresent(FunctionsMultiLangTests::createQueue);
             environment.getContainerByServiceName(BASE_IMAGE)
                     .ifPresent(containerState -> runContainerCommands(language, hostPort, containerState));
         } catch (IOException e) {
@@ -140,7 +138,7 @@ public class FunctionsMultiLangTests extends Simulation {
             .range(1, 10).mapToObj(count -> new Product(seconds - count,
                     String.format("Product-%s-%d", language, seconds - count), (seconds - count) / 1000999.999))
             .collect(Collectors.toList());
-    int noActionTime = RUN_TRIGGER ? 60 : 20;
+    int noActionTime = 60;//RUN_TRIGGER ? 60 : 20;
     long itemId = seconds + 10;
     Item addItemWithMapping = new Item(itemId, String.format("Item-%s-%d", language, itemId), itemId / 1000999.999);
     ChainBuilder inputAndOutputBindings = exec(session ->

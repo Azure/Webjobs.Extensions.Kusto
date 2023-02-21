@@ -3,8 +3,8 @@
   "extensions": {
     "rabbitMQ": {
         "prefetchCount": 100,
-        "queueName": "bindings.queue",
-        "connectionString": "amqp://guest:guest@rabbitmq:15672"
+        "queueName": "bindings.test.queue",
+        "connectionString": "amqp://guest:guest@rabbitmq:5672"
     }
   },
   "logging": {

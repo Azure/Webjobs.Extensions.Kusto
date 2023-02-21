@@ -12,7 +12,7 @@ public class QueueTriggerBinding {
     @FunctionName("QueueTriggerKustoOutputBinding")
     @KustoOutput(name = "product", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR)
     public static Product run(
-            @RabbitMQTrigger(connectionStringSetting = "rabbitMQConnectionAppSetting", queueName = "bindings.queue") Product product,
+            @RabbitMQTrigger(connectionStringSetting = "rabbitMQConnectionAppSetting", queueName = "bindings.test.queue") Product product,
             final ExecutionContext context) {
         context.getLogger().info("Processing message with ID" + product.ProductID);
         return product;

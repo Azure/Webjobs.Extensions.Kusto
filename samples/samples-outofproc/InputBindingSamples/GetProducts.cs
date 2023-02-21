@@ -11,13 +11,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
     public static class GetProducts
     {
         [Function("GetProducts")]
-        public static JsonObject Run(
+        public static JsonArray Run(
 #pragma warning disable
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts/{productId}")] HttpRequestData req,
 #pragma warning disable
             [KustoInput(Database: "sdktestsdb",
             KqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId",
-            KqlParameters = "@productId={productId}",Connection = "KustoConnectionString")] JsonObject products)
+            KqlParameters = "@productId={productId}",Connection = "KustoConnectionString")] JsonArray products)
         {
             return products;
         }
