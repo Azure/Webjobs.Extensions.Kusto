@@ -35,8 +35,38 @@ These instructions will guide you through creating your Function Project and add
     dotnet add package Microsoft.Azure.WebJobs.Extensions.Kusto --prerelease
     ```
 
-## Input Binding
+4. Use the `local.settings.json` to provide the [KustoConnectionString](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto)
 
+    ```json
+    {
+        "IsEncrypted": false,
+        "Values": {
+            "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+            "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+            "AzureWebJobsDashboard": "",
+            "KustoConnectionString": "Data Source=https://<kusto-cluster>.kusto.windows.net;Database=sdktestsdb;Fed=True;AppClientId=<app-id>;AppKey=<app-key>;Authority Id=<tenant-id>"
+        },
+        "ConnectionStrings": {
+            "rabbitMQConnectionAppSetting": "amqp://guest:guest@rabbitmq:5672"
+        }
+    }
+    ```
+    and `host.json`
+    ```json
+    
+        {
+            "version": "2.0",
+            "logging": {
+                "applicationInsights": {
+                    "samplingSettings": {
+                        "isEnabled": true,
+                        "excludedTypes": "Request"
+                    }
+                }
+            }
+        }
+    ```
+## Input Binding
 See [Input Binding Overview](../../README.md#input-binding) for general information about the Kusto Input binding.
 
 ### KustoAttribute for Input Bindings
@@ -72,9 +102,9 @@ The following are valid binding types for the result of the query/stored procedu
 - **JArray**: A [JSONArray](https://www.newtonsoft.com/json/help/html/T_Newtonsoft_Json_Linq_JArray.htm) type of the rows of the result (an example is provided [here](https://github.com/Azure/Webjobs.Extensions.Kusto/blob/main/samples/samples-csharp/InputBindingSamples/GetProductsJson.cs). Note that as a generic representation, returns are a JSONArray with 1 row in case of 1 row being selected
 
 
-The repo contains examples of each of these binding types [here](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-csharp/InputBindingSamples). A few examples are also included [below](#samples-for-input-bindings).
-
 ### Samples for Input Bindings
+
+The repo contains examples of each of these binding types [here](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-csharp/InputBindingSamples).
 
 #### Query String
 
@@ -107,7 +137,7 @@ The corresponding POCO for `Product` is as follows
     public static async Task<IActionResult> RunAsync(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts/{productId}")]
         HttpRequest req,
-        [Kusto(Database:SampleConstants.DatabaseName ,
+        [Kusto(Database:"functionsdb" ,
         KqlCommand = "declare query_parameters (productId:long,rmqPrefix:string);Products | where ProductID == productId and Name !has rmqPrefix" ,
         KqlParameters = "@productId={productId},@rmqPrefix=R-MQ", // Exclude any parameters that have this prefix
         Connection = "KustoConnectionString")]
@@ -119,20 +149,20 @@ The corresponding POCO for `Product` is as follows
 
 #### KQL Functions
 
-`SelectsProductCost` is the name of a procedure stored in the user's database. In this case, *CommandType* is `System.Data.CommandType.StoredProcedure`. The parameter value of the `@Cost` parameter in the procedure is once again the `{cost}` specified in the `getproducts-storedprocedure/{cost}` URL.
+`GetProductsByName` is the name of a KQL Function in the database functionsdb. The parameter value of the `@name` parameter in the procedure is in the `{name}` specified in the `getproductsfn/{name}` URL.
 
 ```csharp
-    [FunctionName("GetProductsStoredProcedure")]
+    [FunctionName("GetProductsFunction")]
     public static IActionResult Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts-storedprocedure/{cost}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproductsfn/{name}")]
         HttpRequest req,
-        [Sql("SelectProductsCost",
-            "SqlConnectionString",
-            System.Data.CommandType.StoredProcedure,
-            "@Cost={cost}")]
+        [Kusto(Database:"functionsdb" ,
+        KqlCommand = "declare query_parameters (name:string);GetProductsByName(name)" ,
+        KqlParameters = "@name={name}",
+        Connection = "KustoConnectionString")]
         IEnumerable<Product> products)
     {
-        return (ActionResult)new OkObjectResult(products);
+        return new OkObjectResult(products);
     }
 ```
 
@@ -145,7 +175,7 @@ Using the `IAsyncEnumerable` binding generally requires that the `Run` function 
     public static async Task<IActionResult> RunAsync(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts-ae?name={name}")]
         HttpRequest req,
-        [Kusto(Database:SampleConstants.DatabaseName ,
+        [Kusto(Database:"functionsdb" ,
         KqlCommand = "declare query_parameters (name:string);Products | where Name == name" ,
         KqlParameters = "@name={name}",
         Connection = "KustoConnectionString")]
