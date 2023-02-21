@@ -16,14 +16,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples.T
     public static class TimeBasedExport
     {
         [FunctionName("TimeBasedExport")]
-        [return: RabbitMQ(QueueName = "bindings.test.queue", ConnectionStringSetting = "rabbitMQConnectionAppSetting")]
-        public static async Task<List<Product>> RunAsync([TimerTrigger("*/5 * * * * *")] TimerInfo exportTimer, IBinder binder, ILogger log)
+        public static async Task Run(
+            [TimerTrigger("*/5 * * * * *")] TimerInfo exportTimer,
+            IBinder binder, ILogger log,
+            [RabbitMQ(QueueName = "bindings.test.queue", ConnectionStringSetting = "rabbitMQConnectionAppSetting")] IAsyncCollector<Product> outputProducts)
         {
             DateTime? dateOfRun = exportTimer?.ScheduleStatus?.Last;
             DateTime runTime = dateOfRun == null ? DateTime.UtcNow : exportTimer.ScheduleStatus.Last.ToUniversalTime();
             string startTime = runTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
             // Runs every one min, so query this every one min
-            string endTime = runTime.AddMinutes(1).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+            string endTime = runTime.AddSeconds(5).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
             var kustoAttribute = new KustoAttribute("sdktestsdb")
             {
                 Connection = "KustoConnectionString",
@@ -38,8 +40,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples.T
             foreach (Product item in exportedRecords)
             {
                 item.Name = $"R-MQ-{item.ProductID}";
+                await outputProducts.AddAsync(item);
             }
-            return exportedRecords;
         }
     }
 }

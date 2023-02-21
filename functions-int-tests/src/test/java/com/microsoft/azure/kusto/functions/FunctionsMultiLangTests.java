@@ -95,7 +95,7 @@ public class FunctionsMultiLangTests extends Simulation {
     private static void createQueue(ContainerState containerState) {
         try {
             containerState.copyFileToContainer(MountableFile.forHostPath(CREATE_QUEUE), "/tmp/create-queue.sh");
-            Container.ExecResult createQueue = containerState.execInContainer("sh", "/tmp/create-queue.sh");
+            Container.ExecResult createQueue = containerState.execInContainer("bash", "/tmp/create-queue.sh");
             // .execInContainer("rabbitmqadmin -u guest -p guest -V / declare queue name=bindings.test.queue");
             logger.info("Create Queue returned {}.StdErr {} and StdOut {}", createQueue.getExitCode(),
                     createQueue.getStderr(), createQueue.getStdout());
