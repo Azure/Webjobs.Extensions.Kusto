@@ -5,6 +5,7 @@
 using System.Globalization;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common;
 using Microsoft.Azure.WebJobs.Kusto;
@@ -16,8 +17,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
     public static class AddProductsWithMapping
     {
         [FunctionName("AddProductsWithMapping")]
-        public static void Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductmapping")]
+        public static IActionResult Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductswithmapping")]
             HttpRequest req, ILogger log,
             [Kusto(Database:"sdktestsdb" ,
             TableName ="Products" ,
@@ -30,6 +31,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
             string productString = string.Format(CultureInfo.InvariantCulture, "(ItemName:{0} ItemID:{1} ItemCost:{2})",
                         item.ItemName, item.ItemID, item.ItemCost);
             log.LogInformation("Ingested item {}", productString);
+            return item != null ? new ObjectResult(item) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
         }
     }
 }

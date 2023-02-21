@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Http" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.RabbitMQ" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" />
   </ItemGroup>
 

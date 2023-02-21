@@ -3,7 +3,9 @@
 
 
 using System.IO;
+using Kusto.Cloud.Platform.Utils;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common;
 using Microsoft.Azure.WebJobs.Kusto;
@@ -15,8 +17,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
     public static class AddProducts
     {
         [FunctionName("AddProducts")]
-        public static void Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproducts")]
+        public static IActionResult Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproduct")]
             HttpRequest req, ILogger log,
             [Kusto(Database:"sdktestsdb" ,
             TableName ="Products" ,
@@ -24,11 +26,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
         {
             log.LogInformation($"AddProducts function started");
             string body = new StreamReader(req.Body).ReadToEnd();
-            ProductList products = JsonConvert.DeserializeObject<ProductList>(body);
-            products.Products.ForEach(p =>
+            Product[] products = JsonConvert.DeserializeObject<Product[]>(body);
+            products.ForEach(p =>
             {
                 collector.AddAsync(p);
             });
+            return products != null ? new ObjectResult(products) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
         }
     }
 }
