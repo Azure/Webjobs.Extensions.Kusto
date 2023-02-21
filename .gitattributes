@@ -1,0 +1,4 @@
+# Declare files that will always have CRLF line endings on checkout.
+*.sln text eol=crlf
+# Shelldcript have line feeds
+*.sh text eol=lf
