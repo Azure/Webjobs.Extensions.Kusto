@@ -9,6 +9,7 @@ using Kusto.Data.Net.Client;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Config;
 using Microsoft.Extensions.Logging;
+using static Microsoft.Azure.WebJobs.Extensions.Kusto.KustoConstants;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {
@@ -36,7 +37,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 We expect minimal input from the user.The end user can just pass a connection string, we need to decipher the DM
                 ingest endpoint as well from this. Both the engine and DM endpoint are needed for the managed ingest to happen
              */
-            string dmConnectionStringEndpoint = engineKcsb.Hostname.Contains(KustoConstants.IngestPrefix) ? engineConnectionString : engineConnectionString.ReplaceFirstOccurrence(KustoConstants.ProtocolSuffix, KustoConstants.ProtocolSuffix + KustoConstants.IngestPrefix);
+            string dmConnectionStringEndpoint = engineKcsb.Hostname.Contains(IngestPrefix) ? engineConnectionString : engineConnectionString.ReplaceFirstOccurrence(KustoConstants.ProtocolSuffix, KustoConstants.ProtocolSuffix + KustoConstants.IngestPrefix);
             KustoConnectionStringBuilder dmKcsb = GetKustoConnectionString(dmConnectionStringEndpoint, managedIdentity);
             // Measure the time it takes for a connection
             var ingestClientInitialize = new Stopwatch();
@@ -75,8 +76,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             var kcsb = new KustoConnectionStringBuilder(connectionString)
             {
-                ClientVersionForTracing = KustoConstants.ClientDetailForTracing
+                ClientVersionForTracing = ClientDetailForTracing,
             };
+            kcsb.SetConnectorDetails(SDKClientName, SDKClientVersion, KustoClientName, AssemblyVersion, additional: AdditionalOptions, sendUser: true);
             if (!string.IsNullOrEmpty(managedIdentity))
             {
                 // There exists a managed identity. Check if that is UserManaged or System identity

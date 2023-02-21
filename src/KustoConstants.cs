@@ -10,7 +10,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         public const string DefaultConnectionStringName = "KustoConnectionString";
         public const string IngestPrefix = "ingest-";
         public const string ProtocolSuffix = "://";
-        public static readonly string ClientDetailForTracing = "Kusto.Function.Client:" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static readonly string ClientRequestId = "AzFunctions.InputBinding;" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        // List of fields for usage tracking of Functions
+        public const string KustoClientName = "Kusto.Function.Client";
+        public static readonly string AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static readonly string ClientDetailForTracing = $"{KustoClientName}:{AssemblyVersion}";
+        public static readonly string ClientRequestId = $"AzFunctions.InputBinding;{AssemblyVersion}";
+        public const string SDKClientName = "Kusto.Dotnet.Client";
+        public const string SDKClientVersion = "11.2.2";
+        public static readonly (string, string)[] AdditionalOptions = new[] { ("AppRuntime", System.Environment.Version.ToString()) };
     }
 }

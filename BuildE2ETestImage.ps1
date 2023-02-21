@@ -47,16 +47,18 @@ function BuildE2ETestImage {
     if(!$Acr)
     {
         $TagCreated = "${TargetImageName}:${BuildDate}"
-        Write-Host "Creating docker tag $TagCreated" -ForegroundColor Green
-        docker build -t ${TargetImageName}-$TagCreated -t ${TargetImageName}:latest -f $TargetDockerFile .
+        $LatestTagCreated = "$Acr/${TargetImageName}:latest"
+        Write-Host "Creating docker tag $TagCreated and $LatestTagCreated " -ForegroundColor Green
+        docker build -t "${TargetImageName}-$TagCreated" -t "${TargetImageName}:latest" -f $TargetDockerFile .
     }
     else {
         $TagCreated = "$Acr/${TargetImageName}:$BuildDate"
-        Write-Host "Creating docker tag $TagCreated" -ForegroundColor Green
-        docker build -t $TagCreated -t $Acr/${TargetImageName}:latest -f $TargetDockerFile .
+        $LatestTagCreated = "$Acr/${TargetImageName}:latest"
+        Write-Host "Creating ACR docker tag $TagCreated and $LatestTagCreated " -ForegroundColor Green
+        docker build -t $TagCreated -t $LatestTagCreated -f $TargetDockerFile .
         if($true -eq $DockerPush)
         {
-            docker push $TagCreated
+            docker image push --all-tags "$Acr/${TargetImageName}"
         }
     }
     
