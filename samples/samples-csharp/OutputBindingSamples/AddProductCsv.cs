@@ -19,8 +19,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
         public static void Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductcsv")]
             HttpRequest req, ILogger log,
-            [Kusto(Database:"sdktestsdb" ,
-            TableName ="Products" ,
+            [Kusto(Database:SampleConstants.DatabaseName ,
+            TableName =SampleConstants.ProductsTable ,
             DataFormat = "csv",
             Connection = "KustoConnectionString")] out string productCsv)
         {

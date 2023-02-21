@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common;
 using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -18,8 +19,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
         public static void Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductjson")]
             HttpRequest req, ILogger log,
-            [Kusto(Database:"sdktestsdb" ,
-            TableName ="Products" ,
+            [Kusto(Database:SampleConstants.DatabaseName ,
+            TableName =SampleConstants.ProductsTable ,
             Connection = "KustoConnectionString")] out JObject json)
         {
             string body = new StreamReader(req.Body).ReadToEnd();

@@ -20,8 +20,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
         public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductswithmapping")]
             HttpRequest req, ILogger log,
-            [Kusto(Database:"sdktestsdb" ,
-            TableName ="Products" ,
+            [Kusto(Database:SampleConstants.DatabaseName ,
+            TableName =SampleConstants.ProductsTable ,
             MappingRef = "item_to_product_json",
             Connection = "KustoConnectionString")] out Item item)
         {

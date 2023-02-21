@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Kusto;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindingSamples.Common;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBindingSamples
 {
@@ -15,7 +16,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
 #pragma warning disable
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts/{productId}")] HttpRequestData req,
 #pragma warning disable
-            [KustoInput(Database: "sdktestsdb",
+            [KustoInput(Database: SampleConstants.DatabaseName,
             KqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId",
             KqlParameters = "@productId={productId}",Connection = "KustoConnectionString")] JsonArray products)
         {

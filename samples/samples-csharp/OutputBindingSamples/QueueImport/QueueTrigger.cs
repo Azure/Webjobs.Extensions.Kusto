@@ -10,8 +10,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples.
     public class QueueTrigger
     {
         [FunctionName("QueueTriggerBinding")]
-        [return: Kusto(Database: "sdktestsdb",
-                    TableName = "Products",
+        [return: Kusto(Database: SampleConstants.DatabaseName,
+                    TableName = SampleConstants.ProductsTable,
                     Connection = "KustoConnectionString")]
         public static Product Run(
             [RabbitMQTrigger(queueName: "bindings.test.queue", ConnectionStringSetting = "rabbitMQConnectionAppSetting")] Product product,

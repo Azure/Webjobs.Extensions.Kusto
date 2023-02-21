@@ -12,8 +12,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindin
     internal class AddProductCsv
     {
         [Function("AddProductCsv")]
-        [KustoOutput(Database: "sdktestsdb",
-            TableName = "Products",
+        [KustoOutput(Database: SampleConstants.DatabaseName,
+            TableName = SampleConstants.ProductsTable,
             DataFormat = "csv",
             Connection = "KustoConnectionString")]
         public static async Task<string> Run(

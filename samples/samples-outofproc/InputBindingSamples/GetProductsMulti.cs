@@ -15,10 +15,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
 #pragma warning disable 
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproductsmq/{productId}/{name}")] HttpRequestData req,
 #pragma warning disable
-            [KustoInput(Database: "sdktestsdb",
+            [KustoInput(Database: SampleConstants.DatabaseName,
             KqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId",
             KqlParameters = "@productId={productId}",Connection = "KustoConnectionString")] List<Product> productsQuery,
-            [KustoInput(Database: "sdktestsdb",
+            [KustoInput(Database: SampleConstants.DatabaseName,
             KqlCommand = "declare query_parameters (name:string);GetProductsByName(name)",
             KqlParameters = "@name={name}",Connection = "KustoConnectionString")] List<Product> productsFunction)
         {

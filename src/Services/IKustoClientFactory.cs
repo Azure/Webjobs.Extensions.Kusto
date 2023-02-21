@@ -79,7 +79,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 ClientVersionForTracing = ClientDetailForTracing,
             };
-            AdditionalOptions.Add(FunctionsRuntime, runtimeName);
+            AdditionalOptions[FunctionsRuntime] = runtimeName;
             kcsb.SetConnectorDetails(name: AzFunctionsClientName, version: AssemblyVersion, additional: AdditionalOptions.Select(kv => (kv.Key, kv.Value)).ToArray(), sendUser: true);
             if (!string.IsNullOrEmpty(managedIdentity))
             {

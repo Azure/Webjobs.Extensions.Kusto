@@ -11,7 +11,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindin
     public static class AddProductsWithMapping
     {
         [Function("AddProductsWithMapping")]
-        [KustoOutput(Database: "sdktestsdb", Connection = "KustoConnectionString", TableName = "Products", MappingRef = "item_to_product_json")]
+        [KustoOutput(Database: SampleConstants.DatabaseName, Connection = "KustoConnectionString", TableName = SampleConstants.ProductsTable, MappingRef = "item_to_product_json")]
         public static async Task<Item> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductswithmapping")]
             HttpRequestData req)
