@@ -3,15 +3,22 @@
 ## Table of Contents
 
 - [Kusto bindings for Azure Functions - .NET](#kusto-bindings-for-azure-functions---net)
-  - [Table of Contents](#table-of-contents)
-  - [Setup Function Project](#setup-function-project)
-  - [Input Binding](#input-binding)
-    - [KustoAttribute for Input Bindings](#KustoAttribute-for-input-bindings)
-    - [Setup for Input Bindings](#setup-for-input-bindings)
-    - [Samples for Input Bindings](#samples-for-input-bindings)
+  * [Table of Contents](#table-of-contents)
+  * [Setup Function Project](#setup-function-project)
+  * [Input Binding](#input-binding)
+    + [KustoAttribute for Input Bindings](#kustoattribute-for-input-bindings)
+    + [Samples for Input Bindings](#samples-for-input-bindings)
       - [Query String](#query-string)
       - [KQL Functions](#kql-functions)
       - [IAsyncEnumerable](#iasyncenumerable)
+    + [KustoAttribute for Output Bindings](#kustoattribute-for-output-bindings)
+    + [Samples for Output Bindings](#samples-for-output-bindings)
+      - [ICollector&lt;T&gt;/IAsyncCollector&lt;T&gt;](#icollectorlttgtiasynccollectorlttgt)
+      - [Array](#array)
+      - [Single Row](#single-row)
+      - [Ingest CSV / Multiline CSV](#ingest-csv--multiline-csv)
+      - [Ingest with mappings](#ingest-with-mappings)
+
 
 ## Setup Function Project
 
@@ -66,6 +73,7 @@ These instructions will guide you through creating your Function Project and add
             }
         }
     ```
+5. Reference the [set-up](../set-up/KQL-Setup.kql) to create sample tables, mappings , functions required for the example
 ## Input Binding
 See [Input Binding Overview](../../README.md#input-binding) for general information about the Kusto Input binding.
 
