@@ -18,7 +18,7 @@
       - [Single Row](#single-row)
       - [Ingest CSV / Multiline CSV](#ingest-csv--multiline-csv)
       - [Ingest with mappings](#ingest-with-mappings)
-
+    + [Advanced example - Dynamic bindings & delta exports](#advanced-example---dynamic-bindings--delta-exports)
 
 ## Setup Function Project
 
@@ -396,10 +396,10 @@ and we have to ingest this to the product table which has got different names. A
         }
 ```
 
-### Advanced example - Time based exports
+### Advanced example - Dynamic bindings & delta exports
 
 A sightly more advanced example of combining a time based export, dynamic bindings in function (supported in C#) is depicted below. This assumes that a rabbitmq server is running (example in the [setup](#setup-function-project)).
-In this case there is no declarative syntax used in the binding, values for time are picked up from the timer and bound at runtime and the data queried, transformed & then exported to a destination (RabbitMQ in this case for simplicity)
+In this case there is no declarative syntax used in the binding, values for time are picked up from the timer and bound at runtime and the data queried, transformed & then exported to a destination (RabbitMQ in this case for simplicity). 
 
 ```csharp
 
