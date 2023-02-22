@@ -44,6 +44,9 @@ Takes row(s) and inserts them into the Kusto table .
 
 - Connection: Refer [Connection](#input-binding) attribute above.Note that the application id should have ingest privileges on the table being ingested into
 
+- MappingRef: Optional attribute to pass a [mapping ref](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/create-ingestion-mapping-command) that is already defined in the ADX cluster
+
+- DataFormat: The default dataformat is `multijson/json`. This can be set to _**text**_ formats supported in the datasource format [enumeration](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/kusto-ingest-client-reference#enum-datasourceformat). Samples are validated and provided for csv and JSON formats.
 
 ### **Samples**
 

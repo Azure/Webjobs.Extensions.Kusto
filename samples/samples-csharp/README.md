@@ -191,3 +191,191 @@ Using the `IAsyncEnumerable` binding generally requires that the `Run` function 
         return new OkObjectResult(productList);
     }
 ```
+### KustoAttribute for Output Bindings
+
+See [Output Binding Overview](../../README.md#output-binding) for general information about the Kusto Input binding.
+
+The [KustoAttribute](https://github.com/Azure/Webjobs.Extensions.Kusto/blob/main/src/KustoAttribute.cs) for Output bindings takes the following arguments:
+
+- Database: The database against which the query has to be executed
+
+- ManagedServiceIdentity: A managed identity can be used to connect to Kusto. To use a System managed identity, use "system", any other identity names are interpreted as user managed identity
+
+- TableName: The table to ingest the data into
+
+- MappingRef: Optional attribute to pass a [mapping ref](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/create-ingestion-mapping-command) that is already defined in the ADX cluster
+
+- Connection: The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.
+Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto)
+
+
+- DataFormat: The default dataformat is `multijson/json`. This can be set to _**text**_ formats supported in the datasource format [enumeration](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/kusto-ingest-client-reference#enum-datasourceformat). Samples are validated and provided for csv and JSON formats.
+
+
+
+The following are valid binding types for the rows to be inserted into the table:
+
+- **ICollector&lt;T&gt;/IAsyncCollector&lt;T&gt;**: Each element is a row represented by `T`, where `T` is a user-defined POCO, or Plain Old C# Object. `T` should follow the structure of a row in the queried table. See the [Query String](#query-string) for an example of what `T` should look like.
+- **T**: Used when just one row is to be inserted into the table.
+- **T[]**: Each element is again a row of the generic type  `T`. This output binding type requires manual instantiation of the array in the function.
+- **string**: When data is not a POCO, rather a raw CSV for example that needs to be ingested.
+    ```csv
+    19222,prod2,220.22
+    19223,prod2,221.22
+    ```
+
+The repo contains examples of each of these binding types [here](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-csharp/OutputBindingSamples). A few examples are also included [below](#samples-for-output-bindings).
+
+
+### Samples for Output Bindings
+
+The following are some samples for the above collector types and options
+
+#### ICollector&lt;T&gt;/IAsyncCollector&lt;T&gt;
+
+When using an `ICollector`, it is not necessary to instantiate it. The function can add rows to the `ICollector` directly, and its contents are automatically upserted once the function exits.
+
+ ```csharp
+    [FunctionName("AddProductsCollector")]
+    public static IActionResult Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductscollector")]
+        HttpRequest req, ILogger log,
+        [Kusto(Database:SampleConstants.DatabaseName ,
+        TableName =SampleConstants.ProductsTable ,
+        Connection = "KustoConnectionString")] ICollector<Product> collector)
+    {
+        log.LogInformation($"AddProducts function started");
+        string body = new StreamReader(req.Body).ReadToEnd();
+        Product[] products = JsonConvert.DeserializeObject<Product[]>(body);
+        products.ForEach(p =>
+        {
+            collector.Add(p);
+        });
+        return products != null ? new ObjectResult(products) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
+    }
+```
+
+It is also possible to force an upsert within the function by calling `FlushAsync()` on an `IAsyncCollector`
+
+```csharp
+    [FunctionName("AddProductsAsyncCollector")]
+    public static IActionResult Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductsasynccollector")]
+        HttpRequest req, ILogger log,
+        [Kusto(Database:SampleConstants.DatabaseName ,
+        TableName =SampleConstants.ProductsTable ,
+        Connection = "KustoConnectionString")] IAsyncCollector<Product> collector)
+    {
+        log.LogInformation($"AddProductsAsyncCollector function started");
+        string body = new StreamReader(req.Body).ReadToEnd();
+        Product[] products = JsonConvert.DeserializeObject<Product[]>(body);
+        products.ForEach(p =>
+        {
+            collector.AddAsync(p);
+        });
+        collector.FlushAsync();
+        return products != null ? new ObjectResult(products) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
+    }
+```
+
+#### Array
+
+This output binding type requires explicit instantiation within the function body. Note also that the `Product[]` array must be prefixed by `out` when attached to the output binding
+
+``` csharp
+    [FunctionName("AddProductsArray")]
+    public static IActionResult Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductsarray")]
+        HttpRequest req, ILogger log,
+        [Kusto(Database:SampleConstants.DatabaseName ,
+        TableName =SampleConstants.ProductsTable ,
+        Connection = "KustoConnectionString")] out Product[] products)
+    {
+        log.LogInformation($"AddProducts function started");
+        string body = new StreamReader(req.Body).ReadToEnd();
+        products = JsonConvert.DeserializeObject<Product[]>(body);
+        return products != null ? new ObjectResult(products) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
+    }
+```
+
+#### Single Row
+
+When binding to a single row, it is also necessary to prefix the row with `out`
+
+```csharp
+    [FunctionName("AddProductUni")]
+    public static IActionResult Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductuni")]
+        HttpRequest req, ILogger log,
+        [Kusto(Database:SampleConstants.DatabaseName ,
+        TableName =SampleConstants.ProductsTable ,
+        Connection = "KustoConnectionString")] out Product product)
+    {
+        log.LogInformation($"AddProduct function started");
+        string body = new StreamReader(req.Body).ReadToEnd();
+        product = JsonConvert.DeserializeObject<Product>(body);
+        string productString = string.Format(CultureInfo.InvariantCulture, "(Name:{0} ID:{1} Cost:{2})",
+                    product.Name, product.ProductID, product.Cost);
+        log.LogInformation("Ingested product {}", productString);
+        return new CreatedResult($"/api/addproductuni", product);
+    }
+```
+
+#### Ingest CSV / Multiline CSV
+A csv row can be bound to an `out` **_string_** and processed as follows. Note the `DataFormat` element used in the binding
+```csharp
+    [FunctionName("AddProductCsv")]
+    public static IActionResult Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductcsv")]
+        HttpRequest req, ILogger log,
+        [Kusto(Database:SampleConstants.DatabaseName ,
+        TableName =SampleConstants.ProductsTable ,
+        DataFormat = "csv",
+        Connection = "KustoConnectionString")] out string productCsv)
+    {
+        productCsv = new StreamReader(req.Body).ReadToEnd();
+        string productString = string.Format(CultureInfo.InvariantCulture, "(Csv : {0})", productCsv);
+        log.LogInformation("Ingested product CSV {}", productString);
+        return new CreatedResult($"/api/addproductcsv", productString);
+    }
+```
+#### Ingest with mappings
+
+In the event that we had a POCO of type item
+```csharp
+        public class Item
+        {
+            public long ItemID { get; set; }
+    #nullable enable
+            public string? ItemName { get; set; }
+            public double ItemCost { get; set; }
+        }
+```
+and we have to ingest this to the product table which has got different names. An ingestion mapping reference of **_item_to_product_json_** can be created and referenced. For example see mapping reference in the database below
+```sql
+    .show table Products ingestion mappings
+```
+| Name | Kind     | Mapping   |
+| :----:    | :----:   | :----: |
+| item_to_product_json       | Json |```[{"column":"ProductID","path":"$.ItemID","datatype":"","transform":null},{"column":"Name","path":"$.ItemName","datatype":"","transform":null},{"column":"Cost","path":"$.ItemCost","datatype":"","transform":null}]```  |
+
+
+```csharp
+        [FunctionName("AddProductsWithMapping")]
+        public static IActionResult Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductswithmapping")]
+            HttpRequest req, ILogger log,
+            [Kusto(Database:SampleConstants.DatabaseName ,
+            TableName =SampleConstants.ProductsTable ,
+            MappingRef = "item_to_product_json",
+            Connection = "KustoConnectionString")] out Item item)
+        {
+            log.LogInformation($"AddProductsWithMapping function started");
+            string body = new StreamReader(req.Body).ReadToEnd();
+            item = JsonConvert.DeserializeObject<Item>(body);
+            string productString = string.Format(CultureInfo.InvariantCulture, "(ItemName:{0} ItemID:{1} ItemCost:{2})",
+                        item.ItemName, item.ItemID, item.ItemCost);
+            log.LogInformation("Ingested item {}", productString);
+            return item != null ? new ObjectResult(item) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
+        }
+```

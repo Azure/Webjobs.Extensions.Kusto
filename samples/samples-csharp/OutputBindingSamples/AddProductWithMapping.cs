@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
 {
-    public static class AddProductsWithMapping
+    public static class AddProductWithMapping
     {
         [FunctionName("AddProductsWithMapping")]
         public static IActionResult Run(

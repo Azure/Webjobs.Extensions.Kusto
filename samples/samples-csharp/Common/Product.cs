@@ -7,13 +7,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common
 {
     public class Product
     {
-        [JsonProperty("ProductID")]
+        [JsonProperty(nameof(ProductID))]
         public long ProductID { get; set; }
 
-        [JsonProperty("Name")]
+        [JsonProperty(nameof(Name))]
         public string Name { get; set; }
 
-        [JsonProperty("Cost")]
+        [JsonProperty(nameof(Cost))]
         public double Cost { get; set; }
     }
 
