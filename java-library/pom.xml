@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.microsoft.azure.functions</groupId>
   <artifactId>azure-functions-java-library-kusto</artifactId>
-  <version>1.0.2-Preview</version>
+  <version>1.0.3-Preview</version>
   <packaging>jar</packaging>
   <name>Microsoft Azure Functions Java Kusto Types</name>
   <description>This package contains all Java annotations to interact with Microsoft Azure Functions runtime for Kusto (ADX) Bindings.</description>
