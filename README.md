@@ -19,6 +19,8 @@ The input binding takes the following attributes
 
 - Database: The database against which the query has to be executed
 
+- ManagedServiceIdentity: A managed identity can be used to connect to Kusto. To use a System managed identity, use "system", any other identity names are interpreted as user managed identity
+
 - KqlCommand: The KqlQuery that has to be executed. Can be a KQL query or a KQL Function call
 
 - KqlParameters: Parameters that act as predicate variables for the KqlCommand. For example "@name={name},@Id={id}" where the parameters {name} and {id} will be substituted at runtime with actual values acting as predicates
@@ -32,20 +34,29 @@ Note that the application id should atleast have viewer privileges on the table(
 
 ### **Output Binding**
  
-Takes row(s) and inserts them into the Kusto table (i.e. If a row doesn't already exist, it is added. If it does, it is updated).
+Takes row(s) and inserts them into the Kusto table .
 
 - Database: The database against which the query has to be executed
 
 - TableName: The table to ingest the data into
 
+- ManagedServiceIdentity: A managed identity can be used to connect to Kusto. To use a System managed identity, use "system", any other identity names are interpreted as user managed identity
+
 - Connection: Refer [Connection](#input-binding) attribute above.Note that the application id should have ingest privileges on the table being ingested into
 
+- MappingRef: Optional attribute to pass a [mapping ref](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/create-ingestion-mapping-command) that is already defined in the ADX cluster
+
+- DataFormat: The default dataformat is `multijson/json`. This can be set to _**text**_ formats supported in the datasource format [enumeration](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/kusto-ingest-client-reference#enum-datasourceformat). Samples are validated and provided for csv and JSON formats.
 
 ### **Samples**
 
-Samples for C# are available and available at the following. This can run with local functions framework. Set up and run samples are available at the following [location](samples/postman/samples-csharp)
+Samples for C# are available and available at the following. This can run with local functions framework. Setup required for the run is available at the [location](samples/set-up)
 
 - [.NET (C# in-process)](samples/samples-csharp)
+- [.NET (C# isolated)](samples/samples-outofproc)
+- [Java](samples/samples-java)
+- [Node](samples/samples-node)
+- [Python](samples/samples-python)
 
 
 ## Known Issues

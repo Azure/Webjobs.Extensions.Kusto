@@ -20,8 +20,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
         public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproduct")]
             HttpRequest req, ILogger log,
-            [Kusto(Database:"sdktestsdb" ,
-            TableName ="Products" ,
+            [Kusto(Database:SampleConstants.DatabaseName ,
+            TableName =SampleConstants.ProductsTable ,
             Connection = "KustoConnectionString")] IAsyncCollector<Product> collector)
         {
             log.LogInformation($"AddProducts function started");
@@ -31,6 +31,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
             {
                 collector.AddAsync(p);
             });
+            collector.FlushAsync();
             return products != null ? new ObjectResult(products) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
         }
     }

@@ -26,7 +26,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples.T
             string startTime = runTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
             // Runs every one min, so query this every one min
             string endTime = runTime.AddSeconds(5).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
-            var kustoAttribute = new KustoAttribute("sdktestsdb")
+            var kustoAttribute = new KustoAttribute(SampleConstants.DatabaseName)
             {
                 Connection = "KustoConnectionString",
                 KqlCommand = "declare query_parameters (name:string,startTime:string,endTime:string);Products | extend ig=ingestion_time() | where Name has name | where ig >= todatetime(startTime) and ig <= todatetime(endTime) | order by ig asc",

@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using static Microsoft.Azure.WebJobs.Extensions.Kusto.KustoQueryConverters;
+using static Microsoft.Azure.WebJobs.Extensions.Kusto.KustoConstants;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {
@@ -75,7 +76,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             if (string.IsNullOrEmpty(attribute.Connection))
             {
-                this._logger.LogDebug($"ConnectionString attribute not passed explicitly, will be defaulted to {KustoConstants.DefaultConnectionStringName}");
+                this._logger.LogDebug($"ConnectionString attribute not passed explicitly, will be defaulted to {DefaultConnectionStringName}");
             }
             string resolvedConnectionString = this._configuration.GetConnectionStringOrSetting(attribute.Connection);
             if (string.IsNullOrEmpty(resolvedConnectionString))
@@ -106,12 +107,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         internal IKustoIngestClient GetIngestClient(KustoAttribute kustoAttribute)
         {
             // If the connection string attribute is not custom, use the default
-            string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? KustoConstants.DefaultConnectionStringName : kustoAttribute.Connection;
-            string engineConnectionString = this.GetConnectionString(connection);
+            string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? DefaultConnectionStringName : kustoAttribute.Connection;
+            string functionRuntime = this.GetSetting(FunctionsRuntimeHostKey);
+            string engineConnectionString = this.GetSetting(connection);
             try
             {
                 string cacheKey = BuildCacheKey(engineConnectionString);
-                return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, this._logger));
+                return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, functionRuntime, this._logger));
             }
             catch (Exception e)
             {
@@ -138,8 +140,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 
         internal ICslQueryProvider GetQueryClient(KustoAttribute kustoAttribute)
         {
-            string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? KustoConstants.DefaultConnectionStringName : kustoAttribute.Connection;
-            string engineConnectionString = this.GetConnectionString(connection);
+            string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? DefaultConnectionStringName : kustoAttribute.Connection;
+            string engineConnectionString = this.GetSetting(connection);
+            string functionRuntime = this.GetSetting(FunctionsRuntimeHostKey);
             try
             {
                 if (string.IsNullOrEmpty(engineConnectionString))
@@ -147,7 +150,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
                 }
                 string cacheKey = BuildCacheKey(engineConnectionString);
-                return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, this._logger));
+                return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, functionRuntime, this._logger));
             }
             catch (Exception e)
             {
@@ -164,7 +167,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// </summary>
         /// <param name="connectionStringSetting">The name of the env-var or setting that has to be resolved</param>
         /// <returns>A connection string that can be used to connect to Kusto</returns>
-        internal string GetConnectionString(string connectionStringSetting)
+        internal string GetSetting(string connectionStringSetting)
         {
             string resolvedConnectionString = this._configuration.GetConnectionStringOrSetting(connectionStringSetting);
             // Already validated upfront in Validate that ConnectionString setting is passed in and not null

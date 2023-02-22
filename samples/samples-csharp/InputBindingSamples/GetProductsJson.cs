@@ -4,6 +4,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common;
 using Microsoft.Azure.WebJobs.Kusto;
 using Newtonsoft.Json.Linq;
 
@@ -17,7 +18,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
 #pragma warning disable IDE0060 // Remove unused parameter
             HttpRequest req,
 #pragma warning restore IDE0060 // Remove unused parameter
-            [Kusto(Database:"sdktestsdb" ,
+            [Kusto(Database:SampleConstants.DatabaseName ,
             KqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId" ,
             KqlParameters = "@productId={productId}",
             Connection = "KustoConnectionString")]

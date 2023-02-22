@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.Diagnostics;
+using System.Linq;
 using Kusto.Cloud.Platform.Utils;
 using Kusto.Data;
 using Kusto.Data.Common;
@@ -9,6 +10,7 @@ using Kusto.Data.Net.Client;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Config;
 using Microsoft.Extensions.Logging;
+using static Microsoft.Azure.WebJobs.Extensions.Kusto.KustoConstants;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {
@@ -18,8 +20,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     /// </summary>
     internal interface IKustoClientFactory
     {
-        IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, ILogger logger);
-        ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, ILogger logger);
+        IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
+        ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
     }
     internal class KustoClient : IKustoClientFactory
     {
@@ -29,15 +31,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// <param name="engineConnectionString">The engine connection string. The ingest URL will be derieved from this for the managed ingest</param>
         /// <param name="managedIdentity">MSI string to use Managed service identity</param>
         /// <returns>A managed ingest client. Attempts ingestion through streaming and then fallsback to Queued ingest mode</returns>
-        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, ILogger logger)
+        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
         {
-            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity);
+            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName);
             /*
                 We expect minimal input from the user.The end user can just pass a connection string, we need to decipher the DM
                 ingest endpoint as well from this. Both the engine and DM endpoint are needed for the managed ingest to happen
              */
-            string dmConnectionStringEndpoint = engineKcsb.Hostname.Contains(KustoConstants.IngestPrefix) ? engineConnectionString : engineConnectionString.ReplaceFirstOccurrence(KustoConstants.ProtocolSuffix, KustoConstants.ProtocolSuffix + KustoConstants.IngestPrefix);
-            KustoConnectionStringBuilder dmKcsb = GetKustoConnectionString(dmConnectionStringEndpoint, managedIdentity);
+            string dmConnectionStringEndpoint = engineKcsb.Hostname.Contains(IngestPrefix) ? engineConnectionString : engineConnectionString.ReplaceFirstOccurrence(ProtocolSuffix, ProtocolSuffix + IngestPrefix);
+            KustoConnectionStringBuilder dmKcsb = GetKustoConnectionString(dmConnectionStringEndpoint, managedIdentity, runtimeName);
             // Measure the time it takes for a connection
             var ingestClientInitialize = new Stopwatch();
             ingestClientInitialize.Start();
@@ -59,9 +61,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// <param name="managedIdentity">MSI string to use Managed service identity</param>
         /// <returns>A query client to execute KQL</returns>
 
-        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, ILogger logger)
+        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
         {
-            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity);
+            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName);
             var timer = new Stopwatch();
             timer.Start();
             // Create a query client connection. This is needed in cases to debug any connection issues
@@ -71,12 +73,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             return queryProvider;
         }
 
-        private static KustoConnectionStringBuilder GetKustoConnectionString(string connectionString, string managedIdentity)
+        private static KustoConnectionStringBuilder GetKustoConnectionString(string connectionString, string managedIdentity, string runtimeName)
         {
             var kcsb = new KustoConnectionStringBuilder(connectionString)
             {
-                ClientVersionForTracing = KustoConstants.ClientDetailForTracing
+                ClientVersionForTracing = ClientDetailForTracing,
             };
+            AdditionalOptions[FunctionsRuntime] = runtimeName;
+            kcsb.SetConnectorDetails(name: AzFunctionsClientName, version: AssemblyVersion, additional: AdditionalOptions.Select(kv => (kv.Key, kv.Value)).ToArray(), sendUser: true);
             if (!string.IsNullOrEmpty(managedIdentity))
             {
                 // There exists a managed identity. Check if that is UserManaged or System identity

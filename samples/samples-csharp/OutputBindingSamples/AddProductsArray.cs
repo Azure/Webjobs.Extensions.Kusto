@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 
-using System.Globalization;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,23 +13,20 @@ using Newtonsoft.Json;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
 {
-    public static class AddProduct
+    public static class AddProductsArray
     {
-        [FunctionName("AddProductUni")]
+        [FunctionName("AddProductsArray")]
         public static IActionResult Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductuni")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addproductsarray")]
             HttpRequest req, ILogger log,
             [Kusto(Database:SampleConstants.DatabaseName ,
             TableName =SampleConstants.ProductsTable ,
-            Connection = "KustoConnectionString")] out Product product)
+            Connection = "KustoConnectionString")] out Product[] products)
         {
-            log.LogInformation($"AddProduct function started");
+            log.LogInformation($"AddProducts function started");
             string body = new StreamReader(req.Body).ReadToEnd();
-            product = JsonConvert.DeserializeObject<Product>(body);
-            string productString = string.Format(CultureInfo.InvariantCulture, "(Name:{0} ID:{1} Cost:{2})",
-                        product.Name, product.ProductID, product.Cost);
-            log.LogInformation("Ingested product {}", productString);
-            return new CreatedResult($"/api/addproductuni", product);
+            products = JsonConvert.DeserializeObject<Product[]>(body);
+            return products != null ? new ObjectResult(products) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
         }
     }
 }
