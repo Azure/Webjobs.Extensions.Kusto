@@ -241,7 +241,7 @@ The following are some samples for the above collector types and options
 
 #### ICollector&lt;T&gt;/IAsyncCollector&lt;T&gt;
 
-When using an `ICollector`, it is not necessary to instantiate it. The function can add rows to the `ICollector` directly, and its contents are automatically upserted once the function exits.
+When using an `ICollector`, it is not necessary to instantiate it. The function can add rows to the `ICollector` directly, and its contents are automatically inserted once the function exits.
 
  ```csharp
     [FunctionName("AddProductsCollector")]
@@ -263,7 +263,7 @@ When using an `ICollector`, it is not necessary to instantiate it. The function 
     }
 ```
 
-It is also possible to force an upsert within the function by calling `FlushAsync()` on an `IAsyncCollector`
+It is also possible to force an insert within the function by calling `FlushAsync()` on an `IAsyncCollector`
 
 ```csharp
     [FunctionName("AddProductsAsyncCollector")]
