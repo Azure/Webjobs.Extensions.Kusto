@@ -28,8 +28,8 @@ The input binding takes the following attributes
 - Connection: The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.
 Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto)
 e.g.:
-"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_
-Note that the application id should atleast have viewer privileges on the table(s)/function(s) being queried in the KqlCommand
+`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_`
+Note that the application id should **_atleast have viewer privileges_** on the table(s)/function(s) being queried in the KqlCommand
 
 
 ### **Output Binding**
