@@ -74,6 +74,14 @@ These instructions will guide you through creating your Function Project and add
         }
     ```
 5. Reference the [set-up](../set-up/KQL-Setup.kql) to create sample tables, mappings , functions required for the example
+
+6. For advanced set-up sample with dynamic binding and time based exports, a simple RabbitMQ (with management plugins) [docker instance](https://hub.docker.com/_/rabbitmq) can be set up. A simple queue can be [declared](https://www.rabbitmq.com/management-cli.html) by using the CLI
+    ```bash
+    rabbitmqadmin declare queue name=bindings.test.queue durable=false
+    ```
+
+
+
 ## Input Binding
 See [Input Binding Overview](../../README.md#input-binding) for general information about the Kusto Input binding.
 
@@ -385,5 +393,42 @@ and we have to ingest this to the product table which has got different names. A
                         item.ItemName, item.ItemID, item.ItemCost);
             log.LogInformation("Ingested item {}", productString);
             return item != null ? new ObjectResult(item) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
+        }
+```
+
+### Advanced example - Time based exports
+
+A sightly more advanced example of combining a time based export, dynamic bindings in function (supported in C#) is depicted below. This assumes that a rabbitmq server is running (example in the [setup](#setup-function-project)).
+In this case there is no declarative syntax used in the binding, values for time are picked up from the timer and bound at runtime and the data queried, transformed & then exported to a destination (RabbitMQ in this case for simplicity)
+
+```csharp
+
+        [FunctionName("TimeBasedExport")]
+        public static async Task Run(
+            [TimerTrigger("*/5 * * * * *")] TimerInfo exportTimer,
+            IBinder binder, ILogger log,
+            [RabbitMQ(QueueName = "bindings.test.queue", ConnectionStringSetting = "rabbitMQConnectionAppSetting")] IAsyncCollector<Product> outputProducts)
+        {
+            DateTime? dateOfRun = exportTimer?.ScheduleStatus?.Last;
+            DateTime runTime = dateOfRun == null ? DateTime.UtcNow : exportTimer.ScheduleStatus.Last.ToUniversalTime();
+            string startTime = runTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+            // Runs every 5sec, so query this with 5sec delta
+            string endTime = runTime.AddSeconds(5).ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+            var kustoAttribute = new KustoAttribute(SampleConstants.DatabaseName)
+            {
+                Connection = "KustoConnectionString",
+                KqlCommand = "declare query_parameters (name:string,startTime:string,endTime:string);Products | extend ig=ingestion_time() | where Name has name | where ig >= todatetime(startTime) and ig <= todatetime(endTime) | order by ig asc",
+                KqlParameters = $"@name=Item,@startTime={startTime},@endTime={endTime}"
+            };
+            // List of ingested records
+            var exportedRecords = (await binder.BindAsync<IEnumerable<Product>>(kustoAttribute)).ToList();
+            // Count for logs
+            log.LogInformation($"Querying data between {startTime} and {endTime} yielded {exportedRecords.Count} records");
+            // Send them to a continuous export topic. Just transform the names in this case
+            foreach (Product item in exportedRecords)
+            {
+                item.Name = $"R-MQ-{item.ProductID}"; // A simple transform!
+                await outputProducts.AddAsync(item);
+            }
         }
 ```
