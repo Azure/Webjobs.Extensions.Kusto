@@ -75,6 +75,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 
         private static KustoConnectionStringBuilder GetKustoConnectionString(string connectionString, string managedIdentity, string runtimeName)
         {
+            KustoConnectionStringBuilder.DefaultPreventAccessToLocalSecretsViaKeywords = false;
             var kcsb = new KustoConnectionStringBuilder(connectionString)
             {
                 ClientVersionForTracing = ClientDetailForTracing,
