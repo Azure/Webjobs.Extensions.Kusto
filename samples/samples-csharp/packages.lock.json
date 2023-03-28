@@ -1604,7 +1604,7 @@
           "Microsoft.Azure.Kusto.Data": "[11.2.2, )",
           "Microsoft.Azure.Kusto.Ingest": "[11.2.2, )",
           "Microsoft.Azure.WebJobs": "[3.0.36, )",
-          "Newtonsoft.Json": "[13.0.2, )"
+          "Newtonsoft.Json": "[13.0.3, )"
         }
       },
       "Microsoft.AspNetCore.Http": {
@@ -1730,9 +1730,9 @@
       },
       "Newtonsoft.Json": {
         "type": "CentralTransitive",
-        "requested": "[13.0.2, )",
-        "resolved": "13.0.2",
-        "contentHash": "R2pZ3B0UjeyHShm9vG+Tu0EBb2lC8b0dFzV9gVn50ofHXh9Smjk6kTn7A/FdAsC8B5cKib1OnGYOXxRBz5XQDg=="
+        "requested": "[13.0.3, )",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       }
     }
   }

@@ -104,7 +104,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             string actualExceptionCause = ingestPrivilegeException.GetBaseException().Message;
             Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
 
-            // Tests for managed service identity
+            // Tests for managed service identity disabled for local runs
+            /*
             string tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
             string appId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
             string appSecret = Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
@@ -118,6 +119,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputMSI), parameter);
                 await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputMSI), parameter);
             }
+            */
             // Tests where the exceptions are caused due to invalid strings
             string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString) };
             foreach (string test in testsToExecute)
