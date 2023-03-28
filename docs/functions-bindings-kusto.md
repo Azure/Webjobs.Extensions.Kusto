@@ -6,7 +6,7 @@ ms.topic: reference
 ms.custom: event-tier1-build-2022
 ms.date: 27/03/2023
 ms.author: ramacg
-ms.reviewer: glenga
+ms.reviewer: 
 zone_pivot_groups: programming-languages-set-functions-lang-workers
 ---
 
@@ -180,7 +180,7 @@ Kusto bindings for Azure Functions have a required property for the connection s
 
 - [Read data from a database (Input binding)](./functions-bindings-kusto-input.md)
 - [Save data to a database (Output binding)](./functions-bindings-kusto-output.md)
-- [Learn how to connect Azure Function to Kusto with managed identity](./functions-identity-access-azure-sql-with-managed-identity.md)
+- [Learn how to connect Azure Function to Kusto with managed identity](./functions-bindings-kusto-managed-identity.md)
 
 [preview NuGet package]: https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Kusto
 [maven coordinates]: https://mvnrepository.com/artifact/com.microsoft.azure.functions/azure-functions-java-library-kusto

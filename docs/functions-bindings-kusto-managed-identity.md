@@ -40,11 +40,11 @@ The client id created on the first step can then be used in the bindings to pass
 The client id can be passed into the ManagedServiceIdentity attribute. 
 
 ```csharp
-            [Kusto(Database:SampleConstants.DatabaseName ,
+            [Kusto(Database:"database" ,
             KqlCommand = "declare query_parameters (name:string);GetProductsByName(name)" ,
             KqlParameters = "@name={name}",
             Connection = "KustoConnectionStringManagedIdentity", ManagedServiceIdentity ="abcdef5f-a46f-4ca0-9bc0-27a46c7799ff")]
             IEnumerable<Product> products)
 ```
 
-> Note that in this case the connection string used can be updated to not have the Application credentials (Client Id, Secret , Tenant & Auth tokens passed into them)
+> Note that in this case the connection string used can be updated to not have the Application credentials (Client Id, Secret , Tenant & Auth tokens passed into them). For example ```KustoConnectionStringManagedIdentity``` can be the value ```"Data Source=https://kustocluster.kusto.windows.net;Database=database;"```
