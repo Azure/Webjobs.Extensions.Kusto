@@ -24,7 +24,7 @@ public class AddProductReturn {
     @FunctionName("AddJProductReturn")
     @KustoOutput(name = "productReturn", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR)
     public Product run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproductreturn") HttpRequestMessage<Optional<String>> request)
+            HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproductreturn") HttpRequestMessage<Optional<String>> request)
             throws IOException {
         if (request.getBody().isPresent()) {
             String json = request.getBody().get();

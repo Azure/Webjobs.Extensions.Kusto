@@ -74,6 +74,10 @@
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
                 <version>${formatter.version}</version>
+               <configuration>
+                   <configFile>${project.basedir}\kustostyle.xml</configFile>
+                   <encoding>UTF-8</encoding>
+               </configuration>
                 <executions>
                     <execution>
                         <goals>

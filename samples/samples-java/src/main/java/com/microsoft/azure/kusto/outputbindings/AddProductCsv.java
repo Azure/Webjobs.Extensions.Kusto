@@ -27,8 +27,9 @@ import static com.microsoft.azure.kusto.common.Constants.*;
 public class AddProductCsv {
     @FunctionName("AddProductCsv")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproductcsv") HttpRequestMessage<Optional<String>> request,
-            @KustoOutput(name = "productCsv", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR, dataFormat = "csv") OutputBinding<String> productString)
+            HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproductcsv") HttpRequestMessage<Optional<String>> request,
+            @KustoOutput(name = "productCsv", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR,
+                    dataFormat = "csv") OutputBinding<String> productString)
             throws IOException {
         if (request.getBody().isPresent()) {
             String json = request.getBody().get();
