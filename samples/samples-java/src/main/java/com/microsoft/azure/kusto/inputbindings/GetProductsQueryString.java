@@ -24,8 +24,8 @@ public class GetProductsQueryString {
     @FunctionName("GetProductsQueryString")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.GET}, authLevel = AuthorizationLevel.ANONYMOUS, route = "getproducts") HttpRequestMessage<Optional<String>> request,
-            @KustoInput(name = "getjproducts", kqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId",
-                    kqlParameters = "@productId={Query.productId}", database = SDKTESTSDB, connection = KUSTOCONNSTR) Product[] products) {
+            @KustoInput(name = "getjproductsquery", kqlCommand = "declare query_parameters (name:string);GetProductsByName(name)",
+                    kqlParameters = "@name={Query.name}", database = SDKTESTSDB, connection = KUSTOCONNSTR) Product[] products) {
         return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/json").body(products)
                 .build();
     }
