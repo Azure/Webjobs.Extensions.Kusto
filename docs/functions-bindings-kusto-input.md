@@ -66,7 +66,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
         public static async Task<IActionResult> RunAsync(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproducts")]
             HttpRequest req,
-            [Kusto(Database:"products" ,
+            [Kusto(Database:"productsdb" ,
             KqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId" ,
             KqlParameters = "@productId={Query.productId}", // get the value of the query parameter "productId"
             Connection = "KustoConnectionString")]
@@ -112,7 +112,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
           public static IActionResult Run(
               [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproductsfn/{name}")]
               HttpRequest req,
-              [Kusto(Database:"products" ,
+              [Kusto(Database:"productsdb" ,
               KqlCommand = "declare query_parameters (name:string);GetProductsByName(name)" ,
               KqlParameters = "@name={name}",
               Connection = "KustoConnectionString")]
@@ -159,7 +159,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
         [Function("GetProductsQuery")]
         public static JsonArray Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproductsquery")] HttpRequestData req,
-            [KustoInput(Database: "products",
+            [KustoInput(Database: "productsdb",
             KqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId",
             KqlParameters = "@productId={Query.productId}",Connection = "KustoConnectionString")] JsonArray products)
         {
@@ -187,7 +187,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
         [Function("GetProductsFunction")]
         public static IEnumerable<Product> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getproductsfn/{name}")] HttpRequestData req,
-            [KustoInput(Database: "products",
+            [KustoInput(Database: "productsdb",
             KqlCommand = "declare query_parameters (name:string);GetProductsByName(name)",
             KqlParameters = "@name={name}",Connection = "KustoConnectionString")] IEnumerable<Product> products)
         {
@@ -269,7 +269,7 @@ public class GetProducts {
         @HttpTrigger(name = "req", methods = {
             HttpMethod.GET}, authLevel = AuthorizationLevel.ANONYMOUS, route = "getproducts/{productId}") HttpRequestMessage<Optional<String>> request,
             @KustoInput(name = "getjproducts", kqlCommand = "declare query_parameters (productId:long);Products | where ProductID == productId",
-                    kqlParameters = "@productId={productId}", database = "products", connection = "KustoConnectionString") Product[] products) {
+                    kqlParameters = "@productId={productId}", database = "productsdb", connection = "KustoConnectionString") Product[] products) {
         return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/json").body(products)
                 .build();
     }
@@ -301,7 +301,7 @@ public class GetProductsQueryString {
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
             HttpMethod.GET}, authLevel = AuthorizationLevel.ANONYMOUS, route = "getproducts") HttpRequestMessage<Optional<String>> request,
             @KustoInput(name = "getjproductsquery", kqlCommand = "declare query_parameters (name:string);GetProductsByName(name)",
-                    kqlParameters = "@name={Query.name}", database = "products", connection = "KustoConnectionString") Product[] products) {
+                    kqlParameters = "@name={Query.name}", database = "productsdb", connection = "KustoConnectionString") Product[] products) {
         return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/json").body(products)
                 .build();
     }
@@ -350,7 +350,7 @@ The following is binding data in the function.json file:
     {
       "name": "productget",
       "type": "kusto",
-      "database": "products",
+      "database": "productsdb",
       "direction": "in",
       "kqlCommand": "declare query_parameters (productId:long);Products | where ProductID == productId",
       "kqlParameters": "@productId={productId}",
@@ -402,7 +402,7 @@ The following is binding data in the function.json file:
     {
       "name": "productfnget",
       "type": "kusto",
-      "database": "products",
+      "database": "productsdb",
       "direction": "in",
       "kqlCommand": "declare query_parameters (name:string);GetProductsByName(name)",
       "kqlParameters": "@name={Query.name}",
@@ -465,7 +465,7 @@ The following is binding data in the function.json file:
       "name": "$return"
     },
     {
-      "name": "products",
+      "name": "productsdb",
       "type": "kusto",
       "database": "sdktestsdb",
       "direction": "in",
@@ -523,7 +523,7 @@ The following is binding data in the function.json file:
     {
       "name": "productfnget",
       "type": "kusto",
-      "database": "products",
+      "database": "productsdb",
       "direction": "in",
       "kqlCommand": "declare query_parameters (name:string);GetProductsByName(name)",
       "kqlParameters": "@name={Query.name}",

@@ -7,5 +7,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common
     {
         public const string DatabaseName = "sdktestsdb";
         public const string ProductsTable = "Products";
+        public const string ProductsChangeLogTable = "ProductsChangeLog";
     }
 }

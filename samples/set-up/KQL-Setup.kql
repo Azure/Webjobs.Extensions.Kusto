@@ -9,7 +9,7 @@
     Products | where Name == name
 }
 
-Products
+.create-merge table Item (ItemID:long, ItemName:string, ItemCost:float)  
 
 .clear table Products data 
 
