@@ -1,14 +1,8 @@
 # **Kusto input bindings for Azure Functions - Preview**
 
-## **Table of Contents**
-- [Kusto bindings for Azure Functions - Preview](#kusto-input-bindings-for-azure-functions---preview)
-  - [Introduction](#introduction)
-  - [Input Bindings](#input-binding)
-  - [Trademarks](#trademarks)
-
 ## **Introduction**
 
-This document explains the usage of the input bindings that are suppported on  Azure functions for Kusto
+This document explains the usage of the input bindings that are suppported on Azure functions for Kusto.Input bindings are used to read data from Kusto.
 
 ## Examples
 <a id="example"></a>

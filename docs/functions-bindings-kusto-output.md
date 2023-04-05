@@ -1,15 +1,9 @@
 # **Kusto output bindings for Azure Functions - Preview**
 
-## **Table of Contents**
-- [Kusto bindings for Azure Functions - Preview](#kusto-output-bindings-for-azure-functions---preview)
-  - [Introduction](#introduction)
-  - [Output Bindings](#output-binding)
-  - [Trademarks](#trademarks)
-
-
 ## **Introduction**
 
-This document explains the usage of the output bindings that are suppported on  Azure functions for Kusto
+This document explains the usage of the output bindings that are suppported on  Azure functions for Kusto. Output bindings are used to ingest data to Kusto.
+
 
 
 ### **Output Binding**

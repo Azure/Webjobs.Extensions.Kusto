@@ -34,6 +34,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="State\" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties properties_4servicedependencies_1local_1json__JsonSchema="https://geojson.org/schema/GeoJSON.json" /></VisualStudio></ProjectExtensions>
 
 </Project>
