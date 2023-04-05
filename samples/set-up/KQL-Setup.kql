@@ -16,3 +16,5 @@
 .create table Products ingestion json mapping "item_to_product_json" '[{"Column": "ProductID", "Properties": {"Path": "$.ItemID"}},{"Column": "Name", "Properties": {"Path": "$.ItemName"}},{"Column": "Cost", "Properties": {"Path": "$.ItemCost"}},]'
 
 .show streamingingestion statistics  | order by StartTime desc | take 10
+
+.create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
