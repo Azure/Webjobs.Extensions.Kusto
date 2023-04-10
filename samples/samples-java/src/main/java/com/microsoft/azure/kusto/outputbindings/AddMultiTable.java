@@ -16,26 +16,32 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.kusto.annotation.KustoOutput;
-import com.microsoft.azure.kusto.common.Item;
-
-import java.io.IOException;
-import java.util.Optional;
+import com.microsoft.azure.kusto.common.Product;
+import com.microsoft.azure.kusto.common.ProductChangeLog;
 
 import static com.microsoft.azure.kusto.common.Constants.*;
 
-public class AddProductWithMapping {
-    @FunctionName("AddProductMapping")
+import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Optional;
+
+public class AddMultiTable {
+    @FunctionName("AddMultiTable")
     public HttpResponseMessage run(@HttpTrigger(name = "req", methods = {
-            HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS, route = "addproductswithmapping") HttpRequestMessage<Optional<String>> request,
-            @KustoOutput(name = "product", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR,
-                    mappingRef = "item_to_product_json") OutputBinding<Item> item)
+            HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS, route = "addmultitable") HttpRequestMessage<Optional<String>> request,
+            @KustoOutput(name = "product", database = SDKTESTSDB, tableName = PRODUCTS, connection = KUSTOCONNSTR) OutputBinding<Product> product,
+            @KustoOutput(name = "productChangeLog", database = SDKTESTSDB, tableName = PRODUCTSCHANGELOG,
+                    connection = KUSTOCONNSTR) OutputBinding<ProductChangeLog> productChangeLog)
             throws IOException {
+
         if (request.getBody().isPresent()) {
             String json = request.getBody().get();
             ObjectMapper mapper = new ObjectMapper();
-            Item p = mapper.readValue(json, Item.class);
-            item.setValue(p);
-            return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/json").body(item)
+            Product p = mapper.readValue(json, Product.class);
+            product.setValue(p);
+            productChangeLog.setValue(new ProductChangeLog(p.ProductID, Instant.now(Clock.systemUTC()).toString()));
+            return request.createResponseBuilder(HttpStatus.OK).header("Content-Type", "application/json").body(product)
                     .build();
         } else {
             return request.createResponseBuilder(HttpStatus.NO_CONTENT).header("Content-Type", "application/json")

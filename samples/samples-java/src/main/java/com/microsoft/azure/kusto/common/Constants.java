@@ -10,4 +10,5 @@ public class Constants {
     public static final String SDKTESTSDB = "sdktestsdb";
     public static final String KUSTOCONNSTR = "KustoConnectionString";
     public static final String PRODUCTS = "Products";
+    public static final String PRODUCTSCHANGELOG = "ProductsChangeLog";
 }

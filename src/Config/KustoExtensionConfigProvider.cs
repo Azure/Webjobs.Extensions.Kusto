@@ -15,8 +15,8 @@ using Microsoft.Azure.WebJobs.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using static Microsoft.Azure.WebJobs.Extensions.Kusto.KustoQueryConverters;
 using static Microsoft.Azure.WebJobs.Extensions.Kusto.KustoConstants;
+using static Microsoft.Azure.WebJobs.Extensions.Kusto.KustoQueryConverters;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 {

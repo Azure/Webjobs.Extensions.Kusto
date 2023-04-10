@@ -33,13 +33,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// <returns>A managed ingest client. Attempts ingestion through streaming and then fallsback to Queued ingest mode</returns>
         public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
         {
-            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName);
+            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName, logger);
             /*
                 We expect minimal input from the user.The end user can just pass a connection string, we need to decipher the DM
                 ingest endpoint as well from this. Both the engine and DM endpoint are needed for the managed ingest to happen
              */
             string dmConnectionStringEndpoint = engineKcsb.Hostname.Contains(IngestPrefix) ? engineConnectionString : engineConnectionString.ReplaceFirstOccurrence(ProtocolSuffix, ProtocolSuffix + IngestPrefix);
-            KustoConnectionStringBuilder dmKcsb = GetKustoConnectionString(dmConnectionStringEndpoint, managedIdentity, runtimeName);
+            KustoConnectionStringBuilder dmKcsb = GetKustoConnectionString(dmConnectionStringEndpoint, managedIdentity, runtimeName, logger);
             // Measure the time it takes for a connection
             var ingestClientInitialize = new Stopwatch();
             ingestClientInitialize.Start();
@@ -63,7 +63,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 
         public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
         {
-            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName);
+            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName, logger);
             var timer = new Stopwatch();
             timer.Start();
             // Create a query client connection. This is needed in cases to debug any connection issues
@@ -73,7 +73,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             return queryProvider;
         }
 
-        private static KustoConnectionStringBuilder GetKustoConnectionString(string connectionString, string managedIdentity, string runtimeName)
+        private static KustoConnectionStringBuilder GetKustoConnectionString(string connectionString, string managedIdentity, string runtimeName, ILogger logger)
         {
             KustoConnectionStringBuilder.DefaultPreventAccessToLocalSecretsViaKeywords = false;
             var kcsb = new KustoConnectionStringBuilder(connectionString)
@@ -88,11 +88,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 // use "system" to indicate the system-assigned identity
                 if ("system".EqualsOrdinalIgnoreCase(managedIdentity))
                 {
-                    kcsb.WithAadSystemManagedIdentity();
+                    logger.LogDebug($"Using system managed user identity : {managedIdentity}");
+                    kcsb = kcsb.WithAadSystemManagedIdentity();
                 }
                 else
                 {
-                    kcsb.WithAadUserManagedIdentity(managedIdentity);
+                    logger.LogDebug($"Using user managed identity : {managedIdentity}");
+                    kcsb = kcsb.WithAadUserManagedIdentity(managedIdentity);
                 }
             }
             return kcsb;
