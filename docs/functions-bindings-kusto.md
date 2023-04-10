@@ -3,7 +3,6 @@ title: Kusto bindings for Functions
 description: Understand how to use Kusto bindings in Azure Functions.
 author: ramacg
 ms.topic: reference
-ms.custom: event-tier1-build-2022
 ms.date: 27/03/2023
 ms.author: ramacg
 ms.reviewer: 
@@ -11,7 +10,6 @@ zone_pivot_groups: programming-languages-set-functions-lang-workers
 ---
 
 # Kusto bindings for Azure Functions overview (preview)
-
 
 This set of articles explains how to work with [Kusto](/azure/kusto/index) bindings in Azure Functions. Azure Functions supports input bindings, output bindings for Kusto.
 
@@ -58,14 +56,11 @@ You can install this version of the extension in your function app by registerin
 
 ::: zone-end
 
-
 ::: zone pivot="programming-language-javascript, programming-language-powershell"
-
 
 ## Install bundle
 
 Kusto bindings extension is part of a preview [extension bundle], which is specified in your host.json project file.
-
 
 # [Preview Bundle v4.x](#tab/extensionv4)
 
@@ -89,14 +84,12 @@ Kusto bindings for Azure Functions aren't available for the v3 version of the fu
 
 ::: zone-end
 
-
 ::: zone pivot="programming-language-python"
 
 ## Functions runtime
 
 > [!NOTE]
 > Python language support for the Kusto bindings extension is available starting with v4.6.0 of the [functions runtime](./set-runtime-version.md#view-and-update-the-current-runtime-version).  You may need to update your install of Azure Functions [Core Tools](functions-run-local.md) for local development.
-
 
 ## Install bundle
 
@@ -124,9 +117,7 @@ Kusto bindings for Azure Functions aren't available for the v3 version of the fu
 
 ::: zone-end
 
-
 ::: zone pivot="programming-language-java"
-
 
 ## Install bundle
 
@@ -168,7 +159,7 @@ Add the Java library for Kusto bindings to your functions project with an update
 
 ## Kusto connection string
 
-Kusto bindings for Azure Functions have a required property for the connection string on all bindings. The connection string is documented at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto). 
+Kusto bindings for Azure Functions have a required property for the connection string on all bindings. The connection string is documented at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto).
 
 ## Considerations
 
@@ -182,8 +173,4 @@ Kusto bindings for Azure Functions have a required property for the connection s
 - [Save data to a database (Output binding)](./functions-bindings-kusto-output.md)
 - [Learn how to connect Azure Function to Kusto with managed identity](./functions-bindings-kusto-managed-identity.md)
 
-[preview NuGet package]: https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Kusto
-[maven coordinates]: https://mvnrepository.com/artifact/com.microsoft.azure.functions/azure-functions-java-library-kusto
-[core tools]: ./functions-run-local.md
 [extension bundle]: ./functions-bindings-register.md#extension-bundles
-[Azure Tools extension]: https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-node-azure-pack

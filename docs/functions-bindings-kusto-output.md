@@ -39,7 +39,7 @@ public class Product
 }
 ```
 
-```kql
+```kusto
 .create-merge table Products (ProductID:long, Name:string, Cost:double)
 ```
 
@@ -90,7 +90,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
 
 The following example shows a [C# function](functions-dotnet-class-library.md) that adds records to a database in two different tables (`Products` and `ProductsChangeLog`), using data provided in an HTTP POST request as a JSON body and multiple output bindings.
 
-```kql
+```kusto
 .create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
 ```
 
@@ -224,7 +224,7 @@ public class Product
 }
 ```
 
-```kql
+```kusto
 .create-merge table Products (ProductID:long, Name:string, Cost:double)
 ```
 
@@ -267,7 +267,7 @@ The following example shows a [C# function](functions-dotnet-class-library.md) t
 
 To transform data from `Product` to `Item`, the function uses a mapping reference 
 
-```kql
+```kusto
 .create-merge table Item (ItemID:long, ItemName:string, ItemCost:float)
 
 
@@ -420,7 +420,7 @@ The following example shows a Kusto output binding in a Java function that adds 
 
 The second table, `ProductsChangeLog`, corresponds to the following definition:
 
-```kql
+```kusto
 .create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
 ```
 
@@ -573,7 +573,7 @@ The following example shows a Kusto output binding in a function.json file and a
 
 The second table, `ProductsChangeLog`, corresponds to the following definition:
 
-```kql
+```kusto
 .create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
 ```
 
@@ -722,7 +722,7 @@ def main(req: func.HttpRequest, product: func.Out[str]) -> func.HttpResponse:
 
 The following example shows a Kusto output binding in a function.json file and a JavaScript function that adds records to a database in two different tables (`Products` and `ProductsChangeLog`), using data provided in an HTTP POST request as a JSON body and multiple output bindings. The second table, `ProductsChangeLog`, corresponds to the following definition:
 
-```kql
+```kusto
 .create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
 ```
 
