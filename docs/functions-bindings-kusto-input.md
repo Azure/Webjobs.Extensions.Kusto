@@ -616,4 +616,3 @@ The attribute's constructor takes the Database and the attributes KQLCommand , K
 ## Next steps
 
 - [Save data to a table (Output binding)](./functions-bindings-kusto-output.md)
-- [Review ToDo API sample with Kusto bindings]()
