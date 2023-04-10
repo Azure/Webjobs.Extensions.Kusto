@@ -201,7 +201,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
 
 # [Isolated process](#tab/isolated-process)
 
-More samples for the Azure SQL output binding are available in the [GitHub repository](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-outofproc).
+More samples for the Kusto output binding are available in the [GitHub repository](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-outofproc).
 
 This section contains the following examples:
 
@@ -317,14 +317,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindin
 
 ::: zone pivot="programming-language-java"
 
-More samples for the Azure SQL output binding are available in the [GitHub repository](https://github.com/Azure/azure-functions-sql-extension/tree/main/samples/samples-java).
+More samples for the java Kusto input binding are available in the [GitHub repository](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-java).
 
 This section contains the following examples:
 
 * [HTTP trigger, write a record to a table](#http-trigger-write-record-to-table-java)
 * [HTTP trigger, write to two tables](#http-trigger-write-to-two-tables-java)
 
-The examples refer to a `PrProductoducts` class (in a separate file `Product.java`) and a corresponding database table `Products` (defined earlier):
+The examples refer to a `Products` class (in a separate file `Product.java`) and a corresponding database table `Products` (defined earlier):
 
 ```java
 package com.microsoft.azure.kusto.common;
@@ -349,8 +349,6 @@ public class Product {
     }
 }
 ```
-
-:::code language="sql" source="~/functions-sql-todo-sample/sql/create.sql" range="1-7":::
 
 <a id="http-trigger-write-record-to-table-java"></a>
 ### HTTP trigger, write a record to a table
@@ -410,7 +408,7 @@ public class AddProduct {
 <a id="http-trigger-write-to-two-tables-java"></a>
 ### HTTP trigger, write to two tables
 
-The following example shows a SQL output binding in a JavaS function that adds records to a database in two different tables (`dbo.ToDo` and `dbo.RequestLog`), using data provided in an HTTP POST request as a JSON body and multiple output bindings.  The function takes an additional dependency on the [com.fasterxml.jackson.core](https://github.com/FasterXML/jackson) library to parse the JSON body.
+The following example shows a Kusto output binding in a Java function that adds records to a database in two different tables (`Product` and `ProductChangeLog`), using data provided in an HTTP POST request as a JSON body and multiple output bindings.  The function takes an additional dependency on the [com.fasterxml.jackson.core](https://github.com/FasterXML/jackson) library to parse the JSON body.
 
 ```xml
 <dependency>
@@ -422,7 +420,7 @@ The following example shows a SQL output binding in a JavaS function that adds r
 
 The second table, `ProductsChangeLog`, corresponds to the following definition:
 
-```sql
+```kql
 .create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
 ```
 
@@ -497,5 +495,373 @@ public class AddMultiTable {
     }
 }
 ```
+::: zone-end
+
+::: zone pivot="programming-language-javascript"
+
+More samples for the Kusto output binding are available in the [GitHub repository](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-node).
+
+This section contains the following examples:
+
+* [HTTP trigger, write records to a table](#http-trigger-write-records-to-table-javascript)
+* [HTTP trigger, write to two tables](#http-trigger-write-to-two-tables-javascript)
+
+The examples refer to a database table:
+
+The examples refer to the tables `Products` and `ProductsChangeLog` (defined earlier):
+
+
+<a id="http-trigger-write-records-to-table-javascript"></a>
+### HTTP trigger, write records to a table
+
+The following example shows a Kusto output binding in a function.json file and a JavaScript function that adds records to a table, using data provided in an HTTP POST request as a JSON body.
+
+The following is binding data in the function.json file:
+
+```json
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "name": "req",
+      "direction": "in",
+      "type": "httpTrigger",
+      "methods": [
+        "post"
+      ],
+      "route": "addproduct"
+    },
+    {
+      "name": "$return",
+      "type": "http",
+      "direction": "out"
+    },
+    {
+      "name": "product",
+      "type": "kusto",
+      "database": "productsdb",
+      "direction": "out",
+      "tableName": "Products",
+      "connection": "KustoConnectionString"
+    }
+  ],
+  "disabled": false
+}
+```
+
+The [configuration](#configuration) section explains these properties.
+
+The following is sample JavaScript code:
+
+```javascript
+// Insert the product, which will insert it into the Products table.
+module.exports = async function (context, req) {
+    // Note that this expects the body to be a JSON object or array of objects which have a property
+    // matching each of the columns in the table to insert to.
+    context.bindings.product = req.body;
+    return {
+        status: 201,
+        body: req.body
+    };
+}
+```
+
+<a id="http-trigger-write-to-two-tables-javascript"></a>
+### HTTP trigger, write to two tables
+
+The following example shows a Kusto output binding in a function.json file and a JavaScript function that adds records to a database in two different tables (`Products` and `ProductsChangeLog`), using data provided in an HTTP POST request as a JSON body and multiple output bindings.
+
+The second table, `ProductsChangeLog`, corresponds to the following definition:
+
+```kql
+.create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
+```
+
+The following is binding data in the function.json file:
+
+```json
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "name": "req",
+      "direction": "in",
+      "type": "httpTrigger",
+      "methods": [
+        "post"
+      ],
+      "route": "addmultitable"
+    },
+    {
+      "name": "res",
+      "type": "http",
+      "direction": "out"
+    },
+    {
+      "name": "product",
+      "type": "kusto",
+      "database": "productsdb",
+      "direction": "out",
+      "tableName": "Products",
+      "connection": "KustoConnectionString"
+    },
+    {
+      "name": "productchangelog",
+      "type": "kusto",
+      "database": "productsdb",
+      "direction": "out",
+      "tableName": "ProductsChangeLog",
+      "connection": "KustoConnectionString"
+    }
+  ],
+  "disabled": false
+}
+```
+
+The [configuration](#configuration) section explains these properties.
+
+The following is sample JavaScript code:
+
+```javascript
+module.exports = async function (context, req) {
+    context.log('JavaScript HTTP trigger and Kusto output binding function processed a request.');
+    context.log(req.body);
+
+    if (req.body) {
+        var changeLog = {ProductID:req.body.ProductID, CreatedAt: new Date().toISOString()};
+        context.bindings.product = req.body;
+        context.bindings.productchangelog = changeLog;
+        context.res = {
+            body: req.body,
+            mimetype: "application/json",
+            status: 201
+        }
+    } else {
+        context.res = {
+            status: 400,
+            body: "Error reading request body"
+        }
+    }
+}
+```
 
 ::: zone-end  
+
+::: zone pivot="programming-language-python"  
+
+More samples for the Kusto output binding are available in the [GitHub repository](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-python).
+
+This section contains the following examples:
+
+* [HTTP trigger, write records to a table](#http-trigger-write-records-to-table-python)
+* [HTTP trigger, write to two tables](#http-trigger-write-to-two-tables-python)
+
+The examples refer to the tables `Products` and `ProductsChangeLog` (defined earlier):
+
+<a id="http-trigger-write-records-to-table-python"></a>
+### HTTP trigger, write records to a table
+
+The following example shows a Kusto output binding in a function.json file and a Python function that adds records to a table, using data provided in an HTTP POST request as a JSON body.
+
+The following is binding data in the function.json file:
+
+```json
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "authLevel": "Anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "post"
+      ],
+      "route": "addproductuni"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    },
+    {
+      "name": "product",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "out",
+      "tableName": "Products",
+      "connection": "KustoConnectionString"
+    }
+  ]
+}
+```
+
+The [configuration](#configuration) section explains these properties.
+
+The following is sample Python code:
+
+```python
+import azure.functions as func
+from Common.product import Product
+
+
+def main(req: func.HttpRequest, product: func.Out[str]) -> func.HttpResponse:
+    body = str(req.get_body(),'UTF-8')
+    product.set(body)
+    return func.HttpResponse(
+        body=body,
+        status_code=201,
+        mimetype="application/json"
+    )
+
+```
+
+<a id="http-trigger-write-to-two-tables-python"></a>
+### HTTP trigger, write to two tables
+
+
+The following example shows a Kusto output binding in a function.json file and a JavaScript function that adds records to a database in two different tables (`Products` and `ProductsChangeLog`), using data provided in an HTTP POST request as a JSON body and multiple output bindings. The second table, `ProductsChangeLog`, corresponds to the following definition:
+
+```kql
+.create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
+```
+
+The following is binding data in the function.json file:
+
+```json
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "authLevel": "Anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "post"
+      ],
+      "route": "addmultitable"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    },
+    {
+      "name": "product",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "out",
+      "tableName": "Products",
+      "connection": "KustoConnectionString"
+    },
+    {
+      "name": "productchangelog",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "out",
+      "tableName": "ProductsChangeLog",
+      "connection": "KustoConnectionString"
+    }
+  ]
+}
+```
+
+The [configuration](#configuration) section explains these properties.
+
+The following is sample Python code:
+
+```python
+import json
+from datetime import datetime
+
+import azure.functions as func
+from Common.product import Product
+
+
+def main(req: func.HttpRequest, product: func.Out[str],productchangelog: func.Out[str]) -> func.HttpResponse:
+    body = str(req.get_body(),'UTF-8')
+    # parse x:
+    product.set(body)
+    id = json.loads(body)["ProductID"]
+
+    changelog = {
+        "ProductID": id,
+        "CreatedAt": datetime.now().isoformat(),
+    }
+    productchangelog.set(json.dumps(changelog))
+    return func.HttpResponse(
+        body=body,
+        status_code=201,
+        mimetype="application/json"
+    )
+```
+
+::: zone-end
+
+::: zone pivot="programming-language-csharp"
+## Attributes 
+
+The [C# library](functions-dotnet-class-library.md) uses the [KustoAttribute](https://github.com/Azure/Webjobs.Extensions.Kusto/blob/main/src/KustoAttribute.cs) attribute to declare the Kusto bindings on the function, which has the following properties:
+
+| Attribute property |Description|
+|---------|---------|
+| **Database** | Required. The database against which the query has to be executed.  |
+| **Connection** | Required. The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` .| 
+| **TableName** | Required. The table to ingest the data into.|
+| **MappingRef** | Optional. attribute to pass a [mapping ref](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/create-ingestion-mapping-command) that is already defined in the Kusto cluster. |
+| **ManagedServiceIdentity** | Optional. A managed identity can be used to connect to Kusto. To use a System managed identity, use "system", any other identity names are interpreted as user managed identity |
+| **DataFormat** | Optional.The default dataformat is `multijson/json`. This can be set to _**text**_ formats supported in the datasource format [enumeration](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/kusto-ingest-client-reference#enum-datasourceformat). Samples are validated and provided for csv and JSON formats. |
+
+::: zone-end  
+
+::: zone pivot="programming-language-java"  
+## Annotations
+
+In the [Java functions runtime library](/java/api/overview/azure/functions/runtime), uses the [`@KustoInput`](https://github.com/Azure/Webjobs.Extensions.Kusto/blob/main/java-library/src/main/java/com/microsoft/azure/functions/kusto/annotation/KustoInput.java) annotation (`com.microsoft.azure.functions.kusto.annotation.KustoOutput`):
+
+| Element |Description|
+|---------|---------|
+| **name** | Required. The name of the variable that represents the query results in function code. |
+| **database** | Required. The database against which the query has to be executed. |
+| **connection** | Required. The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` | 
+| **tableName** | Required. The table to ingest the data into.|
+| **mappingRef** | Optional. attribute to pass a [mapping ref](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/create-ingestion-mapping-command) that is already defined in the Kusto cluster. |
+| **dataFormat** | Optional.The default dataformat is `multijson/json`. This can be set to _**text**_ formats supported in the datasource format [enumeration](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/kusto-ingest-client-reference#enum-datasourceformat). Samples are validated and provided for csv and JSON formats. |
+| **managedServiceIdentity** | A managed identity can be used to connect to Kusto. To use a System managed identity, use "system", any other identity names are interpreted as user managed identity|
+
+::: zone-end 
+ 
+::: zone pivot="programming-language-javascript,programming-language-powershell,programming-language-python"  
+## Configuration
+
+The following table explains the binding configuration properties that you set in the function.json file.
+
+|function.json property | Description|
+|---------|----------------------|
+|**type** |  Required. Must be set to `kusto`. |
+|**direction** | Required. Must be set to `out`. |
+|**name** |  Required. The name of the variable that represents the query results in function code. | 
+| **database** | Required. The database against which the query has to be executed. |
+| **connection** | Required. The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` | 
+| **tableName** | Required. The table to ingest the data into.|
+| **mappingRef** | Optional. attribute to pass a [mapping ref](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/create-ingestion-mapping-command) that is already defined in the Kusto cluster. |
+| **dataFormat** | Optional.The default dataformat is `multijson/json`. This can be set to _**text**_ formats supported in the datasource format [enumeration](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/kusto-ingest-client-reference#enum-datasourceformat). Samples are validated and provided for csv and JSON formats. |
+| **managedServiceIdentity** | A managed identity can be used to connect to Kusto. To use a System managed identity, use "system", any other identity names are interpreted as user managed identity|
+::: zone-end  
+
+
+[!INCLUDE [app settings to local.settings.json](../../includes/functions-app-settings-local.md)]
+
+## Usage
+
+::: zone pivot="programming-language-csharp,programming-language-javascript,programming-language-python,programming-language-java"
+
+The attribute's constructor takes the Database and the attributes TableName,MappingRef,DataFormat and the Connection setting name. The KQLCommand can be a KQL statement or a KQLFunction. The connection string setting name corresponds to the application setting (in `local.settings.json` for local development) that contains the [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` . Queries executed by the input binding are parameterized and the values provided in the KQLParameters are used at runtime.
+
+
+::: zone-end
+
+## Next steps
+
+- [Read data from a table (Input binding)](./functions-bindings-kusto-input.md)

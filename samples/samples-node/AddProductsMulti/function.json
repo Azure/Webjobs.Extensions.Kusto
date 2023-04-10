@@ -1,0 +1,36 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "name": "req",
+      "direction": "in",
+      "type": "httpTrigger",
+      "methods": [
+        "post"
+      ],
+      "route": "addmultitable"
+    },
+    {
+      "name": "res",
+      "type": "http",
+      "direction": "out"
+    },
+    {
+      "name": "product",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "out",
+      "tableName": "Products",
+      "connection": "KustoConnectionString"
+    },
+    {
+      "name": "productchangelog",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "out",
+      "tableName": "ProductsChangeLog",
+      "connection": "KustoConnectionString"
+    }
+  ],
+  "disabled": false
+}

@@ -1,0 +1,36 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "authLevel": "Anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "post"
+      ],
+      "route": "addmultitable"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    },
+    {
+      "name": "product",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "out",
+      "tableName": "Products",
+      "connection": "KustoConnectionString"
+    },
+    {
+      "name": "productchangelog",
+      "type": "kusto",
+      "database": "sdktestsdb",
+      "direction": "out",
+      "tableName": "ProductsChangeLog",
+      "connection": "KustoConnectionString"
+    }
+  ]
+}
