@@ -1,3 +1,14 @@
+---
+title: Kusto input bindings for Azure Functions - Preview
+description: Understand usage of Kusto input bindings for Azure Functions (Query data from Kusto)
+author: ramacg
+ms.topic: reference
+ms.date: 03/27/2023
+ms.author: ramacg
+ms.reviewer: 
+zone_pivot_groups: programming-languages-set-functions-lang-workers
+---
+
 # **Kusto input bindings for Azure Functions - Preview**
 
 ## **Introduction**
@@ -5,6 +16,7 @@
 This document explains the usage of the input bindings that are suppported on Azure functions for Kusto.Input bindings are used to read data from Kusto.
 
 ## Examples
+
 <a id="example"></a>
 
 ::: zone pivot="programming-language-csharp"
@@ -36,11 +48,12 @@ public class Product
 }
 ```
 
-```kql
+```kusto
 .create-merge table Products (ProductID:long, Name:string, Cost:double)
 ```
 
 <a id="http-trigger-look-up-id-from-query-string-c"></a>
+
 ### HTTP trigger, get row by ID from query string
 
 The following example shows a [C# function](functions-dotnet-class-library.md) that retrieves a list of products given a productId. The function is triggered by an HTTP request that uses a parameter for the ID. That ID is used to retrieve a list of `Product` that match the query.
@@ -86,11 +99,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples
 ```
 
 <a id="http-trigger-get-multiple-items-from-route-data-c"></a>
+
 ### HTTP trigger, get multiple rows from route parameter
 
 The following example shows a [C# function](functions-dotnet-class-library.md) that retrieves documents returned by the query. The function is triggered by an HTTP request that uses route data to specify the value of a KQL function parameter. GetProductsByName is a simple function that retrieves a set of products that match a product name
 
-```kql
+```kusto
 .create function ifnotexists GetProductsByName(name:string)
 {
     Products | where Name == name
@@ -133,10 +147,10 @@ This section contains the following examples:
 * [HTTP trigger, get row by ID from query string](#http-trigger-look-up-id-from-query-string-c-oop)
 * [HTTP trigger, get multiple rows from route data](#http-trigger-get-multiple-items-from-route-data-c-oop)
 
-
 The examples refer to a `Product` class and the Products table, both of which are defined in the sections above.
 
 <a id="http-trigger-look-up-id-from-query-string-c-oop"></a>
+
 ### HTTP trigger, get row by ID from query string
 
 The following example shows a [C# function](functions-dotnet-class-library.md) that retrieves a single record. The function is triggered by an HTTP request that uses a query string to specify the ID. That ID is used to retrieve a `Product` record with the specified query.
@@ -170,6 +184,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
 ```
 
 <a id="http-trigger-get-multiple-items-from-route-data-c-oop"></a>
+
 ### HTTP trigger, get multiple rows from route parameter
 
 The following example shows a [C# function](functions-dotnet-class-library.md) that retrieves records returned by the query (based on the name of product in this case). The function is triggered by an HTTP request that uses route data to specify the value of a query parameter. That parameter is used to filter the `Product` records in the specified query.
@@ -197,7 +212,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
 }
 ```
 
-
 <!-- Uncomment to support C# script examples.
 # [C# Script](#tab/csharp-script)
 
@@ -207,7 +221,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.InputBinding
 ::: zone-end
 
 ::: zone pivot="programming-language-java"
-
 
 More samples for the java Kusto input binding are available in the [GitHub repository](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-java).
 
@@ -242,7 +255,9 @@ public class Product {
 }
 
 ```
+
 <a id="http-trigger-get-multiple-items-java"></a>
+
 ### HTTP trigger, get multiple rows
 
 The example uses a route parameter to specify the name of the id of the products.All matching products are retrieved from the products table.
@@ -277,6 +292,7 @@ public class GetProducts {
 ```
 
 <a id="http-trigger-look-up-id-from-query-string-java"></a>
+
 ### HTTP trigger, get row by ID from query string
 
 The following example shows a queries the products table by the product name. The function is triggered by an HTTP request that uses a query string to specify the value of a query parameter. That parameter is used to filter the `Product` records in the specified query.
@@ -319,10 +335,10 @@ This section contains the following examples:
 * [HTTP trigger, get multiple rows](#http-trigger-get-multiple-items-javascript)
 * [HTTP trigger, get row by ID from query string](#http-trigger-look-up-id-from-query-string-javascript)
 
-
 The examples refer to a database table:
 
 <a id="http-trigger-get-multiple-items-javascript"></a>
+
 ### HTTP trigger, get multiple rows
 
 The following example shows a Kusto input binding in a function.json file and a JavaScript function that reads from a query and returns the results in the HTTP response.
@@ -375,6 +391,7 @@ module.exports = async function (context, req, productget) {
 ```
 
 <a id="http-trigger-look-up-id-from-query-string-javascript"></a>
+
 ### HTTP trigger, get row by name from query string
 
 The following example shows a queries the products table by the product name. The function is triggered by an HTTP request that uses a query string to specify the value of a query parameter. That parameter is used to filter the `Product` records in the specified query.
@@ -417,7 +434,6 @@ The [configuration](#configuration) section explains these properties.
 
 The following is sample JavaScript code:
 
-
 ```javascript
 module.exports = async function (context, req, producproductfngettget) {
     return {
@@ -426,6 +442,7 @@ module.exports = async function (context, req, producproductfngettget) {
     };
 }
 ```
+
 ::: zone-end
 
 ::: zone pivot="programming-language-python"  
@@ -437,8 +454,8 @@ This section contains the following examples:
 * [HTTP trigger, get multiple rows](#http-trigger-get-multiple-items-python)
 * [HTTP trigger, get records using a KQL Function](#http-trigger-look-up-id-from-query-string-python)
 
-
 <a id="http-trigger-get-multiple-items-python"></a>
+
 ### HTTP trigger, get multiple rows
 
 The following example shows a Kusto input binding in a function.json file and a Python function that reads from a query and returns the results in the HTTP response.
@@ -481,7 +498,6 @@ The [configuration](#configuration) section explains these properties.
 
 The following is sample Python code:
 
-
 ```python
 import azure.functions as func
 from Common.product import Product
@@ -496,6 +512,7 @@ def main(req: func.HttpRequest, products: str) -> func.HttpResponse:
 ```
 
 <a id="http-trigger-look-up-id-from-query-string-python"></a>
+
 ### HTTP trigger, get row by ID from query string
 
 The following example shows a queries the products table by the product name. The function is triggered by an HTTP request that uses a query string to specify the value of a query parameter. That parameter is used to filter the `Product` records in the specified query.
@@ -538,7 +555,6 @@ The [configuration](#configuration) section explains these properties.
 
 The following is sample Python code:
 
-
 ```python
 import azure.functions as func
 
@@ -552,16 +568,16 @@ def main(req: func.HttpRequest, products: str) -> func.HttpResponse:
 
 ::: zone-end
 
-
 ::: zone pivot="programming-language-csharp"
-## Attributes 
+
+## Attributes
 
 The [C# library](functions-dotnet-class-library.md) uses the [KustoAttribute](https://github.com/Azure/Webjobs.Extensions.Kusto/blob/main/src/KustoAttribute.cs) attribute to declare the Kusto bindings on the function, which has the following properties:
 
 | Attribute property |Description|
 |---------|---------|
 | **Database** | Required. The database against which the query has to be executed.  |
-| **Connection** | Required. The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` | 
+| **Connection** | Required. The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` |
 | **KqlCommand** | Required. The KqlQuery that has to be executed. Can be a KQL query or a KQL Function call|
 | **KqlParameters** | Optional. Parameters that act as predicate variables for the KqlCommand. For example "@name={name},@Id={id}" where the parameters {name} and {id} will be substituted at runtime with actual values acting as predicates. Neither the parameter name nor the parameter value can contain a comma (`,`) or an equals sign (`=`). |
 | **ManagedServiceIdentity** | Optional. A managed identity can be used to connect to Kusto. To use a System managed identity, use "system", any other identity names are interpreted as user managed identity |
@@ -569,6 +585,7 @@ The [C# library](functions-dotnet-class-library.md) uses the [KustoAttribute](ht
 ::: zone-end  
 
 ::: zone pivot="programming-language-java"  
+
 ## Annotations
 
 In the [Java functions runtime library](/java/api/overview/azure/functions/runtime), uses the [`@KustoInput`](https://github.com/Azure/Webjobs.Extensions.Kusto/blob/main/java-library/src/main/java/com/microsoft/azure/functions/kusto/annotation/KustoInput.java) annotation (`com.microsoft.azure.functions.kusto.annotation.KustoInput`):
@@ -577,14 +594,15 @@ In the [Java functions runtime library](/java/api/overview/azure/functions/runti
 |---------|---------|
 | **name** | Required. The name of the variable that represents the query results in function code. |
 | **database** | Required. The database against which the query has to be executed. |
-| **connection** | Required. The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` | 
+| **connection** | Required. The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` |
 | **kqlCommand** | Required. The KqlQuery that has to be executed. Can be a KQL query or a KQL Function call|
-|**kqlParameters** |  Optional. Parameters that act as predicate variables for the KqlCommand. For example "@name={name},@Id={id}" where the parameters {name} and {id} will be substituted at runtime with actual values acting as predicates. Neither the parameter name nor the parameter value can contain a comma (`,`) or an equals sign (`=`). | 
+|**kqlParameters** |  Optional. Parameters that act as predicate variables for the KqlCommand. For example "@name={name},@Id={id}" where the parameters {name} and {id} will be substituted at runtime with actual values acting as predicates. Neither the parameter name nor the parameter value can contain a comma (`,`) or an equals sign (`=`). |
 | **managedServiceIdentity** | A managed identity can be used to connect to Kusto. To use a System managed identity, use "system", any other identity names are interpreted as user managed identity|
 
-::: zone-end 
- 
+::: zone-end
+
 ::: zone pivot="programming-language-javascript,programming-language-powershell,programming-language-python"  
+
 ## Configuration
 
 The following table explains the binding configuration properties that you set in the function.json file.
@@ -593,14 +611,13 @@ The following table explains the binding configuration properties that you set i
 |---------|----------------------|
 |**type** |  Required. Must be set to `kusto`. |
 |**direction** | Required. Must be set to `in`. |
-|**name** |  Required. The name of the variable that represents the query results in function code. | 
+|**name** |  Required. The name of the variable that represents the query results in function code. |
 | **database** | Required. The database against which the query has to be executed. |
-| **connection** | Required. The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` | 
+| **connection** | Required. The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` |
 | **kqlCommand** | Required. The KqlQuery that has to be executed. Can be a KQL query or a KQL Function call|
-|**kqlParameters** |  Optional. Parameters that act as predicate variables for the KqlCommand. For example "@name={name},@Id={id}" where the parameters {name} and {id} will be substituted at runtime with actual values acting as predicates. Neither the parameter name nor the parameter value can contain a comma (`,`) or an equals sign (`=`). | 
+|**kqlParameters** |  Optional. Parameters that act as predicate variables for the KqlCommand. For example "@name={name},@Id={id}" where the parameters {name} and {id} will be substituted at runtime with actual values acting as predicates. Neither the parameter name nor the parameter value can contain a comma (`,`) or an equals sign (`=`). |
 | **managedServiceIdentity** | A managed identity can be used to connect to Kusto. To use a System managed identity, use "system", any other identity names are interpreted as user managed identity|
 ::: zone-end  
-
 
 [!INCLUDE [app settings to local.settings.json](../../includes/functions-app-settings-local.md)]
 
@@ -608,11 +625,10 @@ The following table explains the binding configuration properties that you set i
 
 ::: zone pivot="programming-language-csharp,programming-language-javascript,programming-language-python,programming-language-java"
 
-The attribute's constructor takes the Database and the attributes KQLCommand , KQLParameters, and the Connection setting name. The KQLCommand can be a KQL statement or a KQLFunction. The connection string setting name corresponds to the application setting (in `local.settings.json` for local development) that contains the [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` . Queries executed by the input binding are parameterized and the values provided in the KQLParameters are used at runtime.
-
+The attribute's constructor takes the Database and the attributes KQLCommand , KQLParameters, and the Connection setting name. The KQLCommand can be a KQL statement or a KQLFunction. The connection string setting name corresponds to the application setting (in `local.settings.json` for local development) that contains the [Kusto connection strings](https://learn.microsoft.com/azure/data-explorer/kusto/api/connection-strings/kusto) e.g.:`"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_` . Queries executed by the input binding are parameterized and the values provided in the KQLParameters are used at runtime.
 
 ::: zone-end
 
 ## Next steps
 
-- [Save data to a table (Output binding)](./functions-bindings-kusto-output.md)
+* [Save data to a table (Output binding)](./functions-bindings-kusto-output.md)
