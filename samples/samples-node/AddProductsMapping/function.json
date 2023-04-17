@@ -18,7 +18,7 @@
     {
       "name": "product",
       "type": "kusto",
-      "database": "sdktestsdb",
+      "database": "e2e",
       "direction": "out",
       "tableName": "Products",
       "mappingRef": "item_to_product_json",

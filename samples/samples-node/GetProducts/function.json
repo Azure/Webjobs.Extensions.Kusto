@@ -18,7 +18,7 @@
     {
       "name": "productget",
       "type": "kusto",
-      "database": "sdktestsdb",
+      "database": "e2e",
       "direction": "in",
       "kqlCommand": "declare query_parameters (productId:long);Products | where ProductID == productId",
       "kqlParameters": "@productId={productId}",

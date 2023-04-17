@@ -5,7 +5,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindin
 {
     internal static class SampleConstants
     {
-        public const string DatabaseName = "sdktestsdb";
+        public const string DatabaseName = "e2e";
         public const string ProductsTable = "Products";
     }
 }

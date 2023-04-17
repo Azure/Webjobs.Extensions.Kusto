@@ -1,5 +1,28 @@
 package com.microsoft.azure.kusto.functions;
 
+import static io.gatling.javaapi.core.CoreDsl.StringBody;
+import static io.gatling.javaapi.core.CoreDsl.exec;
+import static io.gatling.javaapi.core.CoreDsl.global;
+import static io.gatling.javaapi.core.CoreDsl.jsonPath;
+import static io.gatling.javaapi.core.CoreDsl.nothingFor;
+import static io.gatling.javaapi.core.CoreDsl.rampUsers;
+import static io.gatling.javaapi.core.CoreDsl.scenario;
+import static io.gatling.javaapi.http.HttpDsl.http;
+import static io.gatling.javaapi.http.HttpDsl.status;
+import static java.lang.System.getProperty;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Container;
@@ -12,26 +35,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.kusto.functions.common.Item;
 import com.microsoft.azure.kusto.functions.common.Product;
 
-import static io.gatling.javaapi.core.CoreDsl.*;
-import static io.gatling.javaapi.http.HttpDsl.http;
-import static io.gatling.javaapi.http.HttpDsl.status;
-import static java.lang.System.getProperty;
-
 import io.gatling.javaapi.core.ChainBuilder;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
-import java.io.File;
-import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class FunctionsMultiLangTests extends Simulation {
     private static final Logger logger = LoggerFactory.getLogger(FunctionsMultiLangTests.class);
@@ -138,7 +145,7 @@ public class FunctionsMultiLangTests extends Simulation {
             .range(1, 10).mapToObj(count -> new Product(seconds - count,
                     String.format("Product-%s-%d", language, seconds - count), (seconds - count) / 1000999.999))
             .collect(Collectors.toList());
-    int noActionTime = 60;//RUN_TRIGGER ? 60 : 20;
+    int noActionTime = 60;// RUN_TRIGGER ? 60 : 20;
     long itemId = seconds + 10;
     Item addItemWithMapping = new Item(itemId, String.format("Item-%s-%d", language, itemId), itemId / 1000999.999);
     ChainBuilder inputAndOutputBindings = exec(session ->

@@ -484,7 +484,7 @@ The following is binding data in the function.json file:
     {
       "name": "productsdb",
       "type": "kusto",
-      "database": "sdktestsdb",
+      "database": "productsdb",
       "direction": "in",
       "kqlCommand": "declare query_parameters (productId:long);Products | where ProductID == productId",
       "kqlParameters": "@productId={Query.productId}",
