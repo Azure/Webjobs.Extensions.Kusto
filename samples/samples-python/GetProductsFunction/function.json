@@ -19,7 +19,7 @@
     {
       "name": "products",
       "type": "kusto",
-      "database": "sdktestsdb",
+      "database": "e2e",
       "direction": "in",
       "kqlCommand": "declare query_parameters (name:string);GetProductsByName(name)",
       "kqlParameters": "@name={name}",

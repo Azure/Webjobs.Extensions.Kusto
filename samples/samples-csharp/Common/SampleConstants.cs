@@ -5,7 +5,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.Common
 {
     internal static class SampleConstants
     {
-        public const string DatabaseName = "sdktestsdb";
+        public const string DatabaseName = "e2e";
         public const string ProductsTable = "Products";
         public const string ProductsChangeLogTable = "ProductsChangeLog";
     }

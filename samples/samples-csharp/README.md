@@ -3,22 +3,22 @@
 ## Table of Contents
 
 - [Kusto bindings for Azure Functions - .NET](#kusto-bindings-for-azure-functions---net)
-  * [Table of Contents](#table-of-contents)
-  * [Setup Function Project](#setup-function-project)
-  * [Input Binding](#input-binding)
-    + [KustoAttribute for Input Bindings](#kustoattribute-for-input-bindings)
-    + [Samples for Input Bindings](#samples-for-input-bindings)
+  - [Table of Contents](#table-of-contents)
+  - [Setup Function Project](#setup-function-project)
+  - [Input Binding](#input-binding)
+    - [KustoAttribute for Input Bindings](#kustoattribute-for-input-bindings)
+    - [Samples for Input Bindings](#samples-for-input-bindings)
       - [Query String](#query-string)
       - [KQL Functions](#kql-functions)
       - [IAsyncEnumerable](#iasyncenumerable)
-    + [KustoAttribute for Output Bindings](#kustoattribute-for-output-bindings)
-    + [Samples for Output Bindings](#samples-for-output-bindings)
+    - [KustoAttribute for Output Bindings](#kustoattribute-for-output-bindings)
+    - [Samples for Output Bindings](#samples-for-output-bindings)
       - [ICollector&lt;T&gt;/IAsyncCollector&lt;T&gt;](#icollectorlttgtiasynccollectorlttgt)
       - [Array](#array)
       - [Single Row](#single-row)
       - [Ingest CSV / Multiline CSV](#ingest-csv--multiline-csv)
       - [Ingest with mappings](#ingest-with-mappings)
-    + [Advanced example - Dynamic bindings & delta exports](#advanced-example---dynamic-bindings--delta-exports)
+    - [Advanced example - Dynamic bindings & delta exports](#advanced-example---dynamic-bindings--delta-exports)
 
 ## Setup Function Project
 
@@ -34,7 +34,7 @@ These instructions will guide you through creating your Function Project and add
     func init --worker-runtime dotnet
     ```
 
-3. Enable Kusto bindings on the function project. 
+3. Enable Kusto bindings on the function project.
 
     Install the extension.
 
@@ -51,14 +51,16 @@ These instructions will guide you through creating your Function Project and add
             "AzureWebJobsStorage": "UseDevelopmentStorage=true",
             "FUNCTIONS_WORKER_RUNTIME": "dotnet",
             "AzureWebJobsDashboard": "",
-            "KustoConnectionString": "Data Source=https://<kusto-cluster>.kusto.windows.net;Database=sdktestsdb;Fed=True;AppClientId=<app-id>;AppKey=<app-key>;Authority Id=<tenant-id>"
+            "KustoConnectionString": "Data Source=https://<kusto-cluster>.kusto.windows.net;Database=<database>;Fed=True;AppClientId=<app-id>;AppKey=<app-key>;Authority Id=<tenant-id>"
         },
         "ConnectionStrings": {
             "rabbitMQConnectionAppSetting": "amqp://guest:guest@rabbitmq:5672"
         }
     }
     ```
+
     and `host.json`
+
     ```json
     
         {
@@ -73,23 +75,24 @@ These instructions will guide you through creating your Function Project and add
             }
         }
     ```
+
 5. Reference the [set-up](../set-up/KQL-Setup.kql) to create sample tables, mappings , functions required for the example
 
 6. For advanced set-up sample with dynamic binding and time based exports, a simple RabbitMQ (with management plugins) [docker instance](https://hub.docker.com/_/rabbitmq) can be set up. A simple queue can be [declared](https://www.rabbitmq.com/management-cli.html) by using the CLI
+
     ```bash
     rabbitmqadmin declare queue name=bindings.test.queue durable=false
     ```
 
-
-
 ## Input Binding
+
 See [Input Binding Overview](../../README.md#input-binding) for general information about the Kusto Input binding.
 
 ### KustoAttribute for Input Bindings
 
 The [KustoAttribute](https://github.com/Azure/Webjobs.Extensions.Kusto/blob/main/src/KustoAttribute.cs) for Input bindings takes four arguments:
 
-Takes a KQL query or KQL function to run (with optional parameters) and returns the output to the function. 
+Takes a KQL query or KQL function to run (with optional parameters) and returns the output to the function.
 The input binding takes the following attributes
 
 - Database: The database against which the query has to be executed
@@ -103,9 +106,8 @@ The input binding takes the following attributes
 - Connection: The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.
 Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto)
 e.g.:
-"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_
+"KustoConnectionString": "Data Source=<https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority> Id=_**TenantId**_
 Note that the application id should atleast have viewer privileges on the table(s)/function(s) being queried in the KqlCommand
-
 
 The following are valid binding types for the result of the query/stored procedure execution:
 
@@ -117,15 +119,13 @@ The following are valid binding types for the result of the query/stored procedu
 
 - **JArray**: A [JSONArray](https://www.newtonsoft.com/json/help/html/T_Newtonsoft_Json_Linq_JArray.htm) type of the rows of the result (an example is provided [here](https://github.com/Azure/Webjobs.Extensions.Kusto/blob/main/samples/samples-csharp/InputBindingSamples/GetProductsJson.cs). Note that as a generic representation, returns are a JSONArray with 1 row in case of 1 row being selected
 
-
 ### Samples for Input Bindings
 
 The repo contains examples of each of these binding types [here](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-csharp/InputBindingSamples).
 
 #### Query String
 
-The input binding executes the `declare query_parameters (productId:long);Products | where ProductID == productId` query, returning the result as an `IEnumerable<Product>`, where Product is a user-defined POCO. The *Parameters* argument passes the `{productId}` specified in the URL that triggers the function, `getproducts/{productId}`, as the value of the `@productId` parameter in the query.
-
+The input binding executes the `declare query_parameters (productId:long);Products | where ProductID == productId` query, returning the result as an `IEnumerable<Product>`, where Product is a user-defined POCO. The _Parameters_ argument passes the `{productId}` specified in the URL that triggers the function, `getproducts/{productId}`, as the value of the `@productId` parameter in the query.
 
 | ProductID | Name     | Cost   |
 | :----:    | :----:   | :----: |
@@ -207,6 +207,7 @@ Using the `IAsyncEnumerable` binding generally requires that the `Run` function 
         return new OkObjectResult(productList);
     }
 ```
+
 ### KustoAttribute for Output Bindings
 
 See [Output Binding Overview](../../README.md#output-binding) for general information about the Kusto Input binding.
@@ -224,10 +225,7 @@ The [KustoAttribute](https://github.com/Azure/Webjobs.Extensions.Kusto/blob/main
 - Connection: The _**name**_ of the variable that holds the connection string, resolved through environment variables or through function app settings. Defaults to lookup on the variable _**KustoConnectionString**_, at runtime this variable will be looked up against the environment.
 Documentation on connection string can be found at [Kusto connection strings](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/connection-strings/kusto)
 
-
 - DataFormat: The default dataformat is `multijson/json`. This can be set to _**text**_ formats supported in the datasource format [enumeration](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/kusto-ingest-client-reference#enum-datasourceformat). Samples are validated and provided for csv and JSON formats.
-
-
 
 The following are valid binding types for the rows to be inserted into the table:
 
@@ -235,13 +233,13 @@ The following are valid binding types for the rows to be inserted into the table
 - **T**: Used when just one row is to be inserted into the table.
 - **T[]**: Each element is again a row of the generic type  `T`. This output binding type requires manual instantiation of the array in the function.
 - **string**: When data is not a POCO, rather a raw CSV for example that needs to be ingested.
+
     ```csv
     19222,prod2,220.22
     19223,prod2,221.22
     ```
 
 The repo contains examples of each of these binding types [here](https://github.com/Azure/Webjobs.Extensions.Kusto/tree/main/samples/samples-csharp/OutputBindingSamples). A few examples are also included [below](#samples-for-output-bindings).
-
 
 ### Samples for Output Bindings
 
@@ -338,7 +336,9 @@ When binding to a single row, it is also necessary to prefix the row with `out`
 ```
 
 #### Ingest CSV / Multiline CSV
+
 A csv row can be bound to an `out` **_string_** and processed as follows. Note the `DataFormat` element used in the binding
+
 ```csharp
     [FunctionName("AddProductCsv")]
     public static IActionResult Run(
@@ -355,9 +355,11 @@ A csv row can be bound to an `out` **_string_** and processed as follows. Note t
         return new CreatedResult($"/api/addproductcsv", productString);
     }
 ```
+
 #### Ingest with mappings
 
 In the event that we had a POCO of type item
+
 ```csharp
         public class Item
         {
@@ -367,14 +369,16 @@ In the event that we had a POCO of type item
             public double ItemCost { get; set; }
         }
 ```
+
 and we have to ingest this to the product table which has got different names. An ingestion mapping reference of **_item_to_product_json_** can be created and referenced. For example see mapping reference in the database below
+
 ```sql
     .show table Products ingestion mappings
 ```
+
 | Name | Kind     | Mapping   |
 | :----:    | :----:   | :----: |
 | item_to_product_json       | Json |```[{"column":"ProductID","path":"$.ItemID","datatype":"","transform":null},{"column":"Name","path":"$.ItemName","datatype":"","transform":null},{"column":"Cost","path":"$.ItemCost","datatype":"","transform":null}]```  |
-
 
 ```csharp
         [FunctionName("AddProductsWithMapping")]
@@ -399,7 +403,7 @@ and we have to ingest this to the product table which has got different names. A
 ### Advanced example - Dynamic bindings & delta exports
 
 A sightly more advanced example of combining a time based export, dynamic bindings in function (supported in C#) is depicted below. This assumes that a rabbitmq server is running (example in the [setup](#setup-function-project)).
-In this case there is no declarative syntax used in the binding, values for time are picked up from the timer and bound at runtime and the data queried, transformed & then exported to a destination (RabbitMQ in this case for simplicity). 
+In this case there is no declarative syntax used in the binding, values for time are picked up from the timer and bound at runtime and the data queried, transformed & then exported to a destination (RabbitMQ in this case for simplicity).
 
 ```csharp
 
