@@ -698,7 +698,7 @@ The following is binding data in the function.json file:
     {
       "name": "product",
       "type": "kusto",
-      "database": "sdktestsdb",
+      "database": "productsdb",
       "direction": "out",
       "tableName": "Products",
       "connection": "KustoConnectionString"
@@ -761,7 +761,7 @@ The following is binding data in the function.json file:
     {
       "name": "product",
       "type": "kusto",
-      "database": "sdktestsdb",
+      "database": "e2e",
       "direction": "out",
       "tableName": "Products",
       "connection": "KustoConnectionString"
@@ -769,7 +769,7 @@ The following is binding data in the function.json file:
     {
       "name": "productchangelog",
       "type": "kusto",
-      "database": "sdktestsdb",
+      "database": "e2e",
       "direction": "out",
       "tableName": "ProductsChangeLog",
       "connection": "KustoConnectionString"
