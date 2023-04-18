@@ -11,7 +11,6 @@ jobs:
       matrix:
         dotnet-version: ['6.0.x' ]
     steps:
-
       - uses: actions/checkout@v3
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
@@ -21,6 +20,11 @@ jobs:
         run: dotnet restore
       - name: Test with dotnet
         run: dotnet test --logger trx --results-directory "TestResults-${{ matrix.dotnet-version }}"
+        env:
+          KustoConnectionString: ${{secrets.KUSTOCONNECTIONSTRING}}        
+          KustoConnectionStringNoPermissions: ${{secrets.KUSTOCONNECTIONSTRINGNOPERMISSIONS}}        
+          KustoConnectionStringMSI: ${{secrets.KUSTOCONNECTIONSTRINGMSI}}        
+          KustoConnectionStringInvalidAttributes: ${{secrets.KUSTOCONNECTIONSTRINGINVALIDATTRIBUTES}}        
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v3
         with:
