@@ -4,21 +4,27 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dotnet-version: [ '3.1.101', '6.0.300' ]
     env:
       config: 'Release'
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET Core
+    - name: Setup .NET Core 2.1	
+      uses: actions/setup-dotnet@v1	
+      with:	
+        dotnet-version: 2.1.x	
+    - name: Setup .NET Core 3.1	
+      uses: actions/setup-dotnet@v1	
+      with:	
+        dotnet-version: 3.1.x
+    - name: Setup .NET Core 6.0
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}    
+        dotnet-version: 6.0.x
       
       # restore dependencies  
     - name: Install dependencies
