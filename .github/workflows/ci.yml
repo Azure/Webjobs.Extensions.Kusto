@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '3.1.101', '6.0.300' ]
     env:
       config: 'Release'
     steps:
@@ -15,11 +18,11 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101    
+        dotnet-version: ${{ matrix.dotnet-version }}    
       
       # restore dependencies  
     - name: Install dependencies
-      run: dotnet restore --force-evaluate
+      run: dotnet restore
       
       # build project
     - name: Build
