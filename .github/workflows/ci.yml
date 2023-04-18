@@ -1,66 +1,34 @@
 name: CI Build and test
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '3.1.101', '6.0.300' ]
-    env:
-      config: 'Release'
+        dotnet-version: ['6.0.x' ]
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ matrix.dotnet-version }}    
+      - name: Setup .NET Core 3.1	
+        uses: actions/setup-dotnet@v1	
+        with:	
+          dotnet-version: 3.1.x
+      - uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Test with dotnet
+        run: dotnet test --logger trx --results-directory "TestResults-${{ matrix.dotnet-version }}"
+      - name: Upload dotnet test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: dotnet-results-${{ matrix.dotnet-version }}
+          path: TestResults-${{ matrix.dotnet-version }}
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
       
-      # restore dependencies  
-    - name: Install dependencies
-      run: dotnet restore
-      
-      # build project
-    - name: Build
-      run: dotnet build --configuration $config --no-restore
-      
-    - name: set pr build number (if pr)
-      id: PRNUMBER
-      if: ${{ github.event_name == 'pull_request' }}
-      uses: kkak10/pr-number-action@v1.3
-      
-      # set report file and title 
-    - name: Set Test Title
-      run: | 
-            if ${{ github.event_name == 'pull_request' }}
-            then
-              echo "title=Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_number}})" >> $GITHUB_ENV
-              echo "file_name=TestReport.${{steps.PRNUMBER.outputs.pr}}.${{github.run_number}}.md" >> $GITHUB_ENV              
-            else
-              echo "title=Test Run ${{github.run_number}}" >> $GITHUB_ENV
-              echo "file_name=TestReport.${{github.run_number}}.md" >> $GITHUB_ENV
-            fi
-      # run tests with built project
-    - name: Test PR      
-      run: dotnet test --no-restore --no-build --configuration $config --logger:"liquid.md;LogFileName=${{github.workspace}}/${{env.file_name}};Title=${{env.title}};"
-      
-      # upload report as build artifact
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2
-      if: ${{always()}}
-      with:
-        name: 'Test Run'
-        path: ${{github.workspace}}/${{env.file_name}}
-      
-      # add report as PR comment (if PR)
-    - name: comment PR
-      uses: machine-learning-apps/pr-comment@master
-      if: ${{ github.event_name == 'pull_request' }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        path: ${{env.file_name}}
