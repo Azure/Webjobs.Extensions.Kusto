@@ -118,21 +118,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             IDataReader mockDataReaderResult4 = KustoTestHelper.MockResultDataReaderItems(DatabaseName, item4, 4);
             IDataReader mockDataReaderResult5 = KustoTestHelper.MockResultDataReaderItems(DatabaseName, item5, 5);
             mockQueryClient.SetupSequence(
-                m => m.ExecuteQueryAsync(DatabaseName, QueryWithBoundParam, Capture.In(capturedCrpsWithParameters)))
+                m => m.ExecuteQueryAsync(DatabaseName, QueryWithBoundParam, Capture.In(capturedCrpsWithParameters), default))
             .ReturnsAsync(mockDataReaderResult1)
             .ReturnsAsync(mockDataReaderResult2)
             .ReturnsAsync(mockDataReaderResult5);
             // For the hardcoded query without parameters
             mockQueryClient
-                .SetupSequence(m => m.ExecuteQueryAsync(DatabaseName, QueryWithNoBoundParam, Capture.In(capturedCrpsWithoutParameters)))
+                .SetupSequence(m => m.ExecuteQueryAsync(DatabaseName, QueryWithNoBoundParam, Capture.In(capturedCrpsWithoutParameters), default))
                 .ReturnsAsync(mockDataReaderResult3)
                 .ReturnsAsync(mockDataReaderResult4);
             // Act
             await this.RunTestAsync(typeof(KustoEndToEndFunctions), queryClientFactory, nameof(KustoEndToEndFunctions.Inputs));
             // Assert
-            mockQueryClient.Verify(f => f.ExecuteQueryAsync(DatabaseName, QueryWithBoundParam, It.IsAny<ClientRequestProperties>()), Times.Exactly(3));
+            mockQueryClient.Verify(f => f.ExecuteQueryAsync(DatabaseName, QueryWithBoundParam, It.IsAny<ClientRequestProperties>(), default), Times.Exactly(3));
             // 2 times called without parameters
-            mockQueryClient.Verify(f => f.ExecuteQueryAsync(DatabaseName, QueryWithNoBoundParam, It.IsAny<ClientRequestProperties>()), Times.Exactly(2));
+            mockQueryClient.Verify(f => f.ExecuteQueryAsync(DatabaseName, QueryWithNoBoundParam, It.IsAny<ClientRequestProperties>(), default), Times.Exactly(2));
             capturedCrpsWithParameters.ForEach(crp =>
             {
                 // Check if the key exists

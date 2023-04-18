@@ -18,3 +18,7 @@
 .show streamingingestion statistics  | order by StartTime desc | take 10
 
 .create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
+
+.alter table Item policy streamingingestion enable
+
+.alter table Products policy streamingingestion enable
