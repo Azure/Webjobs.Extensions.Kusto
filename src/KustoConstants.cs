@@ -15,6 +15,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         // List of fields for usage tracking of Functions
         public const string AzFunctionsClientName = "AzFunctions.Client";
         public const string FunctionsRuntime = "FunctionsRuntime";
+        public const string BindingType = "BindingType";
+        public const string ManagedIdentity = "MSI";
+        public const string SystemManagedIdentity = "SystemManagedIdentity";
+        public const string UserManagedIdentity = "UserManagedIdentity";
+        public const string InputBindingType = "InputBinding";
+        public const string OutputBindingType = "OutputBinding";
         public const string FunctionsRuntimeHostKey = "FUNCTIONS_WORKER_RUNTIME";
         public static readonly string AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static readonly string ClientDetailForTracing = $"{AzFunctionsClientName}:{AssemblyVersion}";
