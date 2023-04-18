@@ -11,10 +11,7 @@ jobs:
       matrix:
         dotnet-version: ['6.0.x' ]
     steps:
-      - name: Setup .NET Core 3.1	
-        uses: actions/setup-dotnet@v1	
-        with:	
-          dotnet-version: 3.1.x
+
       - uses: actions/checkout@v3
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
