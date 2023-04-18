@@ -60,7 +60,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         protected ICslQueryProvider KustoQueryClient { get; private set; }
         protected ICslAdminProvider KustoAdminClient { get; private set; }
         private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
-        private readonly TestLoggerProvider _loggerProvider = new TestLoggerProvider();
+        private readonly TestLoggerProvider _loggerProvider = new();
 
         [Fact]
         public async Task KustoFunctionsE2E()
