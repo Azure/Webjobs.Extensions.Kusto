@@ -30,7 +30,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         private const string QueryWithBoundParam = "declare query_parameters (name:string);TestTable | where Name == name";
         private const string QueryWithNoBoundParam = "TestTable | where Name == 'I4'";
         private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
-        private readonly TestLoggerProvider _loggerProvider = new TestLoggerProvider();
+        private readonly TestLoggerProvider _loggerProvider = new();
 
         public KustoBindingE2EMockTests()
         {
