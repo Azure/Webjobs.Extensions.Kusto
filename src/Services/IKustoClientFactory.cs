@@ -21,7 +21,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     internal interface IKustoClientFactory
     {
         IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
-        ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
+        ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, bool isAdminCommand, ILogger logger);
     }
     internal class KustoClient : IKustoClientFactory
     {
@@ -65,13 +65,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// <param name="managedIdentity">MSI string to use Managed service identity</param>
         /// <returns>A query client to execute KQL</returns>
 
-        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
+        public ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, bool isAdminCommand, ILogger logger)
         {
             KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName, InputBindingType, logger);
             var timer = new Stopwatch();
             timer.Start();
             // Create a query client connection. This is needed in cases to debug any connection issues
-            ICslQueryProvider queryProvider = KustoClientFactory.CreateCslQueryProvider(engineKcsb);
+            ICslQueryProvider queryProvider = isAdminCommand ? KustoClientFactory.CreateCslAdminProvider(engineKcsb) : KustoClientFactory.CreateCslQueryProvider(engineKcsb);
             timer.Stop();
             logger.LogDebug($"Initializing query client with the connection string : {KustoBindingUtils.ToSecureString(engineConnectionString)}  took {timer.ElapsedMilliseconds} milliseconds");
             return queryProvider;

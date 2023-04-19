@@ -149,8 +149,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 {
                     throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
                 }
-                string cacheKey = BuildCacheKey(engineConnectionString);
-                return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, functionRuntime, this._logger));
+                bool isAdminCommand = !string.IsNullOrEmpty(kustoAttribute.KqlCommand) &&
+                    kustoAttribute.KqlCommand.Trim().StartsWith(".", StringComparison.InvariantCultureIgnoreCase);
+                if (isAdminCommand)
+                {
+                    this._logger.LogTrace("Executing admin command : {}", kustoAttribute.KqlCommand);
+                }
+                string prefix = isAdminCommand ? "admin" : "query";
+                string cacheKey = BuildCacheKey(engineConnectionString, prefix);
+                return this.QueryClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.QueryProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, functionRuntime, isAdminCommand, this._logger));
             }
             catch (Exception e)
             {
@@ -173,9 +180,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             // Already validated upfront in Validate that ConnectionString setting is passed in and not null
             return resolvedConnectionString;
         }
-        internal static string BuildCacheKey(string connectionString)
+        internal static string BuildCacheKey(string connectionString, string prefix = "")
         {
-            return $"C-{connectionString.GetHashCode()}";
+            return $"C-{prefix}{connectionString.GetHashCode()}";
         }
     }
     /// <summary>
