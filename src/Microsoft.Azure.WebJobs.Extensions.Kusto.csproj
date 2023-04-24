@@ -7,7 +7,7 @@
     <Product>Kusto Binding Extension</Product>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <!-- Default Version for dev -->
-    <Version>1.0.5-Preview</Version>
+    <Version>1.0.7-Preview</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>

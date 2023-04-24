@@ -10,14 +10,14 @@
       },
       "Microsoft.Azure.Kusto.Data": {
         "type": "Direct",
-        "requested": "[11.3.0, )",
-        "resolved": "11.3.0",
-        "contentHash": "0RHL3NJ4UcQbymYUTW8ROFZawYb+2GuqHQDztPU3SOjOLMpS2/Dg6u4+iuexkFVL4itCSTOPpoRjpQyb5rwHAw==",
+        "requested": "[11.3.1, )",
+        "resolved": "11.3.1",
+        "contentHash": "FLesHS268yX06o3YjrxGxFX+UtKmIy4g7XOf/+dPNtNjaEM2EP+Nt2mEuqzt5EQHrHTVMIPgi2nGh+KqDz4bPQ==",
         "dependencies": {
           "Azure.Core": "1.31.0",
           "Azure.Identity": "1.7.0",
-          "Microsoft.Azure.Kusto.Cloud.Platform": "11.3.0",
-          "Microsoft.Azure.Kusto.Cloud.Platform.Msal": "11.3.0",
+          "Microsoft.Azure.Kusto.Cloud.Platform": "11.3.1",
+          "Microsoft.Azure.Kusto.Cloud.Platform.Msal": "11.3.1",
           "Microsoft.Bcl.AsyncInterfaces": "7.0.0",
           "Microsoft.CSharp": "4.7.0",
           "Microsoft.IO.RecyclableMemoryStream": "2.2.1",
@@ -163,8 +163,8 @@
       },
       "Microsoft.Azure.Kusto.Cloud.Platform": {
         "type": "Transitive",
-        "resolved": "11.3.0",
-        "contentHash": "qvvHtAYoAviKo7SM4ryrkq0xIpE7mGxK5C7hhYdaBdZ2KBlsK6J3F5D7v+zWv5WR06Os17TF12NIUarXJg2d5w==",
+        "resolved": "11.3.1",
+        "contentHash": "K1WQuk2FyknCAvJii/UTnXNr86ryR1eJbH3S76cYJ1DrxUkC2iIsK3/S4mvQGb+tkW99/OZSxNinESEVaYpXmg==",
         "dependencies": {
           "Microsoft.CSharp": "4.5.0",
           "Microsoft.IO.RecyclableMemoryStream": "2.2.0",
@@ -177,12 +177,12 @@
       },
       "Microsoft.Azure.Kusto.Cloud.Platform.Msal": {
         "type": "Transitive",
-        "resolved": "11.3.0",
-        "contentHash": "7yOVyncx9y4QcMpjAqsp8goPbdNpZmhnO/jCqmcNY78jnK4rizWwNP0xw6f/cwvkFqkZJ5c4nr0u8xtBg4z1eg==",
+        "resolved": "11.3.1",
+        "contentHash": "vkOHtGLPGKmc/wgh+5nvgx8Unlg8do28O6ly9D/dHUOUGZ9rC96PRo4GrHCCHHXo1eTzVpRNJ9qjAZFqLUz0eQ==",
         "dependencies": {
           "Azure.Core": "1.31.0",
           "Azure.Identity": "1.7.0",
-          "Microsoft.Azure.Kusto.Cloud.Platform": "11.3.0",
+          "Microsoft.Azure.Kusto.Cloud.Platform": "11.3.1",
           "Microsoft.Bcl.AsyncInterfaces": "7.0.0",
           "Microsoft.CSharp": "4.7.0",
           "Microsoft.IO.RecyclableMemoryStream": "2.2.1",
@@ -1500,17 +1500,17 @@
       "microsoft.azure.webjobs.extensions.kusto": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.Azure.Kusto.Data": "[11.3.0, )",
-          "Microsoft.Azure.Kusto.Ingest": "[11.3.0, )",
+          "Microsoft.Azure.Kusto.Data": "[11.3.1, )",
+          "Microsoft.Azure.Kusto.Ingest": "[11.3.1, )",
           "Microsoft.Azure.WebJobs": "[3.0.37, )",
           "Newtonsoft.Json": "[13.0.3, )"
         }
       },
       "Microsoft.Azure.Kusto.Ingest": {
         "type": "CentralTransitive",
-        "requested": "[11.3.0, )",
-        "resolved": "11.3.0",
-        "contentHash": "lqOmlP9AbIoyN3GHC+mWPJM6iVdlEHasKUWBG3UF+dJxubjgtyxoAKShOJpT5rHkv3pekFGyMJrfJlAPOuPBRw==",
+        "requested": "[11.3.1, )",
+        "resolved": "11.3.1",
+        "contentHash": "Q2vuh7vhpJyJ7lsIjG/MdMRG/CRHOSFJx1ef261dntxOTSpFKJtXfcm/zNj6aUxyhJuUPodG5L6sDqEDuLs1jQ==",
         "dependencies": {
           "Azure.Core": "1.31.0",
           "Azure.Data.Tables": "12.8.0",
@@ -1518,7 +1518,7 @@
           "Azure.Storage.Blobs": "12.13.0",
           "Azure.Storage.Common": "12.12.0",
           "Azure.Storage.Queues": "12.11.0",
-          "Microsoft.Azure.Kusto.Data": "11.3.0",
+          "Microsoft.Azure.Kusto.Data": "11.3.1",
           "Microsoft.Bcl.AsyncInterfaces": "7.0.0",
           "Microsoft.CSharp": "4.7.0",
           "Microsoft.IO.RecyclableMemoryStream": "2.2.1",
