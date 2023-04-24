@@ -6,7 +6,7 @@
 
   <groupId>com.microsoft.azure.kusto</groupId>
   <artifactId>functions-int-tests</artifactId>
-  <version>1.0.5-Preview</version>
+  <version>1.0.7-Preview</version>
   <name>functions-int-tests</name>
   <properties>
     <!-- use the following if you're compiling with JDK 8-->
