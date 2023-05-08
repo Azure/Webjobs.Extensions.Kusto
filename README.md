@@ -1,6 +1,7 @@
 ﻿# **Kusto bindings for Azure Functions - Preview**
 
 ## **Table of Contents**
+
 - [Kusto bindings for Azure Functions - Preview](#kusto-bindings-for-azure-functions---preview)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
@@ -14,7 +15,7 @@ This repository contains the Kusto bindings for Azure Functions extension code a
 
 ### **Input Binding**
 
-Takes a KQL query or KQL function to run (with optional parameters) and returns the output to the function. 
+Takes a KQL query or KQL function to run (with optional parameters) and returns the output to the function.
 The input binding takes the following attributes
 
 - Database: The database against which the query has to be executed
@@ -31,9 +32,8 @@ e.g.:
 `"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_`
 Note that the application id should **_atleast have viewer privileges_** on the table(s)/function(s) being queried in the KqlCommand
 
-
 ### **Output Binding**
- 
+
 Takes row(s) and inserts them into the Kusto table .
 
 - Database: The database against which the query has to be executed
@@ -58,9 +58,7 @@ Samples for C# are available and available at the following. This can run with l
 - [Node](samples/samples-node)
 - [Python](samples/samples-python)
 
-
 ## Known Issues
-
 
 ## Trademarks
 
