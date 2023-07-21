@@ -28,9 +28,9 @@ namespace Microsoft.Azure.WebJobs.Kusto
             return JsonConvert.SerializeObject(Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, i => reader.GetValue(i)));
         }
 
-        public static IDictionary<string, string> ParseParameters(string parameters)
+        public static IDictionary<string, object> ParseParameters(string parameters)
         {
-            IDictionary<string, string> kvParameters = new Dictionary<string, string>();
+            IDictionary<string, object> kvParameters = new Dictionary<string, object>();
             // If parameters is null, user did not specify any parameters in their function so nothing to parse
             if (!string.IsNullOrEmpty(parameters))
             {

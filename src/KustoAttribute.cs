@@ -68,6 +68,13 @@ namespace Microsoft.Azure.WebJobs.Kusto
         [AutoResolve]
         public string KqlParameters { get; set; }
 
+        /// <summary>
+        /// The parameter to use in the ClientRequestProperties in the form (@param1=value1,@param2=value2). 
+        /// Refer https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/request-properties#clientrequestproperties for details on properties
+        /// </summary>
+        [AutoResolve]
+        public string ClientRequestProperties { get; set; }
+
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private string DebuggerDisplay
         {

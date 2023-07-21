@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Kusto.Data.Common;
@@ -64,24 +65,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     if (this._reader == null)
                     {
                         string tracingRequestId = Guid.NewGuid().ToString();
-                        ClientRequestProperties clientRequestProperties;
-                        if (!string.IsNullOrEmpty(this._kustoQueryContext.ResolvedAttribute.KqlParameters))
+                        // expect that this is a string in a specific format
+                        // We expect that we have a declarative query mechanism to perform KQL
+                        IEnumerable<KeyValuePair<string, string>> queryParameters = KustoBindingUtilities.ParseParameters(this._kustoQueryContext.ResolvedAttribute.KqlParameters).Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value?.ToString()));
+                        IEnumerable<KeyValuePair<string, object>> crpOptions = KustoBindingUtilities.ParseParameters(this._kustoQueryContext.ResolvedAttribute.ClientRequestProperties).Select(kvp => new KeyValuePair<string, object>(kvp.Key, kvp.Value));
+                        var clientRequestProperties = new ClientRequestProperties(options: crpOptions, parameters: queryParameters)
                         {
-                            // expect that this is a JSON in a specific format
-                            // We expect that we have a declarative query mechanism to perform KQL
-                            IDictionary<string, string> queryParameters = KustoBindingUtilities.ParseParameters(this._kustoQueryContext.ResolvedAttribute.KqlParameters);
-                            clientRequestProperties = new ClientRequestProperties(options: null, parameters: queryParameters)
-                            {
-                                ClientRequestId = $"{KustoConstants.ClientRequestId};{tracingRequestId}",
-                            };
-                        }
-                        else
-                        {
-                            clientRequestProperties = new ClientRequestProperties()
-                            {
-                                ClientRequestId = $"{KustoConstants.ClientRequestId};{tracingRequestId}",
-                            };
-                        }
+                            ClientRequestId = $"{KustoConstants.ClientRequestId};{tracingRequestId}",
+                        };
                         this._reader = await this._kustoQueryContext.QueryProvider.ExecuteQueryAsync(this._kustoQueryContext.ResolvedAttribute.Database, this._kustoQueryContext.ResolvedAttribute.KqlCommand, clientRequestProperties);
                     }
                     if (this._reader.Read())
