@@ -36,4 +36,8 @@ public @interface KustoInput {
     // else use UserManagedIdentity
     String managedServiceIdentity() default "";
 
+    // An option to set the ClientRequestProperties.
+    // Refer https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/request-properties#clientrequestproperties for details on properties    
+    String clientRequestProperties() default "";
+
 }
