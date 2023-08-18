@@ -35,6 +35,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Config
             // Then
             Assert.NotNull(asyncBuilder);
             Assert.Single(kustoExtensionConfigProvider.IngestClientCache);
+            // Given
+            var queryAttribute = new KustoAttribute("unittestdb")
+            {
+                TableName = "Items",
+                KqlCommand = "Storms | take 10"
+            };
+            // When
+            _ = kustoExtensionConfigProvider.CreateQueryContext(queryAttribute);
+            _ = kustoExtensionConfigProvider.CreateQueryContext(queryAttribute);
+            var asyncQueryClientBuilder = new KustoAsyncCollectorBuilder<KustoOpenType>(this._logger, kustoExtensionConfigProvider);
+            // Then
+            Assert.NotNull(asyncQueryClientBuilder);
+            Assert.Single(kustoExtensionConfigProvider.QueryClientCache);
         }
         [Fact]
         public void FailsWhenConnectionStringIsNotResolvable()
@@ -59,6 +72,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Config
 
             var kustoExtensionConfigProvider = new KustoExtensionConfigProvider(_baseConfig, NullLoggerFactory.Instance, ingestClientFactory);
             kustoExtensionConfigProvider.IngestClientCache.Clear();
+            kustoExtensionConfigProvider.QueryClientCache.Clear();
             ExtensionConfigContext context = KustoTestHelper.CreateExtensionConfigContext(nameResolver);
             // Should Initialize and register the validators and should not throw an error
             kustoExtensionConfigProvider.Initialize(context);

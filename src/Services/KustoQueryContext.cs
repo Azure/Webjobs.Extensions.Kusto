@@ -14,5 +14,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         public KustoAttribute ResolvedAttribute { get; set; }
 
         public ICslQueryProvider QueryProvider { get; set; }
+
+        public ICslAdminProvider AdminProvider { get; set; }
+
+        public bool IsControlCommand { get; set; }
     }
 }
