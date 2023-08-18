@@ -29,6 +29,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         private const string TableName = "TestTable";
         private const string QueryWithBoundParam = "declare query_parameters (name:string);TestTable | where Name == name";
         private const string QueryWithNoBoundParam = "TestTable | where Name == 'I4'";
+        private const string CrpOptions = "@client_max_redirect_count=2, @notruncation=true, @maxoutputcolumns=638258584515103616, @query_language=\"kql\"";
         private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
         private readonly TestLoggerProvider _loggerProvider = new();
 
@@ -140,6 +141,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
                 // Remove the keys
                 setOfItems.Remove(crp.Parameters["name"]);
             });
+            var actualCrpOptions = new Dictionary<string, object>();
+            foreach (KeyValuePair<string, object> option in capturedCrpsWithParameters.SelectMany(crp => crp.Options))
+            {
+                actualCrpOptions[option.Key] = option.Value;
+            }
+            string actualCrp = string.Join(", ", actualCrpOptions.Select(res => $"@{res.Key}={res.Value}"));
+            Assert.Equal(CrpOptions, actualCrp);
             // This way validate all keys are present since matched keys get removed
             Assert.Empty(setOfItems);
             // No params passed. Should not have a name parameter in it
@@ -300,11 +308,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             }
             [NoAutomaticTrigger]
             public static async Task Inputs(
-                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> itemOne,
-                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I2", Connection = KustoConstants.DefaultConnectionStringName)] JArray itemTwo,
-                [Kusto(Database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName)] string itemThree,
-                [Kusto(Database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemFour,
-                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I5", Connection = KustoConstants.DefaultConnectionStringName)] IAsyncEnumerable<Item> itemFive
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName, ClientRequestProperties = CrpOptions)] IEnumerable<Item> itemOne,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I2", Connection = KustoConstants.DefaultConnectionStringName, ClientRequestProperties = CrpOptions)] JArray itemTwo,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName, ClientRequestProperties = CrpOptions)] string itemThree,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithNoBoundParam, Connection = KustoConstants.DefaultConnectionStringName, ClientRequestProperties = CrpOptions)] IAsyncEnumerable<Item> itemFour,
+                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I5", Connection = KustoConstants.DefaultConnectionStringName, ClientRequestProperties = CrpOptions)] IAsyncEnumerable<Item> itemFive
             )
             {
                 Assert.NotNull(itemOne);
@@ -391,4 +399,3 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         }
     }
 }
-

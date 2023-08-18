@@ -2,17 +2,9 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using Microsoft.Extensions.Hosting;
-namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc
-{
-    internal class Program
-    {
-        public static void Main()
-        {
-            IHost host = new HostBuilder()
+
+IHost host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
     .Build();
 
-            host.Run();
-        }
-    }
-}
+host.Run();

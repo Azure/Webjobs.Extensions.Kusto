@@ -32,4 +32,3 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
         }
     }
 }
-

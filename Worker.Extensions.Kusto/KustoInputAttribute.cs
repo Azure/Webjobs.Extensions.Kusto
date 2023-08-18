@@ -32,6 +32,11 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Kusto
         /// </summary>
         public string KqlParameters { get; set; }
 
+        /// <summary>
+        /// The parameter to use in the ClientRequestProperties in the form (@param1=value1,@param2=value2). 
+        /// Refer https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/request-properties#clientrequestproperties for details on properties
+        /// </summary>
+        public string ClientRequestProperties { get; set; }
 
         /// <summary>
         /// The name of the app setting where the Kusto connection string is stored

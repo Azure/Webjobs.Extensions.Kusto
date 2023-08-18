@@ -28,9 +28,9 @@ namespace Microsoft.Azure.WebJobs.Kusto
             return JsonConvert.SerializeObject(Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, i => reader.GetValue(i)));
         }
 
-        public static IDictionary<string, string> ParseParameters(string parameters)
+        public static IDictionary<string, object> ParseParameters(string parameters)
         {
-            IDictionary<string, string> kvParameters = new Dictionary<string, string>();
+            IDictionary<string, object> kvParameters = new Dictionary<string, object>();
             // If parameters is null, user did not specify any parameters in their function so nothing to parse
             if (!string.IsNullOrEmpty(parameters))
             {
@@ -50,11 +50,12 @@ namespace Microsoft.Azure.WebJobs.Kusto
                            "i.e. \"@param1=param1,@param2=param2\". To specify a null value, use null, as in \"@param1=null,@param2=param2\"." +
                            "To specify an empty string as a value, simply do not add anything after the equals sign, as in \"@param1=,@param2=param2\".");
                     }
-                    if (!items[0].StartsWith("@", StringComparison.InvariantCultureIgnoreCase))
+                    string key = items[0].Trim();
+                    if (!key.StartsWith("@", StringComparison.InvariantCultureIgnoreCase))
                     {
                         throw new ArgumentException("Parameter name must start with \"@\", i.e. \"@param1=param1,@param2=param2\"");
                     }
-                    kvParameters.Add(items[0][1..], items[1]);
+                    kvParameters.Add(key[1..], items[1]);
                 }
             }
             return kvParameters;
