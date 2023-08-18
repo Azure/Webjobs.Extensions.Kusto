@@ -4,7 +4,7 @@
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Title>Samples package for C# in-process executions</Title>
+    <Title>Samples package for C# in-process with declarative executions</Title>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Http" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.RabbitMQ" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" />
   </ItemGroup>
 

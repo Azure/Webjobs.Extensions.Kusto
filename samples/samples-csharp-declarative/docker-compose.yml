@@ -1,0 +1,24 @@
+version: '3'
+services:
+  baseimage:
+    image: sdktestsacr.azurecr.io/func-az-kusto-base:latest
+    hostname: func-az-kusto-base
+    ports:
+      - "7101:7101"
+      - "7102:7102"
+      - "7103:7103"
+      - "7104:7104"
+      - "7105:7105"
+  rabbitmq:
+    image: rabbitmq:3.11.9-management
+    hostname: rabbitmq
+    ports:
+      - "7000:15672"
+      - "7001:5672"
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    hostname: azurite
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
