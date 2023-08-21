@@ -135,7 +135,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             return new KustoQueryContext
             {
                 QueryProvider = isControlCommand ? null : this.GetQueryClient(kustoAttribute),
-                AdminProvider = isControlCommand ? null : this.GetAdminClient(kustoAttribute),
+                AdminProvider = isControlCommand ? this.GetAdminClient(kustoAttribute) : null,
                 ResolvedAttribute = kustoAttribute,
                 IsControlCommand = isControlCommand
             };
