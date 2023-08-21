@@ -15,6 +15,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.InputBindingSamples.T
     // To make it harder, we will use a dynamic predicate as well
     public static class TimeBasedExport
     {
+        [Disable("TimerFunctionDisabled")]
         [FunctionName("TimeBasedExport")]
         public static async Task Run(
             [TimerTrigger("*/5 * * * * *")] TimerInfo exportTimer,

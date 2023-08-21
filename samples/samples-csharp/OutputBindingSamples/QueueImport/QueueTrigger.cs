@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples.
 {
     public class QueueTrigger
     {
+        [Disable("QueueFunctionDisabled")]
         [FunctionName("QueueTriggerBinding")]
         [return: Kusto(Database: SampleConstants.DatabaseName,
                     TableName = SampleConstants.ProductsTable,

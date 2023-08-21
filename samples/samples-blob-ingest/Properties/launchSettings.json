@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "samples_blob_ingest": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7247",
+      "launchBrowser": false
+    }
+  }
+}
