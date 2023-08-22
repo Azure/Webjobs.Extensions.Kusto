@@ -25,9 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Functions.W
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc", "samples\samples-outofproc\Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.csproj", "{B5EF39F6-C66B-404D-887E-799C61C7A720}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{2AC4A5E8-D5CF-4CD3-A3FE-8F9FF7F7928B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.WebJobs.Extensions.Kusto.BlobSample", "samples\samples-blob-ingest\Microsoft.Azure.WebJobs.Extensions.Kusto.BlobSample.csproj", "{2F39D1F5-12CA-4543-99F5-B90140770E8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extensions.Kusto.BlobSample", "samples\samples-blob-ingest\Microsoft.Azure.WebJobs.Extensions.Kusto.BlobSample.csproj", "{2F39D1F5-12CA-4543-99F5-B90140770E8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,7 +64,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{4453B407-2CA3-4011-BDE5-247FCE5C1974} = {21CDC01C-247B-46B0-A8F5-9D35686C628B}
 		{A5B55530-71C8-4A9A-92AD-1D33A5E80FC1} = {F7E99EB5-47D3-4B50-A6AA-D8D5508A121A}
-		{2F39D1F5-12CA-4543-99F5-B90140770E8B} = {2AC4A5E8-D5CF-4CD3-A3FE-8F9FF7F7928B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {49902AA5-150F-4567-B562-4AA8549B2CF4}

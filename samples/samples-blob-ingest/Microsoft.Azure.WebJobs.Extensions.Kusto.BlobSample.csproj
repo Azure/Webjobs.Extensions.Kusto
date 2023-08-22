@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage.Blobs"/>
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage.Blobs" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" />
   </ItemGroup>
 
@@ -34,5 +34,5 @@
   <ItemGroup>
     <Folder Include="State\" />
   </ItemGroup>
-  <ProjectExtensions><VisualStudio><UserProperties properties_4servicedependencies_1local_1json__JsonSchema="https://geojson.org/schema/GeoJSON.json" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>
