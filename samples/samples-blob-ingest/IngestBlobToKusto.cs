@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
+using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.BlobTriggerIngestSample
 {
@@ -14,7 +16,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.BlobTriggerIngestSamp
     {
         [FunctionName("IngestBlobToKusto")]
         public static async Task Run(
-            [BlobTrigger("samples-blob-ingest/sample-blob-1", Connection = "StorageConnectionString")] BlobClient blobClient, ILogger logger)
+            [BlobTrigger("samples-blob-ingest/*.csv", Connection = "StorageConnectionString")] BlobClient blobClient, IBinder binder, ILogger logger)
         {
             BlobProperties blobProperties1 = await blobClient.GetPropertiesAsync();
             logger.LogInformation("Blob sample-container/sample-blob-1 has been updated on: {datetime}", blobProperties1.LastModified);
@@ -32,7 +34,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.BlobTriggerIngestSamp
 
             // Use the key to get the SAS token.
             Uri sasToken = blobClient.GenerateSasUri(sasBuilder);
-            logger.LogInformation("SAS token for blob sample-container/sample-blob-1 is: {sasToken}", sasToken);
+            logger.LogTrace("SAS token for blob sample-container/sample-blob-1  is: {sasToken}", sasToken);
+            var kustoIngest = new KustoAttribute("e2e")
+            {
+                Connection = "KustoConnectionString",
+                KqlCommand = $".ingest into table T ('{sasToken}')"
+            };
+            JArray ingestResult = await binder.BindAsync<JArray>(kustoIngest);
+            logger.LogInformation("Ingestion result {ingestResult}", ingestResult);
         }
     }
 }
