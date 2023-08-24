@@ -22,3 +22,5 @@
 .alter table Item policy streamingingestion enable
 
 .alter table Products policy streamingingestion enable
+
+.create table eshopclothing (year: long, month: long, day: long, ['order']: long, country: long, ['session_id']: long, ['page1_main_category_']: long, ['page2_clothing model']: string, colour: long, ['location']: long, ['model_photography']: long, price: long, ['price2']: long, page: long)

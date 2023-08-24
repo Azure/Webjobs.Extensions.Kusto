@@ -16,7 +16,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.BlobTriggerIngestSamp
     {
         [FunctionName("IngestBlobToKusto")]
         public static async Task Run(
-            [BlobTrigger("samples-blob-ingest/*.csv", Connection = "StorageConnectionString")] BlobClient blobClient, IBinder binder, ILogger logger)
+            [BlobTrigger("samples-blob-ingest/*.csv.gz", Connection = "StorageConnectionString")] BlobClient blobClient, IBinder binder, ILogger logger)
         {
             BlobProperties blobProperties1 = await blobClient.GetPropertiesAsync();
             logger.LogInformation("Blob sample-container/sample-blob-1 has been updated on: {datetime}", blobProperties1.LastModified);
@@ -38,7 +38,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.BlobTriggerIngestSamp
             var kustoIngest = new KustoAttribute("e2e")
             {
                 Connection = "KustoConnectionString",
-                KqlCommand = $".ingest into table T ('{sasToken}')"
+                KqlCommand = $".ingest into table eshopclothing ('{sasToken}')"
             };
             JArray ingestResult = await binder.BindAsync<JArray>(kustoIngest);
             logger.LogInformation("Ingestion result {ingestResult}", ingestResult);
