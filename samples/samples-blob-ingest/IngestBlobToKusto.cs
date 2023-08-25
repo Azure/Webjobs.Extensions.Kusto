@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using System.Web;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
@@ -19,16 +20,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.BlobTriggerIngestSamp
             [BlobTrigger("samples-blob-ingest/{name}", Connection = "StorageConnectionString")] BlobClient blobClient, string name, IBinder binder, ILogger logger)
         {
             BlobProperties blobProperties1 = await blobClient.GetPropertiesAsync();
-            logger.LogInformation("Blob sample-container/sample-blob-1 has been updated on: {datetime}", blobProperties1.LastModified);
+            logger.LogInformation("Blob sample-container/{name} has been updated on: {datetime}", name, blobProperties1.LastModified);
             // Create a SAS token that's valid for one hour.
             Uri sasToken = blobClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.Now.AddHours(1));
-            logger.LogTrace("SAS token for blob sample-container  is: {sasToken}", sasToken);
-            string ingestCommand = $".ingest into table eshopclothing ('{sasToken}')";
+            string blobUploadUri = HttpUtility.UrlDecode(sasToken.OriginalString);
+            logger.LogTrace("SAS token for blob sample-container  is: {sasToken}", blobUploadUri);
+            string ingestCommand = $".ingest into table eshopclothing ('{blobUploadUri}')";
             var kustoIngest = new KustoAttribute("e2e")
             {
                 Connection = "KustoConnectionString",
                 KqlCommand = ingestCommand
             };
+            logger.LogInformation("Ingest command is: {ingestCommand}", ingestCommand);
             JArray ingestResult = await binder.BindAsync<JArray>(kustoIngest);
             logger.LogInformation("Ingestion result {ingestResult}", ingestResult);
         }

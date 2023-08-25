@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
