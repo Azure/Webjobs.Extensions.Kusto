@@ -16,29 +16,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.BlobTriggerIngestSamp
     {
         [FunctionName("IngestBlobToKusto")]
         public static async Task Run(
-            [BlobTrigger("samples-blob-ingest/*.csv.gz", Connection = "StorageConnectionString")] BlobClient blobClient, IBinder binder, ILogger logger)
+            [BlobTrigger("samples-blob-ingest/{name}", Connection = "StorageConnectionString")] BlobClient blobClient, string name, IBinder binder, ILogger logger)
         {
             BlobProperties blobProperties1 = await blobClient.GetPropertiesAsync();
             logger.LogInformation("Blob sample-container/sample-blob-1 has been updated on: {datetime}", blobProperties1.LastModified);
             // Create a SAS token that's valid for one hour.
-            var sasBuilder = new BlobSasBuilder()
-            {
-                BlobContainerName = blobClient.BlobContainerName,
-                BlobName = blobClient.Name,
-                Resource = "b",
-                StartsOn = DateTimeOffset.UtcNow,
-                ExpiresOn = DateTimeOffset.UtcNow.AddHours(1)
-            };
-            // Specify read permissions for the SAS.
-            sasBuilder.SetPermissions(BlobSasPermissions.Read);
-
-            // Use the key to get the SAS token.
-            Uri sasToken = blobClient.GenerateSasUri(sasBuilder);
-            logger.LogTrace("SAS token for blob sample-container/sample-blob-1  is: {sasToken}", sasToken);
+            Uri sasToken = blobClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.Now.AddHours(1));
+            logger.LogTrace("SAS token for blob sample-container  is: {sasToken}", sasToken);
+            string ingestCommand = $".ingest into table eshopclothing ('{sasToken}')";
             var kustoIngest = new KustoAttribute("e2e")
             {
                 Connection = "KustoConnectionString",
-                KqlCommand = $".ingest into table eshopclothing ('{sasToken}')"
+                KqlCommand = ingestCommand
             };
             JArray ingestResult = await binder.BindAsync<JArray>(kustoIngest);
             logger.LogInformation("Ingestion result {ingestResult}", ingestResult);
