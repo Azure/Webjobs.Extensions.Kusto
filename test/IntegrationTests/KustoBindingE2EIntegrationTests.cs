@@ -43,7 +43,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private readonly string DropTable = $".drop table {TableName}";
         // Queries for input binding with parameters
         private const string QueryWithBoundParam = "declare query_parameters(startId:int,endId:int);kusto_functions_e2e_tests | where ID >= startId and ID <= endId and ingestion_time()>ago(10s)";
-        // Queries for input binding without parameters
+        // Queries for ingestion inline
+        private const string QueryToIngest = @".ingest inline into table kusto_functions_e2e_tests
+    [4001,""Item-4001"",4001.00]
+    [4002,""Item-4002"",4002.00]";
+        private const string ClearTableTests = @".clear table kusto_functions_e2e_tests data";
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
         private const string DatabaseName = "e2e";
@@ -165,6 +169,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 System.IO.File.AppendAllText("logs-created.txt", logMessage.FormattedMessage + Environment.NewLine);
             }
             */
+            // Validate that Admin or dot commands work as well
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsAdminCommand), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.ClearTableAdminCommand), parameter);
         }
 
         /*
@@ -302,6 +309,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             }
 
             [NoAutomaticTrigger]
+            public static void InputsAdminCommand(
+                int id,
+#pragma warning disable IDE0060                
+                [Kusto(Database: DatabaseName, KqlCommand = QueryToIngest, Connection = KustoConstants.DefaultConnectionStringName)] JArray importResult
+#pragma warning restore IDE0060
+             )
+            {
+                Assert.NotNull(importResult);
+                Assert.Single(importResult);
+                Assert.True(id > 0);
+            }
+            [NoAutomaticTrigger]
             public static void InputFailForUserWithNoIngestPrivileges(
                 int id,
 #pragma warning disable IDE0060
@@ -324,16 +343,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             [NoAutomaticTrigger]
             public static void OutputFailInvalidConnectionString(
             int id,
-#pragma warning disable IDE0060
             [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringInvalidAttributes")] out object itemOne)
-#pragma warning restore IDE0060
             {
                 Assert.True(id > 0);
                 itemOne = GetItem(id + 999);
                 // one item gets retrieved
                 Assert.Null(itemOne);
             }
-
 
             [NoAutomaticTrigger]
             public static void OutputFailForUserWithNoReadPrivileges(
@@ -459,6 +475,27 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 nextItemId++;
                 string item = JsonConvert.SerializeObject(GetItem(nextItemId));
                 mixedJson = $"[{product},{item}]";
+            }
+
+            [NoAutomaticTrigger]
+            public static void ClearTableAdminCommand(
+                int id,
+#pragma warning disable IDE0060                
+                [Kusto(Database: DatabaseName, KqlCommand = ClearTableTests, Connection = KustoConstants.DefaultConnectionStringName)] JArray clearResult
+#pragma warning restore IDE0060
+             )
+            {
+                Assert.NotNull(clearResult);
+                foreach (JObject node in clearResult.Children<JObject>())
+                {
+                    var keys = node.Properties().Select(p => p.Name).ToList();
+                    var values = node.Properties().Select(p => p.Value).ToList();
+                    Assert.Single(keys);
+                    Assert.Equal("Status", keys.First().ToString());
+                    Assert.Single(values);
+                    Assert.Equal("Success", values.First().ToString());
+                }
+                Assert.True(id > 0);
             }
 
             private static Item GetItem(int id)

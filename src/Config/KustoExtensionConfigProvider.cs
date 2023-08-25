@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Description;
@@ -28,6 +29,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     {
         internal ConcurrentDictionary<string, IKustoIngestClient> IngestClientCache { get; } = new ConcurrentDictionary<string, IKustoIngestClient>();
         internal ConcurrentDictionary<string, ICslQueryProvider> QueryClientCache { get; } = new ConcurrentDictionary<string, ICslQueryProvider>();
+        internal ConcurrentDictionary<string, ICslAdminProvider> AdminClientCache { get; } = new ConcurrentDictionary<string, ICslAdminProvider>();
         private readonly IConfiguration _configuration;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IKustoClientFactory _kustoClientFactory;
@@ -127,14 +129,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             }
         }
 
-
         internal KustoQueryContext CreateQueryContext(KustoAttribute kustoAttribute)
         {
-            ICslQueryProvider queryProvider = this.GetQueryClient(kustoAttribute);
+            bool isControlCommand = kustoAttribute.KqlCommand.TrimStart().StartsWith(".", true, CultureInfo.InvariantCulture);
             return new KustoQueryContext
             {
-                QueryProvider = queryProvider,
+                QueryProvider = isControlCommand ? null : this.GetQueryClient(kustoAttribute),
+                AdminProvider = isControlCommand ? this.GetAdminClient(kustoAttribute) : null,
                 ResolvedAttribute = kustoAttribute,
+                IsControlCommand = isControlCommand
             };
         }
 
@@ -162,6 +165,32 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 throw;
             }
         }
+
+        internal ICslAdminProvider GetAdminClient(KustoAttribute kustoAttribute)
+        {
+            string connection = string.IsNullOrEmpty(kustoAttribute.Connection) ? DefaultConnectionStringName : kustoAttribute.Connection;
+            string engineConnectionString = this.GetSetting(connection);
+            string functionRuntime = this.GetSetting(FunctionsRuntimeHostKey);
+            try
+            {
+                if (string.IsNullOrEmpty(engineConnectionString))
+                {
+                    throw new ArgumentNullException(engineConnectionString, $"Parameter {kustoAttribute.Connection} should be passed as an environment variable. This value resolved to null");
+                }
+                string cacheKey = BuildCacheKey(engineConnectionString);
+                return this.AdminClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.AdminProviderFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, functionRuntime, this._logger));
+            }
+            catch (Exception e)
+            {
+                string logContext = $"Error creating query connection : KqlCommand='{kustoAttribute?.KqlCommand}',Database='{kustoAttribute?.Database}'," +
+                    $"KqlParameters='{kustoAttribute?.KqlParameters}'," +
+                    $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
+                    $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
+                this._logger.LogError(logContext, e);
+                throw;
+            }
+        }
+
         /// <summary>
         /// Resolves the connection string with environment variables or from the settings passed
         /// </summary>

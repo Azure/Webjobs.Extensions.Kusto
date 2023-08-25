@@ -22,6 +22,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     {
         IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
         ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
+        ICslAdminProvider AdminProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
     }
     internal class KustoClient : IKustoClientFactory
     {
@@ -75,6 +76,26 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             timer.Stop();
             logger.LogDebug($"Initializing query client with the connection string : {KustoBindingUtils.ToSecureString(engineConnectionString)}  took {timer.ElapsedMilliseconds} milliseconds");
             return queryProvider;
+        }
+
+        /// <summary>
+        /// Given the engine connection string, return an admin client
+        /// </summary>
+        /// <param name="engineConnectionString"></param>
+        /// <param name="managedIdentity"></param>
+        /// <param name="runtimeName"></param>
+        /// <param name="logger"></param>
+        /// <returns>An admin client to run admin commands</returns>
+        public ICslAdminProvider AdminProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
+        {
+            KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName, InputBindingType, logger);
+            var timer = new Stopwatch();
+            timer.Start();
+            // Create a query client connection. This is needed in cases to debug any connection issues
+            ICslAdminProvider adminQueryProvider = KustoClientFactory.CreateCslAdminProvider(engineKcsb);
+            timer.Stop();
+            logger.LogDebug($"Initializing admin query client with the connection string : {KustoBindingUtils.ToSecureString(engineConnectionString)}  took {timer.ElapsedMilliseconds} milliseconds");
+            return adminQueryProvider;
         }
 
         private static KustoConnectionStringBuilder GetKustoConnectionString(string connectionString, string managedIdentity, string runtimeName, string bindingDirection, ILogger logger)

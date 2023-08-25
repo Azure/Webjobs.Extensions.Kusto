@@ -121,7 +121,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 ClientRequestId = $"{KustoConstants.ClientRequestId};{tracingRequestId}",
             };
-            Task<IDataReader> queryTask = kustoQueryContext.QueryProvider.ExecuteQueryAsync(attribute.Database, attribute.KqlCommand, clientRequestProperties);
+            Task<IDataReader> queryTask = kustoQueryContext.IsControlCommand ?
+            kustoQueryContext.AdminProvider.ExecuteControlCommandAsync(attribute.Database, attribute.KqlCommand, clientRequestProperties) :
+            kustoQueryContext.QueryProvider.ExecuteQueryAsync(attribute.Database, attribute.KqlCommand, clientRequestProperties);
             var jArray = new JArray();
             using (IDataReader queryReader = await queryTask.ConfigureAwait(false))
             {

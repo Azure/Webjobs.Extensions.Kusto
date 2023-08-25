@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Functions.W
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc", "samples\samples-outofproc\Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.csproj", "{B5EF39F6-C66B-404D-887E-799C61C7A720}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extensions.Kusto.BlobSample", "samples\samples-blob-ingest\Microsoft.Azure.WebJobs.Extensions.Kusto.BlobSample.csproj", "{2F39D1F5-12CA-4543-99F5-B90140770E8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{B5EF39F6-C66B-404D-887E-799C61C7A720}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5EF39F6-C66B-404D-887E-799C61C7A720}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5EF39F6-C66B-404D-887E-799C61C7A720}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F39D1F5-12CA-4543-99F5-B90140770E8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F39D1F5-12CA-4543-99F5-B90140770E8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F39D1F5-12CA-4543-99F5-B90140770E8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F39D1F5-12CA-4543-99F5-B90140770E8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,6 +11,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
     {
         private readonly IKustoIngestClient _ingestClient;
         private readonly ICslQueryProvider _queryClient;
+        private readonly ICslAdminProvider _adminClient;
         public MockClientFactory(IKustoIngestClient mockClient)
         {
             this._ingestClient = mockClient;
@@ -19,6 +20,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
         public MockClientFactory(ICslQueryProvider queryClient)
         {
             this._queryClient = queryClient;
+        }
+
+        public MockClientFactory(ICslAdminProvider adminClient)
+        {
+            this._adminClient = adminClient;
         }
 
         public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
@@ -30,5 +36,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
         {
             return this._queryClient;
         }
+
+        public ICslAdminProvider AdminProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
+        {
+            return this._adminClient;
+        }
+
     }
 }
