@@ -31,6 +31,9 @@ e.g.:
 `"KustoConnectionString": "Data Source=https://_**cluster**_.kusto.windows.net;Database=_**Database**_;Fed=True;AppClientId=_**AppId**_;AppKey=_**AppKey**_;Authority Id=_**TenantId**_`
 Note that the application id should **_atleast have viewer privileges_** on the table(s)/function(s) being queried in the KqlCommand
 
+- ClientRequestProperties: Optional attribute to pass [client request properties](https://docs.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/request-properties) to the Kusto client
+
+Starting versions 1.0.8-Preview there is support for [management commands](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/management/). A sample is available [here](samples/samples-blob-ingest/IngestBlobToKusto.cs)
 
 ### **Output Binding**
  
@@ -53,6 +56,7 @@ Takes row(s) and inserts them into the Kusto table .
 Samples for C# are available and available at the following. This can run with local functions framework. Setup required for the run is available at the [location](samples/set-up)
 
 - [.NET (C# in-process)](samples/samples-csharp)
+- [.NET (C# dot command examples)](samples/samples-blob-ingest)
 - [.NET (C# isolated)](samples/samples-outofproc)
 - [Java](samples/samples-java)
 - [Node](samples/samples-node)
