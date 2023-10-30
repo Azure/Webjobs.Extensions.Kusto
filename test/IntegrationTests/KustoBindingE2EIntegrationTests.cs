@@ -36,8 +36,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private const string MappingName = "product_to_item_json_mapping";
         private const string NonExistingMappingName = "a_mapping_that_does_not_exist";
         // Create the table
-        private readonly string CreateItemTable = $".create-merge table {TableName}(ID:int,Name:string, Cost:double,Timestamp:datetime)";
-        private readonly string CreateTableMappings = $".create-or-alter table {TableName} ingestion json mapping \"{MappingName}\" '[{{\"column\":\"ID\",\"path\":\"$.ProductID\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Name\",\"path\":\"$.ProductName\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Cost\",\"path\":\"$.UnitCost\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Timestamp\",\"path\":\"$.Timestamp\",\"datatype\":\"\",\"transform\":null}}]'";
+        private readonly string CreateItemTable = $".create-merge table {TableName}(ID:int,Name:string, Cost:double,Timestamp:datetime,InStock:bool)";
+        private readonly string CreateTableMappings = $".create-or-alter table {TableName} ingestion json mapping \"{MappingName}\" '[{{\"column\":\"ID\",\"path\":\"$.ProductID\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Name\",\"path\":\"$.ProductName\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Cost\",\"path\":\"$.UnitCost\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Timestamp\",\"path\":\"$.Timestamp\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"InStock\",\"path\":\"$.InStock\",\"datatype\":\"\",\"transform\":null}}]'";
         private readonly string DropTableMappings = $".drop table {TableName} ingestion json mapping \"{MappingName}\"";
         private readonly string ClearItemTable = $".clear table {TableName} data";
         private readonly string DropTable = $".drop table {TableName}";
@@ -50,7 +50,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private const string ClearTableTests = @".clear table kusto_functions_e2e_tests data";
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
-        private const string DatabaseName = "e2e";
+        private const string DatabaseName = "sdktests";
         private const int startId = 1;
         // Query parameter to get a single row where start and end are the same
         private const string KqlParameterSingleItem = "@startId=1,@endId=1";
@@ -268,7 +268,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Csv test for the data
                 */
                 Item csvItem = GetItem(nextId++);
-                newItemCsv = $"{csvItem.ID},{csvItem.Name},{csvItem.Cost},{csvItem.Timestamp.ToUtcString(CultureInfo.InvariantCulture)}";
+                newItemCsv = $"{csvItem.ID},{csvItem.Name},{csvItem.Cost},{csvItem.Timestamp.ToUtcString(CultureInfo.InvariantCulture)},{csvItem.ID % 2 == 0}";
             }
 
 
@@ -506,6 +506,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     ID = id,
                     Cost = id * 42.42,
                     Name = "Item-" + id,
+                    InStock = id % 2 == 0, // True for evens
                     // To be finite and check for precision
                     Timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999))
                 };
@@ -529,6 +530,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 product.ProductID = id;
                 product.ProductName = "Item-" + id;
                 product.UnitCost = id * 42.42;
+                product.InStock = id % 2 == 0; // True for evens
                 product.Timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999));
                 string result = product.ToString(Formatting.None);
                 return result;
@@ -539,7 +541,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 DateTime now = DateTime.UtcNow;
                 string timestamp = new DateTime(now.Year, now.Month, now.Day, Math.Min(id, 12), Math.Min(id, 59), Math.Min(id, 59), Math.Min(id, 999)).ToUtcString(CultureInfo.InvariantCulture);
                 // is ordinal based in the table with this order
-                return $"{id},Item-{id},{id * 42.42},{timestamp}";
+                return $"{id},Item-{id},{id * 42.42},{timestamp},{id % 2 == 0}";
             }
         }
     }

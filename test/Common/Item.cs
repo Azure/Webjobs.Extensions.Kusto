@@ -15,19 +15,22 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 
         public DateTime Timestamp { get; set; }
 
+        public bool InStock { get; set; }
+
         public override bool Equals(object obj)
         {
             if (obj is Item otherData)
             {
                 return this.ID == otherData.ID && this.Cost == otherData.Cost && ((this.Name == null && otherData.Name == null) ||
-                    string.Equals(this.Name, otherData.Name, StringComparison.OrdinalIgnoreCase)) && this.Timestamp.Equals(otherData.Timestamp);
+                    string.Equals(this.Name, otherData.Name, StringComparison.OrdinalIgnoreCase)) &&
+                    this.Timestamp.Equals(otherData.Timestamp) && this.InStock.Equals(otherData.InStock);
             }
             return false;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(this.ID, this.Name, this.Cost, this.Timestamp);
+            return HashCode.Combine(this.ID, this.Name, this.Cost, this.Timestamp, this.InStock);
         }
     }
 }
