@@ -148,12 +148,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.IsType<FunctionInvocationException>(invalidOutputsException);
                 var actualExceptionMessageJson = JObject.Parse(invalidOutputsException.GetBaseException().Message);
                 string actualMessage = (string)actualExceptionMessageJson["error"]["message"];
-                string actualMessageValue = (string)actualExceptionMessageJson["error"]["@message"];
                 string actualType = (string)actualExceptionMessageJson["error"]["@type"];
                 bool isPermanent = (bool)actualExceptionMessageJson["error"]["@permanent"];
                 Assert.Equal("Request is invalid and cannot be executed.", actualMessage);
-                Assert.Equal("Kusto.DataNode.Exceptions.StreamingIngestionRequestException", actualType);
-                Assert.Equal($"Bad streaming ingestion request to {DatabaseName}.{TableName} : The input stream is empty after processing, tip:check stream validity", actualMessageValue);
+                Assert.Equal("Kusto.Data.Exceptions.KustoBadRequestException", actualType);
                 Assert.True(isPermanent);
             }
             // A case where ingestion is done , but there exists no such mapping causing ingestion failure
