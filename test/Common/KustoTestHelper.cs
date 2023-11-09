@@ -92,7 +92,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
         public static List<Item> LoadItems(string json)
         {
             var serializer = new JsonSerializer();
-            var streamReader = new StreamReader(json, new UTF8Encoding());
+            var streamReader = new StringReader(json);
             var result = new List<Item>();
             using (var reader = new JsonTextReader(streamReader))
             {
