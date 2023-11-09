@@ -89,6 +89,23 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
             return result;
         }
 
+        public static List<Item> LoadItems(string json)
+        {
+            var serializer = new JsonSerializer();
+            var streamReader = new StringReader(json);
+            var result = new List<Item>();
+            using (var reader = new JsonTextReader(streamReader))
+            {
+                reader.CloseInput = false;
+                reader.SupportMultipleContent = true;
+                while (reader.Read())
+                {
+                    result.Add(serializer.Deserialize<Item>(reader));
+                }
+            }
+            return result;
+        }
+
         public static IConfiguration BuildConfiguration()
         {
             var values = new Dictionary<string, string>()

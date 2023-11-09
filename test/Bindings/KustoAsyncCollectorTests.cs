@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Kusto.Cloud.Platform.Utils;
 using Kusto.Ingest;
@@ -12,6 +13,7 @@ using Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common;
 using Microsoft.Azure.WebJobs.Kusto;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
@@ -58,17 +60,32 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
             var collector = new KustoAsyncCollector<Item>(context, this._logger);
             IEnumerable<int> numberOfItems = Enumerable.Range(1, 5);
             var expectedItems = new List<Item>();
-            var taskResult = Task.WhenAll(numberOfItems.Select(i =>
+            var serializer = JsonSerializer.CreateDefault();
+            // Add this test to make sure we do get Quoted strings
+            var sb = new StringBuilder();
+            using (var textWriter = new StringWriter(sb))
             {
-                var item = new Item { ID = i, Name = "x-" + i };
-                expectedItems.Add(item);
-                return collector.AddAsync(item);
-            }));
+                using var jsonWriter = new JsonTextWriter(textWriter) { QuoteName = true, Formatting = Formatting.Indented, CloseOutput = false };
+                var taskResult = Task.WhenAll(numberOfItems.Select(i =>
+                {
+                    var item = new Item { ID = i, Name = "x-" + i };
+                    expectedItems.Add(item);
+                    if (i > 1)
+                    {
+                        textWriter.WriteLine(string.Empty);
+                    }
+                    serializer.Serialize(jsonWriter, item);
+                    return collector.AddAsync(item);
+                }));
+            }
             await collector.FlushAsync();
             // Then
             // Validate the data
-            List<Item> actualResultItems = KustoTestHelper.LoadItems(actualIngestDataStreams.First());
+            var actualIngestDataStream = new StreamReader(actualIngestDataStreams.First(), new UTF8Encoding());
+            string actualIngestDataText = actualIngestDataStream.ReadToEnd();
+            List<Item> actualResultItems = KustoTestHelper.LoadItems(actualIngestDataText);
             Assert.True(expectedItems.SequenceEqual(actualResultItems));
+            Assert.Equal(sb.ToString(), actualIngestDataText);
             // Validate ingestion properties used
             KustoIngestionProperties actualKustoIngestionProp = actualKustoIngestionProps.First();
             Assert.Equal("items", actualKustoIngestionProp.TableName);

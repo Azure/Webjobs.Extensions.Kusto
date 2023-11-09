@@ -162,7 +162,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
                         textWriter.WriteLine(string.Empty);
                     }
                     first = false;
-                    using var jsonWriter = new JsonTextWriter(textWriter) { QuoteName = false, Formatting = indent, CloseOutput = false };
+                    using var jsonWriter = new JsonTextWriter(textWriter) { QuoteName = true, Formatting = indent, CloseOutput = false };
                     if (typeof(T) == typeof(string))
                     {
                         textWriter.Write(row.ToString());
