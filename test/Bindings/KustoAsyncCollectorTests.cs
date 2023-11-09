@@ -67,7 +67,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
             await collector.FlushAsync();
             // Then
             // Validate the data
-            List<Item> actualResultItems = KustoTestHelper.LoadItems(actualIngestDataStreams.First());
+            var actualIngestDataStream = new StreamReader(actualIngestDataStreams.First(), new System.Text.UTF8Encoding());
+            string actualIngestDataText = actualIngestDataStream.ReadToEnd();
+            List<Item> actualResultItems = KustoTestHelper.LoadItems(actualIngestDataText);
             Assert.True(expectedItems.SequenceEqual(actualResultItems));
             // Validate ingestion properties used
             KustoIngestionProperties actualKustoIngestionProp = actualKustoIngestionProps.First();
