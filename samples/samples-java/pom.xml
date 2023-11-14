@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.kusto</groupId>
     <artifactId>samples-java</artifactId>
-    <version>1.0.8-Preview</version>
+    <version>1.0.9-Preview</version>
     <packaging>jar</packaging>
     <name>Microsoft Azure Functions Java Kusto Samples</name>
     <description>This package contains samples that indicate the usage of ADX bindings (for Azure functions)</description>
@@ -36,7 +36,7 @@
         <formatter.version>2.16.0</formatter.version>
         <azure.functions.maven.plugin.version>1.22.0</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>3.0.0</azure.functions.java.library.version>
-        <azure.functions.java.library.kusto.version>1.0.8-Preview</azure.functions.java.library.kusto.version>
+        <azure.functions.java.library.kusto.version>1.0.9-Preview</azure.functions.java.library.kusto.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
         <maven.resources.plugin.version>3.3.0</maven.resources.plugin.version>
         <maven.dependency.plugin.version>3.3.0</maven.dependency.plugin.version>

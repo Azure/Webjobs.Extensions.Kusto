@@ -6,12 +6,12 @@
 
   <groupId>com.microsoft.azure.kusto</groupId>
   <artifactId>functions-int-tests</artifactId>
-  <version>1.0.8-Preview</version>
+  <version>1.0.9-Preview</version>
   <name>functions-int-tests</name>
   <properties>
     <!-- use the following if you're compiling with JDK 8-->
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
     <!-- comment the 2 lines above and uncomment the line bellow if you're compiling with JDK 11 or 17 -->
     <!--    <maven.compiler.release>11</maven.compiler.release>-->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,7 +20,7 @@
     <gatling-maven-plugin.version>4.2.9</gatling-maven-plugin.version>
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
-    <testcontainer.version>1.17.6</testcontainer.version>
+    <testcontainer.version>1.19.1</testcontainer.version>
     <rmq.test.version>0.8.0</rmq.test.version>
   </properties>
 
@@ -58,6 +58,10 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+        </configuration>        
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
