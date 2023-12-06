@@ -4,7 +4,8 @@
 using Microsoft.Extensions.Hosting;
 
 IHost host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
+    .ConfigureServices(s =>
+    {
+    })
     .Build();
-
-host.Run();
+await host.RunAsync();

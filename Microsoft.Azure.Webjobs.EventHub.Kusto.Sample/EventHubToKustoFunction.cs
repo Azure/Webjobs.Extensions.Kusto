@@ -1,4 +1,6 @@
-using System;
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using Azure.Messaging.EventHubs;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -11,7 +13,7 @@ namespace Microsoft.Azure.Webjobs.EventHub.Kusto.Sample
 
         public EventHubToKustoFunction(ILogger<EventHubToKustoFunction> logger)
         {
-            _logger = logger;
+            this._logger = logger;
         }
 
         [Function(nameof(EventHubToKustoFunction))]
@@ -19,8 +21,6 @@ namespace Microsoft.Azure.Webjobs.EventHub.Kusto.Sample
         {
             foreach (EventData @event in events)
             {
-                _logger.LogInformation("Event Body: {body}", @event.Body);
-                _logger.LogInformation("Event Content-Type: {contentType}", @event.ContentType);
             }
         }
     }
