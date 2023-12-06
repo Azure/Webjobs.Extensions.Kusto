@@ -18,11 +18,15 @@
           "Microsoft.Extensions.Logging.ApplicationInsights": "2.22.0"
         }
       },
-      "Microsoft.Azure.Functions.Worker.Extensions.Abstractions": {
+      "Microsoft.Azure.Functions.Worker.Sdk": {
         "type": "Direct",
-        "requested": "[1.3.0, )",
-        "resolved": "1.3.0",
-        "contentHash": "+6+/Yb/ouWUweaSQhesbbiIVSmwYEzkSfjIHrBnNqIiCYnx2iLeoYyWjN/wHP3Fnn5COtyDXRDwHKr5A/tCL9Q=="
+        "requested": "[1.16.3, )",
+        "resolved": "1.16.3",
+        "contentHash": "6NsySHy53tHQPynOp0Xc+GzDpHoLrLu9rOjYKRLJXODAu/IRQbXmpWyEMdVHeAow/p02C5CktXhmE74orHRdVA==",
+        "dependencies": {
+          "Microsoft.Azure.Functions.Worker.Sdk.Analyzers": "1.2.1",
+          "Microsoft.Azure.Functions.Worker.Sdk.Generators": "1.1.5"
+        }
       },
       "Microsoft.ApplicationInsights": {
         "type": "Transitive",
@@ -79,6 +83,16 @@
           "Microsoft.ApplicationInsights": "2.22.0",
           "System.IO.FileSystem.AccessControl": "4.7.0"
         }
+      },
+      "Microsoft.Azure.Functions.Worker.Sdk.Analyzers": {
+        "type": "Transitive",
+        "resolved": "1.2.1",
+        "contentHash": "EOZqyNc718vKJAg4/cgmDqnQg3wYoNKE14NjskBrDAINMBKfujQqHRn4McSFfSHgCXUE0F/Yc4+sh7i6HhbPbg=="
+      },
+      "Microsoft.Azure.Functions.Worker.Sdk.Generators": {
+        "type": "Transitive",
+        "resolved": "1.1.5",
+        "contentHash": "M+hWMm9AT5fnzSukrD7aTT4/suT1KrDpKD4dGPj4sDX1UxDKX8cQKwG1cZMp+lQRqp6Wey2JO8+LIA+l1Lv4CQ=="
       },
       "Microsoft.Extensions.Caching.Abstractions": {
         "type": "Transitive",
