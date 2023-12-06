@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "samples_eventhub": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7060",
+      "launchBrowser": false
+    }
+  }
+}
