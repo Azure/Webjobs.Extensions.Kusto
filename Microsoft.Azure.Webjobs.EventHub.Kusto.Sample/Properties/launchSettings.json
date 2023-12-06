@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "Microsoft.Azure.Webjobs.EventHub.Kusto.Sample": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7179",
-      "launchBrowser": false
-    }
-  }
-}

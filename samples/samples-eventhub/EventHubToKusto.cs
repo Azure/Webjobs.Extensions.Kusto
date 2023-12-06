@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,39 +9,22 @@ using System.Threading.Tasks;
 using Azure.Messaging.EventHubs;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using Microsoft.Azure.WebJobs.Extensions.EventHub.Kusto.Samples.Common;
+using Microsoft.Azure.Functions.Worker.Extensions.Kusto;
 
-namespace samples
+
+namespace Microsoft.Azure.WebJobs.Extensions.EventHub.Kusto.Samples
 {
     public static class EventHubToKusto
     {
         [FunctionName("EventHubToKusto")]
-        public static async Task Run([EventHubTrigger("samples-workitems", Connection = "")] EventData[] events, ILogger log)
+        [return: KustoOutput(Database: SampleConstants.DatabaseName,
+                    TableName = SampleConstants.ProductsTable,
+                    Connection = "KustoConnectionString")]
+        public static async Task Run([EventHubTrigger("samples-workitems", Connection = "")] Product[] products, ILogger log)
         {
-            var exceptions = new List<Exception>();
-
-            foreach (EventData eventData in events)
-            {
-                try
-                {
-                    // Replace these two lines with your processing logic.
-                    log.LogInformation($"C# Event Hub trigger function processed a message: {eventData.EventBody}");
-                    await Task.Yield();
-                }
-                catch (Exception e)
-                {
-                    // We need to keep processing the rest of the batch - capture this exception and continue.
-                    // Also, consider capturing details of the message that failed processing so it can be processed again later.
-                    exceptions.Add(e);
-                }
-            }
-
-            // Once processing of the batch is complete, if any messages in the batch failed processing throw an exception so that there is a record of the failure.
-
-            if (exceptions.Count > 1)
-                throw new AggregateException(exceptions);
-
-            if (exceptions.Count == 1)
-                throw exceptions.Single();
+            log.LogInformation($"C# Event Hub trigger function processed a message: {products.Length}");
+            return products
         }
     }
 }
