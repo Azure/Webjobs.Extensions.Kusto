@@ -1,0 +1,29 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "name": "Request",
+      "direction": "in",
+      "type": "httpTrigger",
+      "methods": [
+        "get",
+        "post"
+      ],
+      "route": "addproduct"
+    },
+    {
+      "name": "response",
+      "type": "http",
+      "direction": "out"
+    },
+    {
+      "name": "addproduct",
+      "type": "kusto",
+      "database": "e2e",
+      "direction": "out",
+      "tableName": "Products",
+      "connection": "KustoConnectionString"
+    }
+  ],
+  "disabled": false
+}

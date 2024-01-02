@@ -13,7 +13,7 @@
 
 .clear table Products data 
 
-.create table Products ingestion json mapping "item_to_product_json" '[{"Column": "ProductID", "Properties": {"Path": "$.ItemID"}},{"Column": "Name", "Properties": {"Path": "$.ItemName"}},{"Column": "Cost", "Properties": {"Path": "$.ItemCost"}},]'
+.create table Products ingestion json mapping item_to_product_json '[{Column: ProductID, Properties: {Path: $.ItemID}},{Column: Name, Properties: {Path: $.ItemName}},{Column: Cost, Properties: {Path: $.ItemCost}},]'
 
 .show streamingingestion statistics  | order by StartTime desc | take 10
 
@@ -24,3 +24,15 @@
 .alter table Products policy streamingingestion enable
 
 .create table eshopclothing (year: long, month: long, day: long, ['order']: long, country: long, ['session_id']: long, ['page1_main_category_']: long, ['page2_clothing model']: string, colour: long, ['location']: long, ['model_photography']: long, price: long, ['price2']: long, page: long)
+
+.create table ProcessDetails (Name: string, Length: int, DirectoryName: string, Directory: dynamic,
+    IsReadOnly: boolean, Exists: boolean, FullName: string, Extension: string, CreationTime: datetime, 
+    CreationTimeUtc: datetime, LastAccessTime: datetime, LastAccessTimeUtc: datetime, LastWriteTime: datetime, 
+    LastWriteTimeUtc: datetime, LinkTarget: string, UnixFileMode: int, Attributes: int, PSPath: string, 
+    PSParentPath: string, PSChildName: string, UnixStat: dynamic, PSDrive: dynamic, 
+    PSProvider: dynamic, PSIsContainer: boolean, UnixMode: string, User: string, Group: string, Size: int, Mode: string,
+    ModeWithoutHardLink: string, VersionInfo: dynamic, BaseName: string, ResolvedTarget: string, Target: string, LinkType: string)
+
+.alter table ProcessDetails policy ingestionbatching @'{"MaximumBatchingTimeSpan":"00:00:05", "MaximumNumberOfItems": 100, "MaximumRawDataSizeMB": 100}'
+
+.alter table ProcessDetails policy streamingingestion enable

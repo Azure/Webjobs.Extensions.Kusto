@@ -1,0 +1,29 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "name": "Request",
+      "type": "httpTrigger",
+      "direction": "in",
+      "methods": [
+        "get"
+      ],
+      "route": "getproducts/{productId}"
+    },
+    {
+      "name": "response",
+      "type": "http",
+      "direction": "out"
+    },
+    {
+      "name": "productget",
+      "type": "kusto",
+      "database": "e2e",
+      "direction": "in",
+      "kqlCommand": "declare query_parameters (productId:long);Products | where ProductID == productId",
+      "kqlParameters": "@productId={productId}",
+      "connection": "KustoConnectionString"
+    }
+  ],
+  "disabled": false
+}
