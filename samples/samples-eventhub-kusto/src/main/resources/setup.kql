@@ -1,0 +1,9 @@
+.create table ProductsEH(
+    productId:long,
+    name:string,
+    cost:decimal ,
+    partitionContext:string )
+
+.alter table ProductsEH policy  ingestionbatching @'{"MaximumBatchingTimeSpan":"00:00:05", "MaximumNumberOfItems": 100, "MaximumRawDataSizeMB": 100}'
+
+.alter table ProductsEH policy streamingingestion enable
