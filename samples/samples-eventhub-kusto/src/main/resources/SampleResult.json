@@ -1,0 +1,12 @@
+{
+  "ProductID": 2,
+  "Name": "Product-2",
+  "Cost": 6.023,
+  "EHPartitionContext": {
+    "IsCheckpointingAfterInvocation": true,
+    "FullyQualifiedNamespace": "hilologsexport.servicebus.windows.net",
+    "EventHubName": "kubeevents.products.v1",
+    "ConsumerGroup": "FunctionsCG",
+    "PartitionId": "0"
+  }
+}
