@@ -1,0 +1,29 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "name": "Request",
+      "direction": "in",
+      "type": "httpTrigger",
+      "methods": [
+        "get",
+        "post"
+      ],
+      "route": "ingest-processdetails"
+    },
+    {
+      "name": "response",
+      "type": "http",
+      "direction": "out"
+    },
+    {
+      "name": "processdetails",
+      "type": "kusto",
+      "database": "e2e",
+      "direction": "out",
+      "tableName": "ProcessDetails",
+      "connection": "KustoConnectionString"
+    }
+  ],
+  "disabled": false
+}
