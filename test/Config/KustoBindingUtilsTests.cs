@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.Config;
 using Xunit;
 
@@ -20,7 +19,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Config
         public void ToSecureStringTest(string connectionStringInput, string expectedString)
         {
             string actualString = KustoBindingUtils.ToSecureString(connectionStringInput);
-            Assert.True(string.Equals(expectedString, actualString, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(expectedString, actualString, ignoreCase: true);
         }
     }
 }
