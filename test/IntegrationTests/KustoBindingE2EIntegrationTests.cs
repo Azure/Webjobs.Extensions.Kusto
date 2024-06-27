@@ -357,7 +357,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             public static void OutputFailForUserWithNoReadPrivileges(
             int id,
 #pragma warning disable IDE0060
-            [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringNoPermissions")] IAsyncCollector<object> asyncCollector)
+            [Kusto(Database: DatabaseNameNoPermissions, TableName = TableName, Connection = "KustoConnectionStringNoPermissions")] IAsyncCollector<object> asyncCollector)
 #pragma warning restore IDE0060
             {
                 Assert.True(id > 0);
