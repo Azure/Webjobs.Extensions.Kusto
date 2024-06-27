@@ -51,6 +51,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
         private const string DatabaseName = "e2e";
+        // No permissions on this database
+        private const string DatabaseNameNoPermissions = "webjobs";
         private const int startId = 1;
         // Query parameter to get a single row where start and end are the same
         private const string KqlParameterSingleItem = "@startId=1,@endId=1";
@@ -324,7 +326,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             public static void InputFailForUserWithNoIngestPrivileges(
                 int id,
 #pragma warning disable IDE0060
-                [Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringNoPermissions")] IEnumerable<Item> itemOne)
+                [Kusto(Database: DatabaseNameNoPermissions, KqlCommand = QueryWithBoundParam, KqlParameters = KqlParameterSingleItem, Connection = "KustoConnectionStringNoPermissions")] IEnumerable<Item> itemOne)
 #pragma warning restore IDE0060
             {
                 Assert.True(id > 0);
