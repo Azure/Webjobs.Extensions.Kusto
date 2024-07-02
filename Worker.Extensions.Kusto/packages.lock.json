@@ -4,9 +4,9 @@
     "net6.0": {
       "Microsoft.Azure.Functions.Worker.Extensions.Abstractions": {
         "type": "Direct",
-        "requested": "[1.1.1, )",
-        "resolved": "1.1.1",
-        "contentHash": "xbShfwvgv92+4Ea5cNxlTuXJetgh8q2zSSEy8QjyvvAxfE8AZ3nLGPFwCqSKirwLx2b4zwuchMnhpSbVXsCq+A=="
+        "requested": "[1.3.0, )",
+        "resolved": "1.3.0",
+        "contentHash": "+6+/Yb/ouWUweaSQhesbbiIVSmwYEzkSfjIHrBnNqIiCYnx2iLeoYyWjN/wHP3Fnn5COtyDXRDwHKr5A/tCL9Q=="
       }
     }
   }

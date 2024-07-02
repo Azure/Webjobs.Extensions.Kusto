@@ -1,16 +1,34 @@
 name: CI Build and test
 on:
+  push:
+    branches: [ "**" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "**" ]
   workflow_dispatch:  
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: build
+    permissions:
+      checks: write
+      pull-requests: write
+      id-token: write
+      contents: read    
     strategy:
       matrix:
         dotnet-version: ['6.0.x' ]
     steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.APP_ID }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: "Run az commands"
+        run: |
+              access_token=$(az account get-access-token --resource=${{ secrets.APP_ID }} --scope=${{ secrets.CLUSTER }}/.default --query accessToken -o tsv)
+              echo "ACCESS_TOKEN=$access_token" >> $GITHUB_ENV      
       - uses: actions/checkout@v3
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
@@ -21,10 +39,10 @@ jobs:
       - name: Test with dotnet
         run: dotnet test --logger trx --results-directory "TestResults-${{ matrix.dotnet-version }}"
         env:
-          KustoConnectionString: ${{secrets.KUSTOCONNECTIONSTRING}}        
-          KustoConnectionStringNoPermissions: ${{secrets.KUSTOCONNECTIONSTRINGNOPERMISSIONS}}        
-          KustoConnectionStringMSI: ${{secrets.KUSTOCONNECTIONSTRINGMSI}}        
-          KustoConnectionStringInvalidAttributes: ${{secrets.KUSTOCONNECTIONSTRINGINVALIDATTRIBUTES}}        
+          KustoConnectionString: "Data Source=${{secrets.CLUSTER}};Database=e2e;Fed=True;UserToken=${{env.ACCESS_TOKEN}}"
+          KustoConnectionStringNoPermissions: "Data Source=${{secrets.CLUSTER}};Database=webjobs;Fed=True;UserToken=${{env.ACCESS_TOKEN}}"
+          KustoConnectionStringMSI: "Data Source=${{secrets.CLUSTER}};Database=e2e;Fed=True;"
+          KustoConnectionStringInvalidAttributes: "Data Source=${{secrets.CLUSTER}};Database=e2e;Fed=True;AppClientId=${{ secrets.APP_ID }}"
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v3
         with:
