@@ -40,6 +40,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
             $"Database='{kustoContext.ResolvedAttribute?.Database}', " +
             $"MappingRef='{kustoContext.ResolvedAttribute?.MappingRef}', " +
             $"DataFormat='{this.GetDataFormat()}', " +
+            $"IngestionType='{kustoContext.ResolvedAttribute?.IngestionType}', " +
             $"ManagedIdentity='{kustoContext.ResolvedAttribute?.ManagedServiceIdentity}'");
         }
 

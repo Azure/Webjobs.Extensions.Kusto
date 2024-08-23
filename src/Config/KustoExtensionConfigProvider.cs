@@ -114,7 +114,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             string engineConnectionString = this.GetSetting(connection);
             try
             {
-                string cacheKey = BuildCacheKey(engineConnectionString);
+                string cacheKey = BuildCacheKey($"{engineConnectionString}-${kustoAttribute?.IngestionType}");
                 return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, functionRuntime, this._logger));
             }
             catch (Exception e)
@@ -123,6 +123,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     $"MappingRef='{kustoAttribute?.MappingRef}'," +
                     $"DataFormat='{kustoAttribute?.DataFormat}'" +
                     $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
+                    $"IngestionType='{kustoAttribute?.IngestionType}'," +
                     $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
                 this._logger.LogError(logContext, e);
                 throw;

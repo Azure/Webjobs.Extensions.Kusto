@@ -20,19 +20,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     /// </summary>
     internal interface IKustoClientFactory
     {
-        IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
+        IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, string ingestionType, ILogger logger);
         ICslQueryProvider QueryProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
         ICslAdminProvider AdminProviderFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger);
     }
     internal class KustoClient : IKustoClientFactory
     {
         /// <summary>
-        /// Given the engine connection string, return a managed ingest client
+        /// Given the engine connection string, return a kusto ingest client
         /// </summary>
         /// <param name="engineConnectionString">The engine connection string. The ingest URL will be derieved from this for the managed ingest</param>
         /// <param name="managedIdentity">MSI string to use Managed service identity</param>
+        /// <param name="ingestionType">Ingestion type, i managed,queued or streaming</param>
+        /// <param name="logger">The logger to use to log the statements</param> 
         /// <returns>A managed ingest client. Attempts ingestion through streaming and then fallsback to Queued ingest mode</returns>
-        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
+        public static IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string ingestionType, ILogger logger)
         {
             KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName, OutputBindingType, logger);
             /*
@@ -44,12 +46,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             // Measure the time it takes for a connection
             var ingestClientInitialize = new Stopwatch();
             ingestClientInitialize.Start();
-            // Create a managed ingest connection , needed to debug connection issues
-            IKustoIngestClient managedIngestClient = GetManagedStreamingClient(engineKcsb, dmKcsb);
+            // Create a managed ingest connection or a queued ingest
+            IKustoIngestClient ingestClient = "queued".EqualsOrdinalIgnoreCase(ingestionType)
+                ? GetQueuedIngestClient(dmKcsb)
+                : GetManagedStreamingClient(engineKcsb, dmKcsb);
             ingestClientInitialize.Stop();
-            logger.LogDebug($"Initializing ingest client with the connection string : {KustoBindingUtils.ToSecureString(engineConnectionString)}  took {ingestClientInitialize.ElapsedMilliseconds} milliseconds");
-            return managedIngestClient;
+            logger.LogDebug($"Initializing ingest client with the connection string : {KustoBindingUtils.ToSecureString(engineConnectionString)}  took {ingestClientInitialize.ElapsedMilliseconds} milliseconds. IngestionType : {ingestionType}");
+            return ingestClient;
         }
+        private static IKustoIngestClient GetQueuedIngestClient(KustoConnectionStringBuilder dmKcsb)
+        {
+            return KustoIngestFactory.CreateQueuedIngestClient(dmKcsb, new QueueOptions { MaxRetries = 3 });
+        }
+
         private static IKustoIngestClient GetManagedStreamingClient(KustoConnectionStringBuilder engineKcsb, KustoConnectionStringBuilder dmKcsb)
         {
             var fallbackPolicy = new ManagedStreamingIngestPolicy

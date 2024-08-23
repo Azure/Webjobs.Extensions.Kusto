@@ -27,7 +27,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
             this._adminClient = adminClient;
         }
 
-        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, ILogger logger)
+        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, string ingestionType, ILogger logger)
         {
             return this._ingestClient;
         }
