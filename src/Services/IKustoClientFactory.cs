@@ -34,7 +34,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// <param name="ingestionType">Ingestion type, i managed,queued or streaming</param>
         /// <param name="logger">The logger to use to log the statements</param> 
         /// <returns>A managed ingest client. Attempts ingestion through streaming and then fallsback to Queued ingest mode</returns>
-        public static IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string ingestionType, ILogger logger)
+        public IKustoIngestClient IngestClientFactory(string engineConnectionString, string managedIdentity, string runtimeName, string ingestionType, ILogger logger)
         {
             KustoConnectionStringBuilder engineKcsb = GetKustoConnectionString(engineConnectionString, managedIdentity, runtimeName, OutputBindingType, logger);
             /*

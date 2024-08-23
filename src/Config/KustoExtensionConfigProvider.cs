@@ -115,7 +115,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             try
             {
                 string cacheKey = BuildCacheKey($"{engineConnectionString}-${kustoAttribute?.IngestionType}");
-                return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, functionRuntime, this._logger));
+                return this.IngestClientCache.GetOrAdd(cacheKey, (c) => this._kustoClientFactory.IngestClientFactory(engineConnectionString, kustoAttribute.ManagedServiceIdentity, functionRuntime, kustoAttribute.IngestionType, this._logger));
             }
             catch (Exception e)
             {
