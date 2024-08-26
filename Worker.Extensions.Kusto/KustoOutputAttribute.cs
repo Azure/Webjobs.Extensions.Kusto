@@ -56,5 +56,10 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Kusto
         /// </summary>
         public string ManagedServiceIdentity { get; set; }
 
+        /// <summary>
+        /// The ingestion client to use. Supports managed,queued clients
+        /// </summary>
+        [AutoResolve]
+        public string IngestionType { get; set; } = "managed";
     }
 }
