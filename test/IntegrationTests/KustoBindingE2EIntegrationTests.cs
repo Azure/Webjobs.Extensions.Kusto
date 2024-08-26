@@ -279,32 +279,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             [NoAutomaticTrigger]
             public static void OutputsQueued(
                 int id,
-                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName , IngestionType="queued")] out object[] arrayItem)
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, IngestionType = "queued")] IAsyncCollector<object> asyncCollector)
             {
-                /*
-                 Add an individual item-1
-                 */
-                newItem = GetItem(id);
-                /*
-                 Individual item as a string - item-2
-                 */
-                int nextId = id + 1;
-                newItemString = JsonConvert.SerializeObject(GetItem(nextId));
 
                 /*Create an item array - has to be large for a queued ingest*/
-                arrayItem = Enumerable.Range(0, 10000).Select(s => GetItem(nextId++)).ToArray();
-                Task.WaitAll(new[]
-                {
-                    asyncCollector.AddAsync(GetItem(nextId++)),
-                    asyncCollector.AddAsync(GetItem(nextId++)),
-                    asyncCollector.AddAsync(GetItem(nextId++))
-                });
+                int nextId = id + 1;
+                int lastId = nextId + 10000;
 
-                /*
-                    Csv test for the data
-                */
-                Item csvItem = GetItem(nextId++);
-                newItemCsv = $"{csvItem.ID},{csvItem.Name},{csvItem.Cost},{csvItem.Timestamp.ToUtcString(CultureInfo.InvariantCulture)}";
+                Task.WhenAll(Enumerable.Range(nextId, lastId).Select(i => asyncCollector.AddAsync(GetItem(i))));
+                asyncCollector.FlushAsync();
             }
             [NoAutomaticTrigger]
             public static async Task Inputs(
