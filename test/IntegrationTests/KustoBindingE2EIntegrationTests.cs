@@ -171,9 +171,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 System.IO.File.AppendAllText("logs-created.txt", logMessage.FormattedMessage + Environment.NewLine);
             }
             */
+            // Output binding tests
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             // Validate that Admin or dot commands work as well
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsAdminCommand), parameter);
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.ClearTableAdminCommand), parameter);
+            // await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.ClearTableAdminCommand), parameter);
         }
 
         /*
@@ -274,6 +276,36 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             }
 
 
+            [NoAutomaticTrigger]
+            public static void OutputsQueued(
+                int id,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName , IngestionType="queued")] out object[] arrayItem)
+            {
+                /*
+                 Add an individual item-1
+                 */
+                newItem = GetItem(id);
+                /*
+                 Individual item as a string - item-2
+                 */
+                int nextId = id + 1;
+                newItemString = JsonConvert.SerializeObject(GetItem(nextId));
+
+                /*Create an item array - has to be large for a queued ingest*/
+                arrayItem = Enumerable.Range(0, 10000).Select(s => GetItem(nextId++)).ToArray();
+                Task.WaitAll(new[]
+                {
+                    asyncCollector.AddAsync(GetItem(nextId++)),
+                    asyncCollector.AddAsync(GetItem(nextId++)),
+                    asyncCollector.AddAsync(GetItem(nextId++))
+                });
+
+                /*
+                    Csv test for the data
+                */
+                Item csvItem = GetItem(nextId++);
+                newItemCsv = $"{csvItem.ID},{csvItem.Name},{csvItem.Cost},{csvItem.Timestamp.ToUtcString(CultureInfo.InvariantCulture)}";
+            }
             [NoAutomaticTrigger]
             public static async Task Inputs(
                 int id,
