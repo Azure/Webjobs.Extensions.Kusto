@@ -284,7 +284,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
 
                 /*Create an item array - has to be large for a queued ingest*/
                 int nextId = id + 1;
-                int lastId = nextId + 10000;
+                int lastId = nextId + 50000;
 
                 Task.WhenAll(Enumerable.Range(nextId, lastId).Select(i => asyncCollector.AddAsync(GetItem(i))));
                 asyncCollector.FlushAsync();
