@@ -107,6 +107,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             // Fail scenario for no ingest privileges
 
             string[] testsNoPrivilegesExecute = { nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges) };
+            // , nameof(KustoEndToEndTestClass.OutputQueuedFailForUserWithNoReadPrivileges) 
             foreach (string testNoPrivilegesExecute in testsNoPrivilegesExecute)
             {
                 Exception ingestPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(testNoPrivilegesExecute, parameter));
@@ -171,7 +172,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Exception noSuchMappingException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(noMappingTest, parameter));
                 Assert.IsType<FunctionInvocationException>(noSuchMappingException);
                 string baseMessage = noSuchMappingException.GetBaseException().Message;
-                Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
+                if (noMappingTest.Contains("Queued"))
+                {
+                    // In case of queued ingestion, the error message is different. Refer KustoAsyncCollector method FlushAsync
+                    Assert.Contains("Ingestion status reported failure/partial success for", baseMessage);
+                }
+                else
+                {
+                    Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
+                }
             }
             /*
             // To debug further, uncomment the following lines. The logs would be available in test\bin\Debug\netcoreapp3.1
