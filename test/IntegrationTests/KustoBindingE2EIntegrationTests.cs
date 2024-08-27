@@ -48,6 +48,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
     [4001,""Item-4001"",4001.00]
     [4002,""Item-4002"",4002.00]";
         private const string ClearTableTests = @".clear table kusto_functions_e2e_tests data";
+        private const string QueuedIngestInTheLastFiveMin = @".show  commands-and-queries  | where CommandType == 'DataIngestPull' | where Database =='e2e' | where LastUpdatedOn >= ago(5m) | where Text has 'kusto_functions_e2e_tests'";
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
         private const string DatabaseName = "e2e";
@@ -104,11 +105,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             Assert.Contains("Forbidden (403-Forbidden)", readPrivilegeException.GetBaseException().Message);
 
             // Fail scenario for no ingest privileges
-            Exception ingestPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges), parameter));
-            Assert.IsType<FunctionInvocationException>(ingestPrivilegeException);
-            Assert.NotEmpty(ingestPrivilegeException.GetBaseException().Message);
-            string actualExceptionCause = ingestPrivilegeException.GetBaseException().Message;
-            Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
+
+            string[] testsNoPrivilegesExecute = { nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges), nameof(KustoEndToEndTestClass.OutputQueuedFailForUserWithNoReadPrivileges) };
+
+            foreach (string testNoPrivilegesExecute in testsNoPrivilegesExecute)
+            {
+
+                Exception ingestPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(testNoPrivilegesExecute, parameter));
+                Assert.IsType<FunctionInvocationException>(ingestPrivilegeException);
+                Assert.NotEmpty(ingestPrivilegeException.GetBaseException().Message);
+                string actualExceptionCause = ingestPrivilegeException.GetBaseException().Message;
+                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
+
+            }
+
+
 
             // Tests for managed service identity disabled for local runs
             /*
@@ -127,7 +138,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             }
             */
             // Tests where the exceptions are caused due to invalid strings
-            string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString) };
+            string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputQueuedFailInvalidConnectionString) };
             foreach (string test in testsToExecute)
             {
                 Exception invalidConnectionStringException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(test, parameter));
@@ -159,10 +170,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.True(isPermanent);
             }
             // A case where ingestion is done , but there exists no such mapping causing ingestion failure
-            Exception noSuchMappingException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), parameter));
-            Assert.IsType<FunctionInvocationException>(noSuchMappingException);
-            string baseMessage = noSuchMappingException.GetBaseException().Message;
-            Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
+            string[] noMappingTestsToExecute = { nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), nameof(KustoEndToEndTestClass.OutputsQueuedWithMappingFailIngestion) };
+            foreach (string noMappingTest in noMappingTestsToExecute)
+            {
+                Exception noSuchMappingException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(noMappingTest, parameter));
+                Assert.IsType<FunctionInvocationException>(noSuchMappingException);
+                string baseMessage = noSuchMappingException.GetBaseException().Message;
+                Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
+            }
             /*
             // To debug further, uncomment the following lines. The logs would be available in test\bin\Debug\netcoreapp3.1
             IEnumerable<LogMessage> allLoggedMessages = this._loggerProvider.GetAllLogMessages();
@@ -175,7 +190,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             // Validate that Admin or dot commands work as well
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsAdminCommand), parameter);
-            // await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.ClearTableAdminCommand), parameter);
+            // Validate the queued ingest command that happened in this run
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsValidateQueuedIngestion), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.ClearTableAdminCommand), parameter);
         }
 
         /*
@@ -537,6 +554,49 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 string productJson = GetProductJson(productId);
                 // Create a JSON that is invalid! This should throw a payload exception
                 product = productJson[1..];
+            }
+
+            [NoAutomaticTrigger]
+            public static void InputsValidateQueuedIngestion(
+                int id,
+                [Kusto(Database: DatabaseName, KqlCommand = QueuedIngestInTheLastFiveMin, Connection = KustoConstants.DefaultConnectionStringName)] JArray showResult
+             )
+            {
+                Assert.NotNull(showResult);
+                Assert.Single(showResult);
+                Assert.True(id > 0);
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputQueuedFailInvalidConnectionString(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringInvalidAttributes", IngestionType = "queued")] out object itemOne)
+            {
+                Assert.True(id > 0);
+                itemOne = GetItem(id + 999);
+                // one item gets retrieved
+                Assert.Null(itemOne);
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputQueuedFailForUserWithNoReadPrivileges(
+            int id,
+#pragma warning disable IDE0060
+            [Kusto(Database: DatabaseNameNoPermissions, TableName = TableName, Connection = "KustoConnectionStringNoPermissions", IngestionType = "queued")] out object newItem)
+#pragma warning restore IDE0060
+            {
+                Assert.True(id > 0);
+                newItem = GetItem(id + 999);
+                // When we add an item it should fail with exception
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputsQueuedWithMappingFailIngestion(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, MappingRef = NonExistingMappingName, IngestionType = "queued")] out string product)
+            {
+                int productId = id + 2999;
+                product = GetProductJson(productId);
             }
 
             private static string GetProductJson(int id)
