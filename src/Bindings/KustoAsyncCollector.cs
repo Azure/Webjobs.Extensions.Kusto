@@ -82,7 +82,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
             {
                 if (this._rows.Count != 0)
                 {
-                    IngestionStatus ingestionStatus = await this.IngestRowsAsync(ingestSourceId);
+                    IngestionStatus ingestionStatus = await this.IngestRowsAsync(ingestSourceId, cancellationToken);
                     if (ingestionStatus.Status == Status.Failed || ingestionStatus.Status == Status.PartiallySucceeded)
                     {
                         string errorMessage = $"Ingestion status reported failure/partial success for {ingestSourceId}. Ingest detail {this._contextdetail.Value}, and status reported was {ingestionStatus.Status}";
@@ -109,44 +109,20 @@ namespace Microsoft.Azure.WebJobs.Kusto
         /// </summary>
         /// <param name="ingestSourceId">The ingest source id is used to track the ingestion</param>
         /// <returns></returns>
-        private async Task<IngestionStatus> IngestRowsAsync(Guid ingestSourceId)
+        private async Task<IngestionStatus> IngestRowsAsync(Guid ingestSourceId, CancellationToken cancellationToken = default)
         {
-            KustoAttribute resolvedAttribute = this._kustoIngestContext.ResolvedAttribute;
             DataSourceFormat format = this.GetDataFormat();
-
-            var kustoIngestProperties = new KustoIngestionProperties(resolvedAttribute.Database, resolvedAttribute.TableName)
-            {
-                Format = format,
-                TableName = resolvedAttribute.TableName
-            };
             string dataToIngest = (format == DataSourceFormat.multijson || format == DataSourceFormat.json) ? this.SerializeToIngestData() : string.Join(Environment.NewLine, this._rows);
-            if (!string.IsNullOrEmpty(resolvedAttribute.MappingRef))
-            {
-                var ingestionMapping = new IngestionMapping
-                {
-                    IngestionMappingReference = resolvedAttribute.MappingRef
-                };
-                kustoIngestProperties.IngestionMapping = ingestionMapping;
-            }
             var streamSourceOptions = new StreamSourceOptions()
             {
                 SourceId = ingestSourceId,
             };
-            /*
-                The expectation here is that user will provide a CSV mapping or a JSON/Multi-JSON mapping
-             */
-            return await this.IngestData(dataToIngest, kustoIngestProperties, streamSourceOptions);
+            return await this.IngestData(dataToIngest, format, streamSourceOptions, cancellationToken);
         }
 
-        private async Task<IngestionStatus> IngestData(string dataToIngest, KustoIngestionProperties kustoIngestionProperties, StreamSourceOptions streamSourceOptions)
+        private async Task<IngestionStatus> IngestData(string dataToIngest, DataSourceFormat format, StreamSourceOptions streamSourceOptions, CancellationToken cancellationToken)
         {
-            IKustoIngestionResult ingestionResult = await this._kustoIngestContext.IngestService.IngestFromStreamAsync(KustoBindingUtilities.StreamFromString(dataToIngest), kustoIngestionProperties, streamSourceOptions);
-            IngestionStatus ingestionStatus = ingestionResult.GetIngestionStatusBySourceId(streamSourceOptions.SourceId);
-            if (this._logger.IsEnabled(LogLevel.Trace))
-            {
-                this._logger.LogTrace("Ingestion status for source id: {IngestSourceId} , Ingest detail {IngestDetail} was {IngestionStatus}", streamSourceOptions.SourceId.ToString(), this._contextdetail.Value, ingestionStatus.Status);
-            }
-            return ingestionStatus;
+            return await this._kustoIngestContext.IngestData(format, KustoBindingUtilities.StreamFromString(dataToIngest), streamSourceOptions, cancellationToken);
         }
 
         private string SerializeToIngestData()
