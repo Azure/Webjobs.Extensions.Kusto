@@ -48,7 +48,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
     [4001,""Item-4001"",4001.00]
     [4002,""Item-4002"",4002.00]";
         private const string ClearTableTests = @".clear table kusto_functions_e2e_tests data";
-        private const string QueuedIngestInTheLastFiveMin = @".show  commands-and-queries  | where CommandType == 'DataIngestPull' | where Database =='e2e' | where LastUpdatedOn >= ago(5m) | where Text has 'kusto_functions_e2e_tests' | project Text | order by LastUpdatedOn asc";
+        private const string QueuedIngestInTheLastFiveMin = @".show  commands-and-queries  | where CommandType == 'DataIngestPull' | where Database =='e2e' | where LastUpdatedOn >= ago(5m) | where Text has 'kusto_functions_e2e_tests' | order by LastUpdatedOn asc | project Text ";
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
         private const string DatabaseName = "e2e";
@@ -191,9 +191,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             }
             */
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsValidateQueuedIngestion), parameter);
             // Output binding tests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsValidateQueuedIngestion), parameter);
             // Validate that Admin or dot commands work as well
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsAdminCommand), parameter);
             // Validate the queued ingest command that happened in this run
