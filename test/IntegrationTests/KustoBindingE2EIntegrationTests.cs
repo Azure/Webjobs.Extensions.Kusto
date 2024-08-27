@@ -68,7 +68,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         protected ICslAdminProvider KustoAdminClient { get; private set; }
         private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
         private readonly TestLoggerProvider _loggerProvider = new();
-        private const string CustomIngestionProperties = /*lang=json,strict*/ "{\"FlushImmediately\":true,\"PollTimeoutMinutes\":1}";
+        private const string CustomIngestionProperties = /*lang=json*/ @"{'FlushImmediately':true,'PollTimeoutMinutes':1}";
         [Fact]
         public async Task KustoFunctionsE2E()
         {
