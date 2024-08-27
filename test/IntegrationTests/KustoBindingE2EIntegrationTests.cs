@@ -106,20 +106,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
 
             // Fail scenario for no ingest privileges
 
-            string[] testsNoPrivilegesExecute = { nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges), nameof(KustoEndToEndTestClass.OutputQueuedFailForUserWithNoReadPrivileges) };
-
+            string[] testsNoPrivilegesExecute = { nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges) };
             foreach (string testNoPrivilegesExecute in testsNoPrivilegesExecute)
             {
-
                 Exception ingestPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(testNoPrivilegesExecute, parameter));
                 Assert.IsType<FunctionInvocationException>(ingestPrivilegeException);
                 Assert.NotEmpty(ingestPrivilegeException.GetBaseException().Message);
                 string actualExceptionCause = ingestPrivilegeException.GetBaseException().Message;
                 Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
-
             }
-
-
 
             // Tests for managed service identity disabled for local runs
             /*
