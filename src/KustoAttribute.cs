@@ -62,6 +62,13 @@ namespace Microsoft.Azure.WebJobs.Kusto
         [AutoResolve]
         public string IngestionType { get; set; } = "managed";
 
+
+        /// <summary>
+        /// The ingestion properties JSON
+        /// </summary>
+        [AutoResolve]
+        public string IngestionPropertiesJson { get; set; }
+
         /// <summary>
         /// In case of Input binding, the KqlCommand a.k.a KQL to execute
         /// </summary>

@@ -48,7 +48,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
     [4001,""Item-4001"",4001.00]
     [4002,""Item-4002"",4002.00]";
         private const string ClearTableTests = @".clear table kusto_functions_e2e_tests data";
-        private const string QueuedIngestInTheLastFiveMin = @".show  commands-and-queries  | where CommandType == 'DataIngestPull' | where Database =='e2e' | where LastUpdatedOn >= ago(5m) | where Text has 'kusto_functions_e2e_tests'";
+        private const string QueuedIngestInTheLastFiveMin = @".show  commands-and-queries  | where CommandType == 'DataIngestPull' | where Database =='e2e' | where LastUpdatedOn >= ago(5m) | where Text has 'kusto_functions_e2e_tests' | project Text | order by LastUpdatedOn asc";
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
         private const string DatabaseName = "e2e";
@@ -68,7 +68,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         protected ICslAdminProvider KustoAdminClient { get; private set; }
         private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
         private readonly TestLoggerProvider _loggerProvider = new();
-
+        private const string CustomIngestionProperties = /*lang=json,strict*/ "{\"FlushImmediately\":true,\"PollTimeoutMinutes\":1}";
         [Fact]
         public async Task KustoFunctionsE2E()
         {
@@ -190,6 +190,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 System.IO.File.AppendAllText("logs-created.txt", logMessage.FormattedMessage + Environment.NewLine);
             }
             */
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsValidateQueuedIngestion), parameter);
             // Output binding tests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             // Validate that Admin or dot commands work as well
@@ -304,12 +306,25 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             {
 
                 /*Create an item array - has to be large for a queued ingest*/
-                int nextId = id + 1;
+                int nextId = id + 4999;
                 int lastId = nextId + 500000;
 
                 Task.WhenAll(Enumerable.Range(nextId, lastId).Select(i => asyncCollector.AddAsync(GetItem(i))));
                 asyncCollector.FlushAsync();
             }
+
+            [NoAutomaticTrigger]
+            public static void OutputsQueuedWithCustomIngestionProperties(
+                int id,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, IngestionType = "queued", IngestionPropertiesJson = CustomIngestionProperties)] IAsyncCollector<object> asyncCollector)
+            {
+                /*Create an item array - has to be small for a flushImmediately*/
+                int nextId = id + 3999;
+                int lastId = nextId + 10;
+                Task.WhenAll(Enumerable.Range(nextId, lastId).Select(i => asyncCollector.AddAsync(GetItem(i))));
+                asyncCollector.FlushAsync();
+            }
+
             [NoAutomaticTrigger]
             public static async Task Inputs(
                 int id,
@@ -563,11 +578,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             [NoAutomaticTrigger]
             public static void InputsValidateQueuedIngestion(
                 int id,
-                [Kusto(Database: DatabaseName, KqlCommand = QueuedIngestInTheLastFiveMin, Connection = KustoConstants.DefaultConnectionStringName)] JArray showResult
+                [Kusto(Database: DatabaseName, KqlCommand = QueuedIngestInTheLastFiveMin, Connection = KustoConstants.DefaultConnectionStringName)] JArray showResults
              )
             {
-                Assert.NotNull(showResult);
-                Assert.Single(showResult);
+                Assert.NotNull(showResults);
+                foreach (JObject showResult in showResults.Children<JObject>())
+                {
+                    var keys = showResult.Properties().Select(p => p.Name).ToList();
+                    var values = showResult.Properties().Select(p => p.Value).ToList();
+                    Assert.Single(keys);
+                    Assert.Equal("Text", keys.First().ToString());
+                }
+
+                Assert.Equal(2, showResults.Count);
                 Assert.True(id > 0);
             }
 
