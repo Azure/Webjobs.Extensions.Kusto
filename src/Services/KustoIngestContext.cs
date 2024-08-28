@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Kusto.Data.Common;
@@ -64,7 +65,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 ingestionStatus = queuedIngestResult.GetIngestionStatusBySourceId(sourceId);
                 // Check if the ingestion status indicates completion
-                if (ingestionStatus.Status != Status.Pending)
+                if (ingestionStatus.Status == Status.Succeeded
+                    || ingestionStatus.Status == Status.Skipped // The ingestion was skipped because it was already ingested 
+                    || ingestionStatus.Status == Status.PartiallySucceeded // Some of the records were ingested 
+                    || ingestionStatus.Status == Status.Failed)
                 {
                     break;
                 }
@@ -74,20 +78,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             return ingestionStatus;
         }
 
-        public async Task<IngestionStatus> IngestData(DataSourceFormat dataFormat, System.IO.Stream dataToIngest, StreamSourceOptions streamSourceOptions, CancellationToken cancellationToken)
+        public async Task<IngestionStatus> IngestData(DataSourceFormat dataFormat, Stream dataToIngest, StreamSourceOptions streamSourceOptions, CancellationToken cancellationToken)
         {
             KustoIngestionProperties kustoIngestionProperties = this.GetKustoIngestionProperties(dataFormat);
             IKustoIngestionResult ingestionResult = await this.IngestService.IngestFromStreamAsync(dataToIngest, kustoIngestionProperties, streamSourceOptions);
-            IngestionStatus ingestionStatus = ingestionResult.GetIngestionStatusBySourceId(streamSourceOptions.SourceId);
             if ("queued".Equals(this.ResolvedAttribute.IngestionType, StringComparison.OrdinalIgnoreCase))
             {
                 // Delay and poll
-                if (ingestionStatus.Status == Status.Pending)
-                {
-                    return await PollIngestionStatus(ingestionResult, streamSourceOptions.SourceId, this._ingestionProperties.PollTimeoutMinutes, cancellationToken);
-                }
+                return await PollIngestionStatus(ingestionResult, streamSourceOptions.SourceId, this._ingestionProperties.PollTimeoutMinutes, cancellationToken);
             }
-            return ingestionStatus;
+            else
+            {
+                return ingestionResult.GetIngestionStatusBySourceId(streamSourceOptions.SourceId);
+            }
         }
     }
 
