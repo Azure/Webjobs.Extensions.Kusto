@@ -73,7 +73,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     break;
                 }
                 // Wait for a specified interval before polling again
-                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken);
             }
             return ingestionStatus;
         }
