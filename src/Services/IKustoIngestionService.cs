@@ -91,16 +91,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             bool flushImmediately = ingestionPropertiesDict.ContainsKey("flushImmediately") && bool.Parse(ingestionPropertiesDict["flushImmediately"].ToString());
             int pollIntervalSeconds = ingestionPropertiesDict.ContainsKey("pollIntervalSeconds") ? int.Parse(ingestionPropertiesDict["pollIntervalSeconds"].ToString(), CultureInfo.InvariantCulture) : 30;
             int pollTimeoutMinutes = ingestionPropertiesDict.ContainsKey("pollTimeoutMinutes") ? int.Parse(ingestionPropertiesDict["pollTimeoutMinutes"].ToString(), CultureInfo.InvariantCulture) : 30;
-
             if (flushImmediately)
             {
                 this._logger.LogWarning($"Flush immediately has been set for  {streamSourceOptions.SourceId}. No aggregation will be performed for ingestion. This is not recommended for large data sets");
                 ingestionProperties.FlushImmediately = flushImmediately;
             }
             IKustoIngestionResult ingestionResult = await this._ingestionContext.IngestService.IngestFromStreamAsync(dataToIngest, ingestionProperties, streamSourceOptions);
-            if (this._logger.IsEnabled(LogLevel.Debug))
+            if (this._logger.IsEnabled(LogLevel.Trace))
             {
-                this._logger.LogDebug($"Queued ingestion for sourceId {streamSourceOptions.SourceId}");
+                string logString = $"Additional properties passed {ingestionProperties.FlushImmediately} , Will poll every {pollIntervalSeconds} for status, until {pollTimeoutMinutes} minutes elapse";
+                this._logger.LogTrace($"Queued ingestion for sourceId {streamSourceOptions.SourceId}. Using ingestion properties {logString}");
             }
             return await PollIngestionStatus(ingestionResult, streamSourceOptions.SourceId, pollTimeoutMinutes, pollIntervalSeconds, cancellationToken);
         }

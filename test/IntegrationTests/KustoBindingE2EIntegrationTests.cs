@@ -130,8 +130,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             // Output binding tests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsCSV), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsCSV), parameter);
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             // Tests for records with mapping
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMapping), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputWithMapping), parameter);
@@ -169,11 +167,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
                 }
             }
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
+            // Validate the queued ingest command that happened in this run
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsValidateQueuedIngestion), parameter);
             // Validate that Admin or dot commands work as well
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsAdminCommand), parameter);
-            // Validate the queued ingest command that happened in this run
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsValidateQueuedIngestion), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.ClearTableAdminCommand), parameter);
         }
 
