@@ -9,7 +9,6 @@ using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Kusto;
 using Moq;
-using Newtonsoft.Json;
 using Xunit;
 
 
@@ -18,7 +17,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Services
     public class KustoIngestContextTests
     {
 
-        private readonly string CustomIngestionProperties = JsonConvert.SerializeObject(new CustomIngestionProps { FlushImmediately = true, PollTimeoutMinutes = 2 });
+        private readonly string CustomIngestionProperties = "@flushImmediately=true,@pollTimeoutMinutes=2,@pollIntervalSeconds=30";
 
         [Fact]
         public async Task PollIngestionStatusShouldReturnCompletedStatus()
@@ -44,7 +43,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Services
                 {
                     TableName = "TestTable",
                     IngestionType = "queued",
-                    IngestionPropertiesJson = CustomIngestionProperties,
+                    IngestionProperties = CustomIngestionProperties,
                 }
             };
             var mockIngestionResult = new Mock<IKustoIngestionResult>();

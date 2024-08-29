@@ -2,12 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Kusto.Data.Common;
 using Kusto.Ingest;
-using Newtonsoft.Json;
+using Microsoft.Azure.WebJobs.Kusto;
 
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto
@@ -17,7 +19,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     /// </summary>
     internal class KustoIngestContext
     {
-        public WebJobs.Kusto.KustoAttribute ResolvedAttribute { get; set; }
+        public KustoAttribute ResolvedAttribute { get; set; }
 
         public IKustoIngestClient IngestService { get; set; }
 
@@ -25,9 +27,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 
         private KustoIngestionProperties GetKustoIngestionProperties(DataSourceFormat dataFormat)
         {
-            this._ingestionProperties = string.IsNullOrEmpty(this.ResolvedAttribute.IngestionPropertiesJson)
-                ? new CustomIngestionProps()
-                : JsonConvert.DeserializeObject<CustomIngestionProps>(this.ResolvedAttribute.IngestionPropertiesJson);
+            this._ingestionProperties = GetIngestionProperties(this.ResolvedAttribute.IngestionProperties);
 
             KustoIngestionProperties kustoIngestProperties = "queued".Equals(this.ResolvedAttribute.IngestionType, StringComparison.OrdinalIgnoreCase)
                            ? new KustoQueuedIngestionProperties(this.ResolvedAttribute.Database, this.ResolvedAttribute.TableName)
@@ -56,7 +56,31 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             return kustoIngestProperties;
         }
 
-        private static async Task<IngestionStatus> PollIngestionStatus(IKustoIngestionResult queuedIngestResult, Guid sourceId, int ingestionTimeoutMinutes, CancellationToken cancellationToken)
+        private static CustomIngestionProps GetIngestionProperties(string IngestionProperties)
+        {
+            int pollTimeoutMinutes = 5; // default to 5 minutes
+            int pollIntervalSeconds = 15; // default to 15 seconds
+            bool flushImmediately = false;
+            if (!string.IsNullOrEmpty(IngestionProperties))
+            {
+                IDictionary<string, object> parsedIngestionProperties = KustoBindingUtilities.ParseParameters(IngestionProperties);
+                if (parsedIngestionProperties.ContainsKey("flushImmediately"))
+                {
+                    flushImmediately = bool.Parse(parsedIngestionProperties["flushImmediately"].ToString());
+                }
+                if (parsedIngestionProperties.ContainsKey("pollTimeoutMinutes"))
+                {
+                    pollTimeoutMinutes = int.Parse(parsedIngestionProperties["pollTimeoutMinutes"].ToString(), CultureInfo.InvariantCulture);
+                }
+                if (parsedIngestionProperties.ContainsKey("pollIntervalSeconds"))
+                {
+                    pollIntervalSeconds = int.Parse(parsedIngestionProperties["pollIntervalSeconds"].ToString(), CultureInfo.InvariantCulture);
+                }
+            }
+            return new CustomIngestionProps(flushImmediately, pollTimeoutMinutes, pollIntervalSeconds);
+        }
+
+        private static async Task<IngestionStatus> PollIngestionStatus(IKustoIngestionResult queuedIngestResult, Guid sourceId, int ingestionTimeoutMinutes, int pollIntervalSeconds, CancellationToken cancellationToken)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(TimeSpan.FromMinutes(ingestionTimeoutMinutes));
@@ -73,7 +97,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     break;
                 }
                 // Wait for a specified interval before polling again
-                await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(pollIntervalSeconds), cancellationToken);
             }
             return ingestionStatus;
         }
@@ -85,7 +109,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             if ("queued".Equals(this.ResolvedAttribute.IngestionType, StringComparison.OrdinalIgnoreCase))
             {
                 // Delay and poll
-                return await PollIngestionStatus(ingestionResult, streamSourceOptions.SourceId, this._ingestionProperties.PollTimeoutMinutes, cancellationToken);
+                return await PollIngestionStatus(ingestionResult, streamSourceOptions.SourceId, this._ingestionProperties.PollTimeoutMinutes, this._ingestionProperties.PollIntervalSeconds, cancellationToken);
             }
             else
             {
@@ -97,18 +121,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
     internal sealed class CustomIngestionProps
     {
         //construtors
-        public CustomIngestionProps()
-        {
-            this.FlushImmediately = false;
-            this.PollTimeoutMinutes = 5; // default to 5 minutes
-        }
         // full args constructor
-        public CustomIngestionProps(bool flushImmediately, int aggregationTimeoutMinutes)
+        public CustomIngestionProps(bool flushImmediately, int aggregationTimeoutMinutes, int pollIntervalSeconds)
         {
             this.FlushImmediately = flushImmediately;
             this.PollTimeoutMinutes = aggregationTimeoutMinutes;
+            this.PollIntervalSeconds = pollIntervalSeconds;
+
         }
         public bool FlushImmediately { get; set; }
         public int PollTimeoutMinutes { get; set; } = 5;
+        public int PollIntervalSeconds { get; set; } = 15;
     }
 }

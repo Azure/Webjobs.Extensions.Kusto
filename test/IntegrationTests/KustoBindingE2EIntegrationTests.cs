@@ -68,7 +68,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         protected ICslAdminProvider KustoAdminClient { get; private set; }
         private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
         private readonly TestLoggerProvider _loggerProvider = new();
-        private const string CustomIngestionProperties = "{{\"FlushImmediately\":true,\"PollTimeoutMinutes\":1}}";
+        private const string CustomIngestionProperties = "@flushImmediately=true,@pollTimeoutMinutes=1,@pollIntervalSeconds=15";
         [Fact]
         public async Task KustoFunctionsE2E()
         {
@@ -316,7 +316,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             [NoAutomaticTrigger]
             public static void OutputsQueuedWithCustomIngestionProperties(
                 int id,
-                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, IngestionType = "queued", IngestionPropertiesJson = CustomIngestionProperties)] IAsyncCollector<object> asyncCollector)
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, IngestionType = "queued", IngestionProperties = CustomIngestionProperties)] IAsyncCollector<object> asyncCollector)
             {
                 /*Create an item array - has to be small for a flushImmediately*/
                 int nextId = id + 3999;
