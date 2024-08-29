@@ -20,6 +20,7 @@
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.Storage.Blobs" Version="5.3.0" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Host.TestCommon" Version="3.0.39" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="4.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Sdk.Functions" Version="4.4.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageVersion Include="Moq" Version="4.20.70" />

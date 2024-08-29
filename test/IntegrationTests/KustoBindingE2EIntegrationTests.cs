@@ -66,7 +66,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         // A client to perform all the assertions
         protected ICslQueryProvider KustoQueryClient { get; private set; }
         protected ICslAdminProvider KustoAdminClient { get; private set; }
-        private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
+        private readonly ILoggerFactory _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+
         private readonly TestLoggerProvider _loggerProvider = new();
         private const string CustomIngestionProperties = "@flushImmediately=true,@pollTimeoutMinutes=1,@pollIntervalSeconds=15";
         [Fact]
@@ -117,22 +118,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
             }
 
-            // Tests for managed service identity disabled for local runs
-            /*
-            string tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
-            string appId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
-            string appSecret = Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
-            if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(appId) || string.IsNullOrEmpty(appSecret))
-            {
-                logger.LogWarning("Environment variables AZURE_TENANT_ID/AZURE_CLIENT_ID/AZURE_CLIENT_SECRET are not set. MSI tests will not be run");
-            }
-            else
-            {
-                // Tests for managed service identity
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputMSI), parameter);
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputMSI), parameter);
-            }
-            */
             // Tests where the exceptions are caused due to invalid strings
             string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputQueuedFailInvalidConnectionString) };
             foreach (string test in testsToExecute)
@@ -142,9 +127,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.Equal("Kusto Connection String Builder has some invalid or conflicting properties: Specified 'AAD application key' authentication method has some incorrect properties. Missing: [Application Key,Authority Id].. ',\r\nPlease consult Kusto Connection String documentation at https://docs.microsoft.com/en-us/azure/kusto/api/connection-strings/kusto", invalidConnectionStringException.GetBaseException().Message);
             }
             // Tests for managed CSV
+            // Output binding tests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsCSV), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsCSV), parameter);
-
             // Tests for records with mapping
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMapping), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputWithMapping), parameter);
@@ -182,17 +169,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
                 }
             }
-            /*
-            // To debug further, uncomment the following lines. The logs would be available in test\bin\Debug\netcoreapp3.1
-            IEnumerable<LogMessage> allLoggedMessages = this._loggerProvider.GetAllLogMessages();
-            foreach (LogMessage logMessage in allLoggedMessages)
-            {
-                System.IO.File.AppendAllText("logs-created.txt", logMessage.FormattedMessage + Environment.NewLine);
-            }
-            */
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
-            // Output binding tests
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsValidateQueuedIngestion), parameter);
             // Validate that Admin or dot commands work as well
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsAdminCommand), parameter);
@@ -220,12 +196,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     builder.Services.AddSingleton<IKustoClientFactory>(new KustoClient());
                     builder.AddKusto();
                 })
+                .ConfigureTestLogger()
                 .ConfigureAppConfiguration(c =>
                 {
                     c.AddTestSettings();
                 })
                 .ConfigureServices(services =>
                 {
+                    services.AddLogging((loggingBuilder) => loggingBuilder
+                    .SetMinimumLevel(LogLevel.Trace)
+                    .AddConsole());
                     services.AddSingleton<ITypeLocator>(locator);
                 })
                 .Build();
@@ -590,7 +570,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Assert.Equal("Text", keys.First().ToString());
                 }
 
-                Assert.Equal(2, showResults.Count);
+                Assert.Equal(3, showResults.Count);
                 Assert.True(id > 0);
             }
 

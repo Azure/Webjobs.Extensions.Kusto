@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Kusto.Cloud.Platform.Utils;
 using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Extensions.Kusto;
@@ -41,6 +42,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
             $"MappingRef='{kustoContext.ResolvedAttribute?.MappingRef}', " +
             $"DataFormat='{this.GetDataFormat()}', " +
             $"IngestionType='{kustoContext.ResolvedAttribute?.IngestionType}', " +
+            $"IngestionProperties='{kustoContext.ResolvedAttribute?.IngestionProperties}', " +
             $"ManagedIdentity='{kustoContext.ResolvedAttribute?.ManagedServiceIdentity}'");
         }
 
@@ -77,6 +79,10 @@ namespace Microsoft.Azure.WebJobs.Kusto
         public async Task FlushAsync(CancellationToken cancellationToken = default)
         {
             await this._rowLock.WaitAsync(cancellationToken);
+            if (this._logger.IsEnabled(LogLevel.Debug))
+            {
+                this._logger.LogDebug($"Flushing rows with {this._rows.Count} rows to ingest.Ingest detail {this._contextdetail.Value}");
+            }
             var ingestSourceId = Guid.NewGuid();
             try
             {
@@ -122,7 +128,15 @@ namespace Microsoft.Azure.WebJobs.Kusto
 
         private async Task<IngestionStatus> IngestData(string dataToIngest, DataSourceFormat format, StreamSourceOptions streamSourceOptions, CancellationToken cancellationToken)
         {
-            return await this._kustoIngestContext.IngestData(format, KustoBindingUtilities.StreamFromString(dataToIngest), streamSourceOptions, cancellationToken);
+            bool isQueuedIngestion = "queued".EqualsOrdinalIgnoreCase(this._kustoIngestContext.ResolvedAttribute.IngestionType);
+            if (this._logger.IsEnabled(LogLevel.Debug))
+            {
+                this._logger.LogDebug($"Ingesting data with SourceId {streamSourceOptions.SourceId} using {this._kustoIngestContext.ResolvedAttribute.IngestionType} ingestion");
+            }
+            IKustoIngestionService ingestionService = isQueuedIngestion
+                ? new KustoQueuedIngestionService(this._kustoIngestContext, this._logger)
+                : (IKustoIngestionService)new KustoManagedIngestionService(this._kustoIngestContext, this._logger);
+            return await ingestionService.IngestData(format, KustoBindingUtilities.StreamFromString(dataToIngest), streamSourceOptions, cancellationToken);
         }
 
         private string SerializeToIngestData()
