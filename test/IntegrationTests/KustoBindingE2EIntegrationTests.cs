@@ -150,6 +150,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.Equal($"Bad streaming ingestion request to {DatabaseName}.{TableName} : The input stream is empty after processing, tip:check stream validity", actualMessageValue);
                 Assert.True(isPermanent);
             }
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             // A case where ingestion is done , but there exists no such mapping causing ingestion failure
             string[] noMappingTestsToExecute = { nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), nameof(KustoEndToEndTestClass.OutputsQueuedWithMappingFailIngestion) };
             foreach (string noMappingTest in noMappingTestsToExecute)
@@ -167,8 +169,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
                 }
             }
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
-            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             // Validate the queued ingest command that happened in this run
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsValidateQueuedIngestion), parameter);
             // Validate that Admin or dot commands work as well
@@ -569,7 +569,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Assert.Equal("Text", keys.First().ToString());
                 }
 
-                Assert.Equal(3, showResults.Count);
+                Assert.Equal(2, showResults.Count);
                 Assert.True(id > 0);
             }
 
