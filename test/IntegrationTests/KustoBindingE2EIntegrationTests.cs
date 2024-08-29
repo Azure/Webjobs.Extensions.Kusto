@@ -569,7 +569,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Assert.Equal("Text", keys.First().ToString());
                 }
 
-                Assert.Equal(2, showResults.Count);
+                Assert.Equal(3, showResults.Count); // 2 success 1 fail
                 Assert.True(id > 0);
             }
 
