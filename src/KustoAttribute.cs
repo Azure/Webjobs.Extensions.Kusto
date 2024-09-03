@@ -64,7 +64,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
 
 
         /// <summary>
-        /// The ingestion properties JSON
+        /// The ingestion properties (@flushImmediately=false,@pollIntervalSeconds=15,@pollTimeoutMinutes=5)
         /// </summary>
         [AutoResolve]
         public string IngestionProperties { get; set; }

@@ -60,5 +60,10 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Kusto
         /// The ingestion client to use. Supports managed,queued clients
         /// </summary>
         public string IngestionType { get; set; } = "managed";
+
+        /// <summary>
+        /// The ingestion properties (@flushImmediately=false,@pollIntervalSeconds=15,@pollTimeoutMinutes=5)
+        /// </summary>
+        public string IngestionProperties { get; set; }
     }
 }
