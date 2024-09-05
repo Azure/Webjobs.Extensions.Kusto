@@ -39,7 +39,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private readonly string CreateItemTable = $".create-merge table {TableName}(ID:int,Name:string, Cost:double,Timestamp:datetime)";
         private readonly string CreateTableMappings = $".create-or-alter table {TableName} ingestion json mapping \"{MappingName}\" '[{{\"column\":\"ID\",\"path\":\"$.ProductID\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Name\",\"path\":\"$.ProductName\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Cost\",\"path\":\"$.UnitCost\",\"datatype\":\"\",\"transform\":null}},{{\"column\":\"Timestamp\",\"path\":\"$.Timestamp\",\"datatype\":\"\",\"transform\":null}}]'";
         private readonly string DropTableMappings = $".drop table {TableName} ingestion json mapping \"{MappingName}\"";
-        private readonly string ClearItemTable = $".clear table {TableName} data";
+        private readonly string ClearItemTable = $".clear async table {TableName} data";
         private readonly string DropTable = $".drop table {TableName}";
         // Queries for input binding with parameters
         private const string QueryWithBoundParam = "declare query_parameters(startId:int,endId:int);kusto_functions_e2e_tests | where ID >= startId and ID <= endId and ingestion_time()>ago(10s)";
@@ -48,6 +48,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
     [4001,""Item-4001"",4001.00]
     [4002,""Item-4002"",4002.00]";
         private const string ClearTableTests = @".clear table kusto_functions_e2e_tests data";
+        private const string QueuedIngestInTheLastFiveMin = @".show  commands-and-queries  | where CommandType == 'DataIngestPull' | where Database =='e2e' | where LastUpdatedOn >= ago(2m) | where Text has 'kusto_functions_e2e_tests' | order by LastUpdatedOn asc | project Text ";
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
         private const string DatabaseName = "e2e";
@@ -65,9 +66,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         // A client to perform all the assertions
         protected ICslQueryProvider KustoQueryClient { get; private set; }
         protected ICslAdminProvider KustoAdminClient { get; private set; }
-        private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
-        private readonly TestLoggerProvider _loggerProvider = new();
+        private readonly ILoggerFactory _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
+        private readonly TestLoggerProvider _loggerProvider = new();
+        private const string CustomIngestionProperties = "@flushImmediately=true,@pollTimeoutMinutes=1,@pollIntervalSeconds=15";
         [Fact]
         public async Task KustoFunctionsE2E()
         {
@@ -104,30 +106,20 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             Assert.Contains("Forbidden (403-Forbidden)", readPrivilegeException.GetBaseException().Message);
 
             // Fail scenario for no ingest privileges
-            Exception ingestPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges), parameter));
-            Assert.IsType<FunctionInvocationException>(ingestPrivilegeException);
-            Assert.NotEmpty(ingestPrivilegeException.GetBaseException().Message);
-            string actualExceptionCause = ingestPrivilegeException.GetBaseException().Message;
-            Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
 
-            // Tests for managed service identity disabled for local runs
-            /*
-            string tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
-            string appId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
-            string appSecret = Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
-            if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(appId) || string.IsNullOrEmpty(appSecret))
+            string[] testsNoPrivilegesExecute = { nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges) };
+            // , nameof(KustoEndToEndTestClass.OutputQueuedFailForUserWithNoReadPrivileges) 
+            foreach (string testNoPrivilegesExecute in testsNoPrivilegesExecute)
             {
-                logger.LogWarning("Environment variables AZURE_TENANT_ID/AZURE_CLIENT_ID/AZURE_CLIENT_SECRET are not set. MSI tests will not be run");
+                Exception ingestPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(testNoPrivilegesExecute, parameter));
+                Assert.IsType<FunctionInvocationException>(ingestPrivilegeException);
+                Assert.NotEmpty(ingestPrivilegeException.GetBaseException().Message);
+                string actualExceptionCause = ingestPrivilegeException.GetBaseException().Message;
+                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
             }
-            else
-            {
-                // Tests for managed service identity
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputMSI), parameter);
-                await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputMSI), parameter);
-            }
-            */
+
             // Tests where the exceptions are caused due to invalid strings
-            string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString) };
+            string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputQueuedFailInvalidConnectionString) };
             foreach (string test in testsToExecute)
             {
                 Exception invalidConnectionStringException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(test, parameter));
@@ -135,9 +127,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.Equal("Kusto Connection String Builder has some invalid or conflicting properties: Specified 'AAD application key' authentication method has some incorrect properties. Missing: [Application Key,Authority Id].. ',\r\nPlease consult Kusto Connection String documentation at https://docs.microsoft.com/en-us/azure/kusto/api/connection-strings/kusto", invalidConnectionStringException.GetBaseException().Message);
             }
             // Tests for managed CSV
+            // Output binding tests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsCSV), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsCSV), parameter);
-
             // Tests for records with mapping
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMapping), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputWithMapping), parameter);
@@ -158,19 +150,27 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.Equal($"Bad streaming ingestion request to {DatabaseName}.{TableName} : The input stream is empty after processing, tip:check stream validity", actualMessageValue);
                 Assert.True(isPermanent);
             }
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             // A case where ingestion is done , but there exists no such mapping causing ingestion failure
-            Exception noSuchMappingException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), parameter));
-            Assert.IsType<FunctionInvocationException>(noSuchMappingException);
-            string baseMessage = noSuchMappingException.GetBaseException().Message;
-            Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
-            /*
-            // To debug further, uncomment the following lines. The logs would be available in test\bin\Debug\netcoreapp3.1
-            IEnumerable<LogMessage> allLoggedMessages = this._loggerProvider.GetAllLogMessages();
-            foreach (LogMessage logMessage in allLoggedMessages)
+            string[] noMappingTestsToExecute = { nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), nameof(KustoEndToEndTestClass.OutputsQueuedWithMappingFailIngestion) };
+            foreach (string noMappingTest in noMappingTestsToExecute)
             {
-                System.IO.File.AppendAllText("logs-created.txt", logMessage.FormattedMessage + Environment.NewLine);
+                Exception noSuchMappingException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(noMappingTest, parameter));
+                Assert.IsType<FunctionInvocationException>(noSuchMappingException);
+                string baseMessage = noSuchMappingException.GetBaseException().Message;
+                if (noMappingTest.Contains("Queued"))
+                {
+                    // In case of queued ingestion, the error message is different. Refer KustoAsyncCollector method FlushAsync
+                    Assert.Contains("Ingestion status reported failure/partial success for", baseMessage);
+                }
+                else
+                {
+                    Assert.Equal($"Entity ID '{NonExistingMappingName}' of kind 'MappingPersistent' was not found.", baseMessage);
+                }
             }
-            */
+            // Validate the queued ingest command that happened in this run
+            await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsValidateQueuedIngestion), parameter);
             // Validate that Admin or dot commands work as well
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputsAdminCommand), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.ClearTableAdminCommand), parameter);
@@ -195,12 +195,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     builder.Services.AddSingleton<IKustoClientFactory>(new KustoClient());
                     builder.AddKusto();
                 })
+                .ConfigureTestLogger()
                 .ConfigureAppConfiguration(c =>
                 {
                     c.AddTestSettings();
                 })
                 .ConfigureServices(services =>
                 {
+                    services.AddLogging((loggingBuilder) => loggingBuilder
+                    .SetMinimumLevel(LogLevel.Trace)
+                    .AddConsole());
                     services.AddSingleton<ITypeLocator>(locator);
                 })
                 .Build();
@@ -273,6 +277,32 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 newItemCsv = $"{csvItem.ID},{csvItem.Name},{csvItem.Cost},{csvItem.Timestamp.ToUtcString(CultureInfo.InvariantCulture)}";
             }
 
+
+            [NoAutomaticTrigger]
+            public static void OutputsQueued(
+                int id,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, IngestionType = "queued")] IAsyncCollector<object> asyncCollector)
+            {
+
+                /*Create an item array - has to be large for a queued ingest*/
+                int nextId = id + 4999;
+                int lastId = nextId + 500000;
+
+                Task.WhenAll(Enumerable.Range(nextId, lastId).Select(i => asyncCollector.AddAsync(GetItem(i))));
+                asyncCollector.FlushAsync();
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputsQueuedWithCustomIngestionProperties(
+                int id,
+                [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, IngestionType = "queued", IngestionProperties = CustomIngestionProperties)] IAsyncCollector<object> asyncCollector)
+            {
+                /*Create an item array - has to be small for a flushImmediately*/
+                int nextId = id + 3999;
+                int lastId = nextId + 10;
+                Task.WhenAll(Enumerable.Range(nextId, lastId).Select(i => asyncCollector.AddAsync(GetItem(i))));
+                asyncCollector.FlushAsync();
+            }
 
             [NoAutomaticTrigger]
             public static async Task Inputs(
@@ -522,6 +552,57 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 string productJson = GetProductJson(productId);
                 // Create a JSON that is invalid! This should throw a payload exception
                 product = productJson[1..];
+            }
+
+            [NoAutomaticTrigger]
+            public static void InputsValidateQueuedIngestion(
+                int id,
+                [Kusto(Database: DatabaseName, KqlCommand = QueuedIngestInTheLastFiveMin, Connection = KustoConstants.DefaultConnectionStringName)] JArray showResults
+             )
+            {
+                Assert.NotNull(showResults);
+                foreach (JObject showResult in showResults.Children<JObject>())
+                {
+                    var keys = showResult.Properties().Select(p => p.Name).ToList();
+                    var values = showResult.Properties().Select(p => p.Value).ToList();
+                    Assert.Single(keys);
+                    Assert.Equal("Text", keys.First().ToString());
+                }
+
+                Assert.Equal(3, showResults.Count); // 2 success 1 fail
+                Assert.True(id > 0);
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputQueuedFailInvalidConnectionString(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = "KustoConnectionStringInvalidAttributes", IngestionType = "queued")] out object itemOne)
+            {
+                Assert.True(id > 0);
+                itemOne = GetItem(id + 999);
+                // one item gets retrieved
+                Assert.Null(itemOne);
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputQueuedFailForUserWithNoReadPrivileges(
+            int id,
+#pragma warning disable IDE0060
+            [Kusto(Database: DatabaseNameNoPermissions, TableName = TableName, Connection = "KustoConnectionStringNoPermissions", IngestionType = "queued")] out object newItem)
+#pragma warning restore IDE0060
+            {
+                Assert.True(id > 0);
+                newItem = GetItem(id + 999);
+                // When we add an item it should fail with exception
+            }
+
+            [NoAutomaticTrigger]
+            public static void OutputsQueuedWithMappingFailIngestion(
+            int id,
+            [Kusto(Database: DatabaseName, TableName = TableName, Connection = KustoConstants.DefaultConnectionStringName, MappingRef = NonExistingMappingName, IngestionType = "queued")] out string product)
+            {
+                int productId = id + 2999;
+                product = GetProductJson(productId);
             }
 
             private static string GetProductJson(int id)

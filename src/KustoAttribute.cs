@@ -57,6 +57,19 @@ namespace Microsoft.Azure.WebJobs.Kusto
         public string DataFormat { get; set; }
 
         /// <summary>
+        /// The ingestion client to use. Supports managed,queued clients
+        /// </summary>
+        [AutoResolve]
+        public string IngestionType { get; set; } = "managed";
+
+
+        /// <summary>
+        /// The ingestion properties (@flushImmediately=false,@pollIntervalSeconds=15,@pollTimeoutMinutes=5)
+        /// </summary>
+        [AutoResolve]
+        public string IngestionProperties { get; set; }
+
+        /// <summary>
         /// In case of Input binding, the KqlCommand a.k.a KQL to execute
         /// </summary>
         [AutoResolve]
@@ -81,8 +94,8 @@ namespace Microsoft.Azure.WebJobs.Kusto
             get
             {
                 {
-                    return string.Format(CultureInfo.InvariantCulture, "{0}(MappingRef={1}, DataFormat={2}, MSI={3}, KqlCommand={4}, KqlParameters={5})",
-                        this.TableName, this.MappingRef, this.DataFormat, this.ManagedServiceIdentity, this.KqlCommand, this.KqlParameters);
+                    return string.Format(CultureInfo.InvariantCulture, "{0}(MappingRef={1}, DataFormat={2}, MSI={3}, KqlCommand={4}, KqlParameters={5}, IngestionType={6}",
+                        this.TableName, this.MappingRef, this.DataFormat, this.ManagedServiceIdentity, this.KqlCommand, this.KqlParameters, this.IngestionType);
                 }
             }
         }

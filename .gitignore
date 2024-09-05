@@ -376,3 +376,6 @@ func-logs.txt
 samples/samples-node/Docker.node
 src/run-tests.sh
 export.ini
+test/dev-key-public.snk
+test/dev-key.snk
+test/test.generated.sln

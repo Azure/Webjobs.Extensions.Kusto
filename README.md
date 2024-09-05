@@ -51,6 +51,18 @@ Takes row(s) and inserts them into the Kusto table .
 
 - DataFormat: The default dataformat is `multijson/json`. This can be set to _**text**_ formats supported in the datasource format [enumeration](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/api/netfx/kusto-ingest-client-reference#enum-datasourceformat). Samples are validated and provided for csv and JSON formats.
 
+- IngestionType: Optional attribute to different ingestion types. Supported values are [queued ingestion](https://learn.microsoft.com/en-us/kusto/api/netfx/about-kusto-ingest?view=microsoft-fabric&tabs=csharp#queued-ingestion) or [managed ingestion](https://learn.microsoft.com/en-us/azure/data-explorer/ingest-data-streaming?tabs=azure-portal%2Ccsharp) which attempts streaming ingest falling back to queued ingestion. The default value is __managed__
+
+
+- IngestionProperties: Optional attribute pertinent to queued ingestion type. When using queued ingestion, the following values can be specified
+  
+  - flushImmediately: Whether aggregation has to be performed during ingestion
+  - pollIntervalSeconds: Queued ingestion is an async operation. Indicates how often to poll for a result to report status of ingestion. Defaults to __15 seconds__
+  - pollTimeoutMinutes: Timeout to report failure of queued ingestion. Defaults to __5 minutes__
+
+    This is specified as ``@flushImmediately=false,@pollIntervalSeconds=15,@pollTimeoutMinutes=5`` like other kusto binding properties.
+
+
 ### **Samples**
 
 Samples for C# are available and available at the following. This can run with local functions framework. Setup required for the run is available at the [location](samples/set-up)
