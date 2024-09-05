@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.microsoft.azure.functions</groupId>
   <artifactId>azure-functions-java-library-kusto</artifactId>
-  <version>1.0.9-Preview</version>
+  <version>1.0.11-Preview</version>
   <packaging>jar</packaging>
   <name>Microsoft Azure Functions Java Kusto Types</name>
   <description>This package contains all Java annotations to interact with Microsoft Azure Functions runtime for Kusto (ADX) Bindings.</description>
@@ -34,9 +34,9 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <azure.functions.maven.plugin.version>1.22.0</azure.functions.maven.plugin.version>
-    <azure.functions.java.library.version>3.0.0</azure.functions.java.library.version>
+    <azure.functions.java.library.version>3.1.0</azure.functions.java.library.version>
     <formatter.version>2.21.0</formatter.version>
-    <junit.version>5.9.2</junit.version>
+    <junit.version>5.11.0</junit.version>
     <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
     <maven.resources.plugin.version>3.3.0</maven.resources.plugin.version>
     <maven.dependency.plugin.version>3.3.0</maven.dependency.plugin.version>

@@ -38,4 +38,11 @@ public @interface KustoOutput {
     // An option to set the ManagedServiceIdentity option. If set to "system" will use SystemManagedIdentity
     // else use UserManagedIdentity
     String managedServiceIdentity() default "";
+
+    // Indicates the type of ingestion. If set to "queued" will use queued ingestion. Defaults to managed ingestion
+    String ingestionTyoe() default "managed";
+
+    // Optional attribute pertinent to queued ingestion type. When using queued ingestion, the following values can be specified
+    // This is specified as ``@flushImmediately=false,@pollIntervalSeconds=15,@pollTimeoutMinutes=5`` like other kusto binding properties.
+    String ingestionProperties() default "@flushImmediately=false,@pollIntervalSeconds=15,@pollTimeoutMinutes=5";
 }
