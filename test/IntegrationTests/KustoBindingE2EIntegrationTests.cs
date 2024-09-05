@@ -568,7 +568,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                     Assert.Single(keys);
                     Assert.Equal("Text", keys.First().ToString());
                 }
-                Assert.IsTrue(showResults.Count >= 2, "There should atleast be 2 ingestions in the last 2 minutes");
+                Assert.True(showResults.Count >= 2, "There should atleast be 2 ingestions in the last 2 minutes");
                 Assert.True(id > 0);
             }
 
