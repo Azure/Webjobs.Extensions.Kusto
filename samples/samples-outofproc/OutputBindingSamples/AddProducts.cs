@@ -17,7 +17,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindin
             HttpRequestData req)
         {
             Product[]? products = await req.ReadFromJsonAsync<Product[]>();
-            return products ?? Array.Empty<Product>();
+            return products ?? [];
         }
     }
 }

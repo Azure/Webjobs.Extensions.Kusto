@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 {
-    internal class Row
+    internal sealed class Row
     {
         public int ID;
         public string Name;
@@ -25,12 +25,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 
         public object[] ToObjectArray()
         {
-            return new object[]
-            {
+            return
+            [
                 this.ID,
                 this.Name,
                 this.Cost
-            };
+            ];
         }
     }
 }

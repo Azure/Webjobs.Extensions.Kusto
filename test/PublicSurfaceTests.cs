@@ -12,12 +12,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests
         {
             System.Reflection.Assembly assembly = typeof(KustoAttribute).Assembly;
 
-            string[] expected = new[]
-            {
+            string[] expected =
+            [
                 "KustoBindingExtension",
                 "KustoBindingStartup",
                 "KustoAttribute"
-            };
+            ];
             Host.TestCommon.TestHelpers.AssertPublicTypes(expected, assembly);
         }
     }

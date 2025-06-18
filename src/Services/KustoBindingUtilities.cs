@@ -12,6 +12,8 @@ namespace Microsoft.Azure.WebJobs.Kusto
 {
     internal static class KustoBindingUtilities
     {
+        private static readonly char[] CommaSeparator = new[] { ',' };
+
         public static Stream StreamFromString(string dataToIngest)
         {
             var stream = new MemoryStream();
@@ -30,14 +32,14 @@ namespace Microsoft.Azure.WebJobs.Kusto
 
         public static IDictionary<string, object> ParseParameters(string parameters)
         {
-            IDictionary<string, object> kvParameters = new Dictionary<string, object>();
+            var kvParameters = new Dictionary<string, object>();
             // If parameters is null, user did not specify any parameters in their function so nothing to parse
             if (!string.IsNullOrEmpty(parameters))
             {
                 // Because we remove empty entries, we will ignore any commas that appear at the beginning/end of the parameter list,
                 // as well as extra commas that appear between parameter pairs.
                 // I.e., ",,@param1=param1,,@param2=param2,,," will be parsed just like "@param1=param1,@param2=param2" is.
-                string[] paramPairs = parameters.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] paramPairs = parameters.Split(CommaSeparator, StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (string pair in paramPairs)
                 {

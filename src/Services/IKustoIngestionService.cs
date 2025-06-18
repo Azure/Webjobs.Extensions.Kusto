@@ -88,9 +88,24 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         {
             var ingestionProperties = (KustoQueuedIngestionProperties)GetKustoIngestionProperties(dataFormat, this._ingestionContext.ResolvedAttribute, true);
             System.Collections.Generic.IDictionary<string, object> ingestionPropertiesDict = KustoBindingUtilities.ParseParameters(this._ingestionContext.ResolvedAttribute.IngestionProperties);
-            bool flushImmediately = ingestionPropertiesDict.ContainsKey("flushImmediately") && bool.Parse(ingestionPropertiesDict["flushImmediately"].ToString());
-            int pollIntervalSeconds = ingestionPropertiesDict.ContainsKey("pollIntervalSeconds") ? int.Parse(ingestionPropertiesDict["pollIntervalSeconds"].ToString(), CultureInfo.InvariantCulture) : 30;
-            int pollTimeoutMinutes = ingestionPropertiesDict.ContainsKey("pollTimeoutMinutes") ? int.Parse(ingestionPropertiesDict["pollTimeoutMinutes"].ToString(), CultureInfo.InvariantCulture) : 30;
+            bool flushImmediately = false;
+            if (ingestionPropertiesDict.TryGetValue("flushImmediately", out object flushImmediatelyObj))
+            {
+                flushImmediately = bool.Parse(flushImmediatelyObj.ToString());
+            }
+
+            int pollIntervalSeconds = 30;
+            if (ingestionPropertiesDict.TryGetValue("pollIntervalSeconds", out object pollIntervalSecondsObj))
+            {
+                pollIntervalSeconds = int.Parse(pollIntervalSecondsObj.ToString(), CultureInfo.InvariantCulture);
+            }
+
+            int pollTimeoutMinutes = 30;
+            if (ingestionPropertiesDict.TryGetValue("pollTimeoutMinutes", out object pollTimeoutMinutesObj))
+            {
+                pollTimeoutMinutes = int.Parse(pollTimeoutMinutesObj.ToString(), CultureInfo.InvariantCulture);
+            }
+
             if (flushImmediately)
             {
                 this._logger.LogWarning($"Flush immediately has been set for  {streamSourceOptions.SourceId}. No aggregation will be performed for ingestion. This is not recommended for large data sets");

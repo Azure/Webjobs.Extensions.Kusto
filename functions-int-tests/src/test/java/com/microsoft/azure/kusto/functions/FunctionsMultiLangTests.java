@@ -189,7 +189,7 @@ public class FunctionsMultiLangTests extends Simulation {
                     "/src/samples-%s/target/azure-functions/kustojavafunctionssample-20230130111810292/func-logs.txt",
                     language);
         } else if ("outofproc".equalsIgnoreCase(language)) {
-            containerPath = String.format("/src/samples-%s/bin/Debug/net6.0/func-logs.txt", language);
+            containerPath = String.format("/src/samples-%s/bin/Debug/net9.0/func-logs.txt", language);
         } else if ("csharp".equalsIgnoreCase(language)) {
             containerPath = String.format("/src/samples-%s/bin/Debug/net6/func-logs.txt", language);
         } else {

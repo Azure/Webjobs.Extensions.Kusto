@@ -30,7 +30,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         private const string QueryWithBoundParam = "declare query_parameters (name:string);TestTable | where Name == name";
         private const string QueryWithNoBoundParam = "TestTable | where Name == 'I4'";
         private const string CrpOptions = "@client_max_redirect_count=2, @notruncation=true, @maxoutputcolumns=638258584515103616, @query_language=\"kql\"";
-        private readonly ILoggerFactory _loggerFactory = new LoggerFactory();
+        private readonly LoggerFactory _loggerFactory = new();
         private readonly TestLoggerProvider _loggerProvider = new();
 
         public KustoBindingE2EMockTests()
@@ -60,10 +60,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
                 It.IsAny<KustoIngestionProperties>(),
                 It.IsAny<StreamSourceOptions>())).
                 ReturnsAsync(mockIngestionResult.Object).
-                Callback<Stream, KustoIngestionProperties, StreamSourceOptions>((s, kip, sso) =>
-                {
-                    Validate(s, kip, sso);
-                });
+                Callback<Stream, KustoIngestionProperties, StreamSourceOptions>(Validate);
             var ingestClientFactory = new MockClientFactory(mockIngestionClient.Object);
             // Act
             await this.RunTestAsync(typeof(KustoEndToEndFunctions), ingestClientFactory, nameof(KustoEndToEndFunctions.Outputs));
@@ -233,10 +230,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
         {
             if (disposing)
             {
-                if (this._loggerFactory != null)
-                {
-                    this._loggerFactory.Dispose();
-                }
+                this._loggerFactory?.Dispose();
             }
         }
 
@@ -281,7 +275,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             await host.GetJobHost().CallAsync(testType.GetMethod(testName), arguments);
             await host.StopAsync();
         }
-        private class KustoEndToEndFunctions
+        private sealed class KustoEndToEndFunctions
         {
             [NoAutomaticTrigger]
             public static void Outputs(
@@ -293,16 +287,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             {
                 newItem = new { };
                 newItemString = "{}";
-                arrayItem = new Item[]
-                {
-                    new Item(),
-                    new Item()
-                };
-                Task.WaitAll(new[]
-                {
+                arrayItem =
+                [
+                    new(),
+                    new()
+                ];
+                Task.WaitAll(
+                [
                     asyncCollector.AddAsync(new { }),
                     asyncCollector.AddAsync(new { })
-                });
+                ]);
                 collector.Add(new { });
                 collector.Add(new { });
             }
@@ -344,7 +338,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             }
         }
 
-        private class NoConnectionString
+        private sealed class NoConnectionString
         {
             [NoAutomaticTrigger]
             public static void ErrBinding([Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1")] IEnumerable<Item> _)
@@ -353,7 +347,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             }
         }
 
-        private class EmptyDatabase
+        private sealed class EmptyDatabase
         {
             [NoAutomaticTrigger]
             public static void ErrBinding([Kusto(Database: "", KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> _)
@@ -362,7 +356,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             }
         }
 
-        private class NoCommandOrTable
+        private sealed class NoCommandOrTable
         {
             [NoAutomaticTrigger]
             public static void ErrBinding([Kusto(Database: DatabaseName, Connection = KustoConstants.DefaultConnectionStringName)] IEnumerable<Item> _)
@@ -371,7 +365,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             }
         }
 
-        private class InvalidBinding
+        private sealed class InvalidBinding
         {
             [NoAutomaticTrigger]
             public static void InvalidBindingType([Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] JObject _)
@@ -380,7 +374,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             }
         }
 
-        private class InvalidByteArrayEnumerable
+        private sealed class InvalidByteArrayEnumerable
         {
             [NoAutomaticTrigger]
             public static void InvalidBindingType([Kusto(Database: DatabaseName, KqlCommand = QueryWithBoundParam, KqlParameters = "@name=I1", Connection = KustoConstants.DefaultConnectionStringName)] byte[] _)
@@ -389,7 +383,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             }
         }
 
-        private class InvalidByteArrayCollector
+        private sealed class InvalidByteArrayCollector
         {
             [NoAutomaticTrigger]
             public static void InvalidCollector(

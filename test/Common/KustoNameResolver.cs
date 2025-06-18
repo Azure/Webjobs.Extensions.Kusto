@@ -7,15 +7,11 @@ using System.Collections.Generic;
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 {
     // Resolved from : https://github.com/Azure/azure-webjobs-sdk-extensions/blob/f60ddaa9da1065fca896a1ef98ab62dd46ffd97d/test/WebJobs.Extensions.Tests.Common/TestNameResolver.cs
-    public class KustoNameResolver : INameResolver
+    public class KustoNameResolver(bool throwNotImplementedException = false) : INameResolver
     {
-        private readonly bool _throwException;
-        public KustoNameResolver(bool throwNotImplementedException = false)
-        {
-            // DefaultNameResolver throws so this helps simulate that for testing
-            this._throwException = throwNotImplementedException;
-        }
-        public Dictionary<string, string> Values { get; } = new Dictionary<string, string>();
+        private readonly bool _throwException = throwNotImplementedException;
+
+        public Dictionary<string, string> Values { get; } = [];
         public string Resolve(string name)
         {
             if (this._throwException)

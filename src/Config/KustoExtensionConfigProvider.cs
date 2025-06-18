@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using Kusto.Data.Common;
 using Kusto.Ingest;
 using Microsoft.Azure.WebJobs.Description;
@@ -132,7 +131,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
 
         internal KustoQueryContext CreateQueryContext(KustoAttribute kustoAttribute)
         {
-            bool isControlCommand = kustoAttribute.KqlCommand.TrimStart().StartsWith(".", true, CultureInfo.InvariantCulture);
+            bool isControlCommand = kustoAttribute.KqlCommand.TrimStart().StartsWith('.');
             return new KustoQueryContext
             {
                 QueryProvider = isControlCommand ? null : this.GetQueryClient(kustoAttribute),
