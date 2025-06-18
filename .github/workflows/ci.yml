@@ -44,7 +44,7 @@ jobs:
           KustoConnectionStringMSI: "Data Source=${{secrets.CLUSTER}};Database=e2e;Fed=True;"
           KustoConnectionStringInvalidAttributes: "Data Source=${{secrets.CLUSTER}};Database=e2e;Fed=True;AppClientId=${{ secrets.APP_ID }}"
       - name: Upload dotnet test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dotnet-results-${{ matrix.dotnet-version }}
           path: TestResults-${{ matrix.dotnet-version }}
