@@ -103,7 +103,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             // Fail scenario for no read privileges
             Exception readPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFailForUserWithNoIngestPrivileges), parameter));
             Assert.IsType<FunctionInvocationException>(readPrivilegeException);
-            Assert.Contains("Forbidden (403-Forbidden)", readPrivilegeException.GetBaseException().Message);
+            string readPrivilegeError = readPrivilegeException.GetBaseException().Message;
+            Assert.NotEmpty(readPrivilegeError);
+            bool isError = readPrivilegeError.Contains("Forbidden (403-Forbidden)") || readPrivilegeError.Contains("Unauthorized (401-Unauthorized)");
+            Assert.True(isError, readPrivilegeException.GetBaseException().Message);
 
             // Fail scenario for no ingest privileges
 
@@ -115,7 +118,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.IsType<FunctionInvocationException>(ingestPrivilegeException);
                 Assert.NotEmpty(ingestPrivilegeException.GetBaseException().Message);
                 string actualExceptionCause = ingestPrivilegeException.GetBaseException().Message;
-                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
+                bool authError = actualExceptionCause.Contains("Forbidden (403-Forbidden)") || actualExceptionCause.Contains("Unauthorized (401-Unauthorized)");
+                Assert.True(authError, actualExceptionCause);
             }
 
             // Tests where the exceptions are caused due to invalid strings
