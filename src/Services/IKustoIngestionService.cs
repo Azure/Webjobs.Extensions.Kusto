@@ -91,7 +91,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             bool flushImmediately = false;
             if (ingestionPropertiesDict.TryGetValue("flushImmediately", out object flushImmediatelyObj))
             {
-                bool.TryParse(flushImmediatelyObj.ToString(), out flushImmediately);
+                if (!bool.TryParse(flushImmediatelyObj.ToString(), out flushImmediately))
+                {
+                    // Handle parsing failure, e.g., log an error or set a default value
+                    flushImmediately = false; // Default value
+                }
             }
 
             int pollIntervalSeconds = 30;
