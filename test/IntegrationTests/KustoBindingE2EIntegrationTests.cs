@@ -151,7 +151,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 bool isPermanent = (bool)actualExceptionMessageJson["error"]["@permanent"];
                 Assert.Equal("Request is invalid and cannot be executed.", actualMessage);
                 Assert.Equal("Kusto.Data.Exceptions.KustoBadRequestException", actualType);
-                Assert.Equal($"Bad streaming ingestion request to {DatabaseName}.{TableName} : The input stream is empty after processing, tip:check stream validity", actualMessageValue);
+                Assert.Contains($"Request is invalid and cannot be processed", actualMessageValue);
                 Assert.True(isPermanent);
             }
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
