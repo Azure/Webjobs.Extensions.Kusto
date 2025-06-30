@@ -39,10 +39,10 @@ jobs:
       - name: Test with dotnet
         run: dotnet test --logger trx --results-directory "TestResults-${{ matrix.dotnet-version }}"
         env:
-          KustoConnectionString: "Data Source=${{secrets.CLUSTER}};Database=e2e;Fed=True;UserToken=${{env.ACCESS_TOKEN}}"
-          KustoConnectionStringNoPermissions: "Data Source=${{secrets.CLUSTER}};Database=webjobs;Fed=True;UserToken=${{env.ACCESS_TOKEN}}"
-          KustoConnectionStringMSI: "Data Source=${{secrets.CLUSTER}};Database=e2e;Fed=True;"
-          KustoConnectionStringInvalidAttributes: "Data Source=${{secrets.CLUSTER}};Database=e2e;Fed=True;AppClientId=${{ secrets.APP_ID }}"
+          KustoConnectionString: "Data Source=${{secrets.CLUSTER}};Database=webjobs-e2e;Fed=True;UserToken=${{env.ACCESS_TOKEN}}"
+          KustoConnectionStringNoPermissions: "Data Source=${{secrets.CLUSTER}};Database=webjobs-e2e-noperms;Fed=True;UserToken=${{env.ACCESS_TOKEN}}"
+          KustoConnectionStringMSI: "Data Source=${{secrets.CLUSTER}};Database=webjobs-e2e;Fed=True;"
+          KustoConnectionStringInvalidAttributes: "Data Source=${{secrets.CLUSTER}};Database=webjobs-e2e;Fed=True;AppClientId=${{ secrets.APP_ID }}"
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v4
         with:

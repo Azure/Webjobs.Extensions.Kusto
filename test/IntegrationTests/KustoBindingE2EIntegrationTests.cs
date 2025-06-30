@@ -51,9 +51,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         private const string QueuedIngestInTheLastFiveMin = @".show  commands-and-queries  | where CommandType == 'DataIngestPull' | where Database =='e2e' | where LastUpdatedOn >= ago(2m) | where Text has 'kusto_functions_e2e_tests' | order by LastUpdatedOn asc | project Text ";
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
-        private const string DatabaseName = "e2e";
+        private const string DatabaseName = "webjobs-e2e";
         // No permissions on this database
-        private const string DatabaseNameNoPermissions = "webjobs";
+        private const string DatabaseNameNoPermissions = "webjobs-e2e-noperms";
         private const int startId = 1;
         // Query parameter to get a single row where start and end are the same
         private const string KqlParameterSingleItem = "@startId=1,@endId=1";
