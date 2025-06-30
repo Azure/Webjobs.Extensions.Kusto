@@ -91,19 +91,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             bool flushImmediately = false;
             if (ingestionPropertiesDict.TryGetValue("flushImmediately", out object flushImmediatelyObj))
             {
-                flushImmediately = bool.Parse(flushImmediatelyObj.ToString());
+                bool.TryParse(flushImmediatelyObj.ToString(), out flushImmediately);
             }
 
             int pollIntervalSeconds = 30;
             if (ingestionPropertiesDict.TryGetValue("pollIntervalSeconds", out object pollIntervalSecondsObj))
             {
-                pollIntervalSeconds = int.Parse(pollIntervalSecondsObj.ToString(), CultureInfo.InvariantCulture);
+                int.TryParse(pollIntervalSecondsObj.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out pollIntervalSeconds);
             }
 
             int pollTimeoutMinutes = 30;
             if (ingestionPropertiesDict.TryGetValue("pollTimeoutMinutes", out object pollTimeoutMinutesObj))
             {
-                pollTimeoutMinutes = int.Parse(pollTimeoutMinutesObj.ToString(), CultureInfo.InvariantCulture);
+                int.TryParse(pollTimeoutMinutesObj.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out pollTimeoutMinutes);
             }
 
             if (flushImmediately)
