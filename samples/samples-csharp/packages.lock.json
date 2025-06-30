@@ -31,9 +31,9 @@
       },
       "Microsoft.NET.Sdk.Functions": {
         "type": "Direct",
-        "requested": "[4.5.0, )",
-        "resolved": "4.5.0",
-        "contentHash": "ZvwOVAhKO/ojjPd8vtGp0n0sVHNPlBcOgcq9UbeC8x1cApuZEt6enE16jeJhL5u2ErcpadCjxyYef3tQuI9aHQ==",
+        "requested": "[4.6.0, )",
+        "resolved": "4.6.0",
+        "contentHash": "jDnf2TZ5JcBQY9BhI5hzRsbsu+EzJuz22GzmHmV9iGFFBraD3MaOTsoHxtS5kpd9qX3qCv7I7HuNjUSiH3nTZg==",
         "dependencies": {
           "Microsoft.Azure.Functions.Analyzers": "[1.0.0, 2.0.0)",
           "Microsoft.Azure.WebJobs": "[3.0.32, 3.1.0)",
@@ -1692,7 +1692,7 @@
       },
       "Microsoft.AspNetCore.Http": {
         "type": "CentralTransitive",
-        "requested": "[2.2.3, )",
+        "requested": "[2.2.2, )",
         "resolved": "2.2.2",
         "contentHash": "BAibpoItxI5puk7YJbIGj95arZueM8B8M5xT1fXBn3hb3L2G3ucrZcYXv1gXdaroLbntUs8qeV8iuBrpjQsrKw==",
         "dependencies": {
@@ -1715,7 +1715,7 @@
       },
       "Microsoft.AspNetCore.Mvc.Core": {
         "type": "CentralTransitive",
-        "requested": "[2.2.6, )",
+        "requested": "[2.2.5, )",
         "resolved": "2.2.0",
         "contentHash": "ALiY4a6BYsghw8PT5+VU593Kqp911U3w9f/dH9/ZoI3ezDsDAGiObqPu/HP1oXK80Ceu0XdQ3F0bx5AXBeuN/Q==",
         "dependencies": {
@@ -1806,7 +1806,7 @@
       },
       "Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator": {
         "type": "CentralTransitive",
-        "requested": "[4.0.2, )",
+        "requested": "[4.0.1, )",
         "resolved": "4.0.1",
         "contentHash": "o1E0hetLv8Ix0teA1hGH9D136RGSs24Njm5+a4FKzJHLlxfclvmOxmcg87vcr6LIszKzenNKd1oJGnOwg2WMnw==",
         "dependencies": {
