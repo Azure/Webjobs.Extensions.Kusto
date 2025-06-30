@@ -10,8 +10,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
         public int ID;
         public string Name;
         public double Cost;
-
-
         public static Row CreateRandom(string itemname, int counter)
         {
             var rnd = new Random();
@@ -25,12 +23,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 
         public object[] ToObjectArray()
         {
-            return
-            [
+            return new object[]
+            {
                 this.ID,
                 this.Name,
                 this.Cost
-            ];
+            };
         }
     }
 }

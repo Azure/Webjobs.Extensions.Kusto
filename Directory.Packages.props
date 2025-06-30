@@ -18,11 +18,11 @@
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.RabbitMQ" Version="2.1.0" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="5.0.2" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.Storage.Blobs" Version="5.3.1" />
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Host.TestCommon" Version="3.0.41" />
+    <PackageVersion Include="Microsoft.Azure.WebJobs.Host.TestCommon" Version="3.0.39" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="4.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Sdk.Functions" Version="4.5.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="System.Linq.Async" Version="6.1.0" />
@@ -30,7 +30,7 @@
     <PackageVersion Include="System.Runtime.Caching" Version="4.8.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="morelinq" Version="3.4.0" />
-    <PackageVersion Include="xunit" Version="2.9.0" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.1" />
+    <PackageVersion Include="xunit" Version="2.8.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.1" />
   </ItemGroup>
 </Project>

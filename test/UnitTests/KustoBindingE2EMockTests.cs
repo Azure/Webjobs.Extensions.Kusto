@@ -261,7 +261,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<ITypeLocator>(locator);
+                    services.AddSingleton((ITypeLocator)locator);
                     services.AddSingleton(kustoClientFactory);
                 })
                 .ConfigureLogging(logging =>
@@ -287,16 +287,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             {
                 newItem = new { };
                 newItemString = "{}";
-                arrayItem =
-                [
-                    new(),
-                    new()
-                ];
-                Task.WaitAll(
-                [
+                arrayItem = new Item[]
+                {
+                    new Item(),
+                    new Item()
+                };
+                Task.WaitAll(new[]
+                {
                     asyncCollector.AddAsync(new { }),
                     asyncCollector.AddAsync(new { })
-                ]);
+                });
                 collector.Add(new { });
                 collector.Add(new { });
             }

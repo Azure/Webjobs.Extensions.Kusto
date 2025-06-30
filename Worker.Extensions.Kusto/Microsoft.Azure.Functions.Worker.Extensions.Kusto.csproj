@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>Microsoft.Azure.Functions.Worker.Extensions.Kusto</AssemblyName>
 		<RootNamespace>Microsoft.Azure.Functions.Worker.Extensions.Kusto</RootNamespace>
 		<Description>Kusto extensions for .NET isolated Azure Functions</Description>

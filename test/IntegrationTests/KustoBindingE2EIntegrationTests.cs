@@ -110,7 +110,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
 
             // Fail scenario for no ingest privileges
 
-            string[] testsNoPrivilegesExecute = [nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges)];
+            string[] testsNoPrivilegesExecute = { nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges) };
             // , nameof(KustoEndToEndTestClass.OutputQueuedFailForUserWithNoReadPrivileges) 
             foreach (string testNoPrivilegesExecute in testsNoPrivilegesExecute)
             {
@@ -123,7 +123,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             }
 
             // Tests where the exceptions are caused due to invalid strings
-            string[] testsToExecute = [nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputQueuedFailInvalidConnectionString)];
+            string[] testsToExecute = { nameof(KustoEndToEndTestClass.InputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputFailInvalidConnectionString), nameof(KustoEndToEndTestClass.OutputQueuedFailInvalidConnectionString) };
             foreach (string test in testsToExecute)
             {
                 Exception invalidConnectionStringException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(test, parameter));
@@ -139,7 +139,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputWithMapping), parameter);
 
             // Tests for the case where this is a bad JSON. This will cause an ingest failure
-            string[] invalidJsonTests = [nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), nameof(KustoEndToEndTestClass.OutputMixedJsonFailure)];
+            string[] invalidJsonTests = { nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), nameof(KustoEndToEndTestClass.OutputMixedJsonFailure) };
             foreach (string test in invalidJsonTests)
             {
                 Exception invalidOutputsException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), parameter));
@@ -157,7 +157,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueued), parameter);
             // A case where ingestion is done , but there exists no such mapping causing ingestion failure
-            string[] noMappingTestsToExecute = [nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), nameof(KustoEndToEndTestClass.OutputsQueuedWithMappingFailIngestion)];
+            string[] noMappingTestsToExecute = { nameof(KustoEndToEndTestClass.OutputsWithMappingFailIngestion), nameof(KustoEndToEndTestClass.OutputsQueuedWithMappingFailIngestion) };
             foreach (string noMappingTest in noMappingTestsToExecute)
             {
                 Exception noSuchMappingException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(noMappingTest, parameter));
@@ -263,13 +263,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 newItemString = JsonConvert.SerializeObject(GetItem(nextId));
 
                 /*Create an item array*/
-                arrayItem = [.. Enumerable.Range(0, 3).Select(s => GetItem(nextId++))];
-                Task.WaitAll(
-                [
+                arrayItem = Enumerable.Range(0, 3).Select(s => GetItem(nextId++)).ToArray();
+                Task.WaitAll(new[]
+                {
                     asyncCollector.AddAsync(GetItem(nextId++)),
                     asyncCollector.AddAsync(GetItem(nextId++)),
                     asyncCollector.AddAsync(GetItem(nextId++))
-                ]);
+                });
 
                 /*
                     Csv test for the data
@@ -430,12 +430,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 int csvNextId = id + 1999;
                 csvItem = GetItemCsv(csvNextId);
                 csvNextId++;
-                Task.WaitAll(
-                [
+                Task.WaitAll(new[]
+                {
                     csvItemsCollector.AddAsync(GetItemCsv(csvNextId)),
                     csvItemsCollector.AddAsync(GetItemCsv(csvNextId++)),
                     csvItemsCollector.AddAsync(GetItemCsv(csvNextId++))
-                ]);
+                });
             }
 
             [NoAutomaticTrigger]
