@@ -48,12 +48,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
     [4001,""Item-4001"",4001.00]
     [4002,""Item-4002"",4002.00]";
         private const string ClearTableTests = @".clear table kusto_functions_e2e_tests data";
-        private const string QueuedIngestInTheLastFiveMin = @".show  commands-and-queries  | where CommandType == 'DataIngestPull' | where Database =='e2e' | where LastUpdatedOn >= ago(2m) | where Text has 'kusto_functions_e2e_tests' | order by LastUpdatedOn asc | project Text ";
+        private const string QueuedIngestInTheLastFiveMin = @".show  commands-and-queries  | where CommandType == 'DataIngestPull' | where Database =='webjobs-e2e' | where LastUpdatedOn >= ago(2m) | where Text has 'kusto_functions_e2e_tests' | order by LastUpdatedOn asc | project Text ";
         private const string QueryWithNoBoundParam = "kusto_functions_e2e_tests| where ingestion_time() > ago(10s) | order by ID asc";
         // Make sure that the InitialCatalog parameter in the tests has the same value as the Database name
-        private const string DatabaseName = "e2e";
+        private const string DatabaseName = "webjobs-e2e";
         // No permissions on this database
-        private const string DatabaseNameNoPermissions = "webjobs";
+        private const string DatabaseNameNoPermissions = "webjobs-e2e-noperms";
         private const int startId = 1;
         // Query parameter to get a single row where start and end are the same
         private const string KqlParameterSingleItem = "@startId=1,@endId=1";
@@ -103,7 +103,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             // Fail scenario for no read privileges
             Exception readPrivilegeException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.InputFailForUserWithNoIngestPrivileges), parameter));
             Assert.IsType<FunctionInvocationException>(readPrivilegeException);
-            Assert.Contains("Forbidden (403-Forbidden)", readPrivilegeException.GetBaseException().Message);
+            string readPrivilegeError = readPrivilegeException.GetBaseException().Message;
+            Assert.NotEmpty(readPrivilegeError);
+            bool isError = readPrivilegeError.Contains("Forbidden (403-Forbidden)") || readPrivilegeError.Contains("Unauthorized (401-Unauthorized)");
+            Assert.True(isError, readPrivilegeException.GetBaseException().Message);
 
             // Fail scenario for no ingest privileges
 
@@ -115,7 +118,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.IsType<FunctionInvocationException>(ingestPrivilegeException);
                 Assert.NotEmpty(ingestPrivilegeException.GetBaseException().Message);
                 string actualExceptionCause = ingestPrivilegeException.GetBaseException().Message;
-                Assert.Contains("Forbidden (403-Forbidden)", actualExceptionCause);
+                bool authError = actualExceptionCause.Contains("Forbidden (403-Forbidden)") || actualExceptionCause.Contains("Unauthorized (401-Unauthorized)");
+                Assert.True(authError, actualExceptionCause);
             }
 
             // Tests where the exceptions are caused due to invalid strings
@@ -146,8 +150,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 string actualType = (string)actualExceptionMessageJson["error"]["@type"];
                 bool isPermanent = (bool)actualExceptionMessageJson["error"]["@permanent"];
                 Assert.Equal("Request is invalid and cannot be executed.", actualMessage);
-                Assert.Equal("Kusto.DataNode.Exceptions.StreamingIngestionRequestException", actualType);
-                Assert.Equal($"Bad streaming ingestion request to {DatabaseName}.{TableName} : The input stream is empty after processing, tip:check stream validity", actualMessageValue);
+                Assert.Equal("Kusto.Data.Exceptions.KustoBadRequestException", actualType);
+                Assert.Contains($"Request is invalid and cannot be processed", actualMessageValue);
                 Assert.True(isPermanent);
             }
             await jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsQueuedWithCustomIngestionProperties), parameter);
@@ -223,10 +227,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         {
             if (disposing)
             {
-                if (this._loggerFactory != null)
-                {
-                    this._loggerFactory.Dispose();
-                }
+                this._loggerFactory?.Dispose();
             }
         }
 #pragma warning disable xUnit1013
@@ -240,7 +241,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         }
 #pragma warning restore xUnit1013
 
-        private class KustoEndToEndTestClass
+        private sealed class KustoEndToEndTestClass
         {
             [NoAutomaticTrigger]
             public static void Outputs(

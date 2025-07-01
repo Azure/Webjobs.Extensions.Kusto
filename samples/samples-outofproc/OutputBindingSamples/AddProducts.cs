@@ -5,7 +5,6 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Kusto;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindingSamples.Common;
-
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindingSamples
 {
     public static class AddProducts

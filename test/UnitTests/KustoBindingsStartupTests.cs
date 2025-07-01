@@ -29,7 +29,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             Assert.IsType<KustoExtensionConfigProvider>(extensionConfig);
         }
 
-        private class TestStartupTypeLocator : IWebJobsStartupTypeLocator
+        private sealed class TestStartupTypeLocator : IWebJobsStartupTypeLocator
         {
             public Type[] GetStartupTypes()
             {

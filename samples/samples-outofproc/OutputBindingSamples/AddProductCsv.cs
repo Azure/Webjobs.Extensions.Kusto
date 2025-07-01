@@ -9,7 +9,7 @@ using Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindingSam
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.SamplesOutOfProc.OutputBindingSamples
 {
-    internal class AddProductCsv
+    internal sealed class AddProductCsv
     {
         [Function("AddProductCsv")]
         [KustoOutput(Database: SampleConstants.DatabaseName,

@@ -5,13 +5,11 @@ using System;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 {
-    internal class Row
+    internal sealed class Row
     {
         public int ID;
         public string Name;
         public double Cost;
-
-
         public static Row CreateRandom(string itemname, int counter)
         {
             var rnd = new Random();
