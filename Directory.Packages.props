@@ -11,7 +11,7 @@
     <!--
                                       **IMPORTANT**
         extension-bundles.public pipelines have to be accounted for the updates on the Kusto package.
-        Changes to the versions (inluding transitive ones in package.lock.json) here also should be reflected in
+        Changes to the versions (including transitive ones in package.lock.json) here also should be reflected in
         https://github.com/Azure/azure-functions-extension-bundles/tree/main-preview/ExtensionBundle.Tests/TestData
     -->
     <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="12.2.8" />
