@@ -1,6 +1,5 @@
 <Project>
   <ItemGroup>
-    <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="Microsoft.AspNet.Mvc" Version="5.2.10" />
     <PackageVersion Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.1" />
@@ -9,8 +8,14 @@
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions" Version="1.3.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.1" />
-    <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="13.0.2" />
-    <PackageVersion Include="Microsoft.Azure.Kusto.Ingest" Version="13.0.2" />
+    <!--
+                                      **IMPORTANT**
+        extension-bundles.public pipelines have to be accounted for the updates on the Kusto package.
+        Changes to the versions (inluding transitive ones in package.lock.json) here also should be reflected in
+        https://github.com/Azure/azure-functions-extension-bundles/tree/main-preview/ExtensionBundle.Tests/TestData
+    -->
+    <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="12.2.8" />
+    <PackageVersion Include="Microsoft.Azure.Kusto.Ingest" Version="12.2.8" />
     <PackageVersion Include="Microsoft.Azure.WebJobs" Version="3.0.41" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Core" Version="3.0.34" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions" Version="4.0.2" />
