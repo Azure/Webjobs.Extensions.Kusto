@@ -18,7 +18,7 @@
     {
       "name": "productget",
       "type": "kusto",
-      "database": "e2e",
+      "database": "%DATABASE%",
       "direction": "in",
       "kqlCommand": "declare query_parameters (productId:long);Products | where ProductID == productId",
       "kqlParameters": "@productId={productId}",
@@ -27,9 +27,9 @@
     {
       "name": "productset",
       "type": "kusto",
-      "database": "e2e",
+      "database": "%DATABASE%",
       "direction": "out",
-      "tableName": "Products",
+      "tableName": "%PRODUCTS_TABLE_NAME%",
       "connection": "KustoConnectionString"
     }
   ],

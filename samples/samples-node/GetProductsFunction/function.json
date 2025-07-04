@@ -18,7 +18,7 @@
     {
       "name": "productfnget",
       "type": "kusto",
-      "database": "e2e",
+      "database": "%DATABASE%",
       "direction": "in",
       "kqlCommand": "declare query_parameters (name:string);GetProductsByName(name)",
       "kqlParameters": "@name={name}",

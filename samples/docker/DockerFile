@@ -1,5 +1,5 @@
 # This image additionally contains function core tools – useful when using custom extensions
-FROM mcr.microsoft.com/azure-functions/node:4-node16-core-tools AS installer-env
+FROM mcr.microsoft.com/azure-functions/node:4-node20-core-tools AS installer-env
 # The host file for all the defaults
 ARG MAVEN_VERSION=3.8.5
 ARG USER_HOME_DIR="/root"
@@ -42,6 +42,6 @@ COPY ./samples/docker/host.json /src/host.json
 COPY ./src/bin/Release/netstandard2.1/Microsoft.Azure.WebJobs.Extensions.Kusto.dll /src/Microsoft.Azure.WebJobs.Extensions.Kusto.dll
 COPY ./samples/docker/init-functions.sh /src/init-functions.sh
 COPY ./samples/docker/start-functions.sh /src/start-functions.sh
-COPY ./samples/docker/Microsoft.Azure.Functions.ExtensionBundle.zip   /src/Microsoft.Azure.Functions.ExtensionBundle.zip
+#COPY  /src/Microsoft.Azure.Functions.ExtensionBundle.zip
 # So that the latest lib is resolved
 ENTRYPOINT ["tail", "-f", "/dev/null"]

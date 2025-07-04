@@ -18,9 +18,9 @@
     {
       "name": "product",
       "type": "kusto",
-      "database": "e2e",
+      "database": "%DATABASE%",
       "direction": "out",
-      "tableName": "Products",
+      "tableName": "%PRODUCTS_TABLE_NAME%",
       "mappingRef": "item_to_product_json",
       "connection": "KustoConnectionString"
     }

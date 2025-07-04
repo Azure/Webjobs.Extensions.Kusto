@@ -1,0 +1,8 @@
+.drop table %PRODUCTS_TBL% (ProductID:long, Name:string, Cost:double) ifexists  
+
+.drop function GetProductsByName
+
+.drop table %ITEMS_TBL% (ProductID:long, Name:string, Cost:double) ifexists 
+
+.clear table ProcessDetails data
+

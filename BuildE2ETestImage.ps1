@@ -18,13 +18,13 @@ function BuildE2ETestImage {
         [Parameter(Mandatory = $false, HelpMessage = "The azure container registry to push to myacr.azure.io")][AllowNull()][string]$Acr = $null,
         [Parameter(Mandatory = $false, HelpMessage = "If the tagged image needs to be pushed to the docker hub")][bool]$DockerPush = $false
     ) #end param
-    $BaseImageTag = "node:4-node16-core-tools" # Of all images this seems to be the best so far
+    $BaseImageTag = "mcr.microsoft.com/azure-functions/node:4-node20-core-tools" # Of all images this seems to be the best so far
     $TargetImageName="func-az-kusto-base" # Name of the target image
     $BuildDate = (Get-Date).ToString("yyyyMMdd")
     $TargetFileLocation="./samples/docker"
     $TargetDockerFile="${TargetFileLocation}\DockerFile"
     Write-Host "------------------------------------------------------------------------------------------------------------------------------"
-    Write-Host "Using base image mcr.microsoft.com/azure-functions/${BaseImageTag}" -ForegroundColor Green
+    Write-Host "Using base image ${BaseImageTag}" -ForegroundColor Green
     # build the DLL so that we can use this when we do the rebuild
     Write-Host "------------------------------------------------------------------------------------------------------------------------------"
     Write-Host "Cleaning and building Project" -ForegroundColor Green
@@ -36,13 +36,13 @@ function BuildE2ETestImage {
     #If an override on the ExtensionBundlePath is specified then use this in the image on the docker file.    
     if (!$ExtensionBundlePath) {
         Write-Host "Creating docker file to build with tag '${TargetImageName}:$BuildDate'" -ForegroundColor Green
-        ((Get-Content -path .\samples\docker\Docker-template.dockerfile -Raw) -creplace 'imagename', "mcr.microsoft.com/azure-functions/${BaseImageTag}" -creplace 'bundlepath', $ExtensionBundlePath) | Set-Content -Path $TargetDockerFile
+        ((Get-Content -path .\samples\docker\Docker-template.dockerfile -Raw) -creplace 'imagename', "${BaseImageTag}" -creplace 'bundlepath', $ExtensionBundlePath) | Set-Content -Path $TargetDockerFile
     }
     else {
         $EscapedPath = (Get-Item $ExtensionBundlePath | Resolve-Path -Relative) -replace "\\", "/"
         Copy-Item -Path $EscapedPath $TargetFileLocation/Microsoft.Azure.Functions.ExtensionBundle.zip
         Write-Host "Creating docker file to build with tag '${TargetFileLocation}:$BuildDate' with extension bundle copy on path $EscapedPath" -ForegroundColor Green
-        ((Get-Content -path .\samples\docker\Docker-template.dockerfile -Raw) -creplace 'imagename', "mcr.microsoft.com/azure-functions/${BaseImageTag}" -creplace 'bundlepath', $EscapedPath -replace '#COPY', "COPY ${TargetFileLocation}/Microsoft.Azure.Functions.ExtensionBundle.zip ") | Set-Content -Path $TargetDockerFile
+        ((Get-Content -path .\samples\docker\Docker-template.dockerfile -Raw) -creplace 'imagename', "${BaseImageTag}" -creplace 'bundlepath', $EscapedPath -replace '#COPY', "COPY ${TargetFileLocation}/Microsoft.Azure.Functions.ExtensionBundle.zip ") | Set-Content -Path $TargetDockerFile
     }
     if(!$Acr)
     {

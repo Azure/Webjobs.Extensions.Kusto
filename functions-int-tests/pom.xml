@@ -1,26 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.microsoft.azure.kusto</groupId>
   <artifactId>functions-int-tests</artifactId>
-  <version>1.0.9-Preview</version>
+  <version>1.0.13-Preview</version>
   <name>functions-int-tests</name>
   <properties>
-    <!-- use the following if you're compiling with JDK 8-->
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
     <!-- comment the 2 lines above and uncomment the line bellow if you're compiling with JDK 11 or 17 -->
-    <!--    <maven.compiler.release>11</maven.compiler.release>-->
+    <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jackson.version>2.13.4.2</jackson.version>
-    <gatling.version>3.9.0</gatling.version>
-    <gatling-maven-plugin.version>4.2.9</gatling-maven-plugin.version>
-    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+    <jackson.version>2.19.1</jackson.version>
+    <gatling.version>3.14.3</gatling.version>
+    <gatling-maven-plugin.version>4.19.0</gatling-maven-plugin.version>
+    <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
     <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
-    <testcontainer.version>1.19.1</testcontainer.version>
+    <testcontainer.version>1.21.1</testcontainer.version>
     <rmq.test.version>0.8.0</rmq.test.version>
   </properties>
 
@@ -51,6 +46,12 @@
       <version>${jackson.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.microsoft.azure.kusto</groupId>
+      <artifactId>kusto-data</artifactId>
+      <version>6.0.3</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -59,8 +60,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
+          <release>${maven.compiler.release}</release>
         </configuration>        
       </plugin>
       <plugin>

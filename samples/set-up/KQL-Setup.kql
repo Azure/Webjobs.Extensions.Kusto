@@ -1,38 +1,29 @@
-.drop table Products
+.drop table %PRODUCTS_TBL% ifexists
 
-.create-merge table Products (ProductID:long, Name:string, Cost:double)  
+.create-merge table %PRODUCTS_TBL% (ProductID:long, Name:string, Cost:double)  
 
-.alter-merge table Products policy retention softdelete = 1h recoverability = disabled
+.alter-merge table %PRODUCTS_TBL% policy retention softdelete = 1h recoverability = disabled
 
-.create function ifnotexists GetProductsByName(name:string)
-{
-    Products | where Name == name
-}
+.create-or-alter function GetProductsByName(name:string) {  %PRODUCTS_TBL% | where Name == name }
 
-.create-merge table Item (ItemID:long, ItemName:string, ItemCost:float)  
+.create-merge table %ITEMS_TBL% (ItemID:long, ItemName:string, ItemCost:double)  
 
-.clear table Products data 
+.clear table %PRODUCTS_TBL% data 
 
-.create table Products ingestion json mapping  'item_to_product_json' '[{"Column": "ProductID", "Properties": {"Path": "$.ItemID"}},{"Column": "Name", "Properties": {"Path": "$.ItemName"}},{"Column": "Cost", "Properties": {"Path": "$.ItemCost"}}]'.create table Products ingestion json mapping  'item_to_product_json' '[{"Column": "ProductID", "Properties": {"Path": "$.ItemID"}},{"Column": "Name", "Properties": {"Path": "$.ItemName"}},{"Column": "Cost", "Properties": {"Path": "$.ItemCost"}}]'
+.create table %PRODUCTS_TBL% ingestion json mapping  'item_to_product_json' '[{"Column": "ProductID", "Properties": {"Path": "$.ItemID"}},{"Column": "Name", "Properties": {"Path": "$.ItemName"}},{"Column": "Cost", "Properties": {"Path": "$.ItemCost"}}]'
 
 .show streamingingestion statistics  | order by StartTime desc | take 10
 
 .create-merge table ProductsChangeLog (ProductID:long, CreatedAt:datetime)
 
-.alter table Item policy streamingingestion enable
+.alter table %ITEMS_TBL% policy streamingingestion enable
 
-.alter table Products policy streamingingestion enable
+.alter table %PRODUCTS_TBL% policy streamingingestion enable
 
-.create table eshopclothing (year: long, month: long, day: long, ['order']: long, country: long, ['session_id']: long, ['page1_main_category_']: long, ['page2_clothing model']: string, colour: long, ['location']: long, ['model_photography']: long, price: long, ['price2']: long, page: long)
+.create-merge table eshopclothing (year: long, month: long, day: long, ['order']: long, country: long, ['session_id']: long, ['page1_main_category_']: long, ['page2_clothing model']: string, colour: long, ['location']: long, ['model_photography']: long, price: long, ['price2']: long, page: long)
 
-.create table ProcessDetails (Name: string, Length: int, DirectoryName: string, Directory: dynamic,
-    IsReadOnly: boolean, Exists: boolean, FullName: string, Extension: string, CreationTime: datetime, 
-    CreationTimeUtc: datetime, LastAccessTime: datetime, LastAccessTimeUtc: datetime, LastWriteTime: datetime, 
-    LastWriteTimeUtc: datetime, LinkTarget: string, UnixFileMode: int, Attributes: int, PSPath: string, 
-    PSParentPath: string, PSChildName: string, UnixStat: dynamic, PSDrive: dynamic, 
-    PSProvider: dynamic, PSIsContainer: boolean, UnixMode: string, User: string, Group: string, Size: int, Mode: string,
-    ModeWithoutHardLink: string, VersionInfo: dynamic, BaseName: string, ResolvedTarget: string, Target: string, LinkType: string)
+.create-merge table ProcessDetails (Name: string, Length: int, DirectoryName: string, Directory: dynamic,IsReadOnly: boolean, Exists: boolean, FullName: string, Extension: string, CreationTime: datetime,  CreationTimeUtc: datetime, LastAccessTime: datetime, LastAccessTimeUtc: datetime, LastWriteTime: datetime,    LastWriteTimeUtc: datetime, LinkTarget: string, UnixFileMode: int, Attributes: int, PSPath: string, PSParentPath: string, PSChildName: string, UnixStat: dynamic, PSDrive: dynamic,     PSProvider: dynamic, PSIsContainer: boolean, UnixMode: string, User: string, Group: string, Size: int, Mode: string,    ModeWithoutHardLink: string, VersionInfo: dynamic, BaseName: string, ResolvedTarget: string, Target: string, LinkType: string)
 
-.alter table ProcessDetails policy ingestionbatching @'{"MaximumBatchingTimeSpan":"00:00:05", "MaximumNumberOfItems": 100, "MaximumRawDataSizeMB": 100}'
+.alter table ProcessDetails policy ingestionbatching @'{"MaximumBatchingTimeSpan":"00:00:10", "MaximumNumberOfItems": 100, "MaximumRawDataSizeMB": 100}'
 
 .alter table ProcessDetails policy streamingingestion enable

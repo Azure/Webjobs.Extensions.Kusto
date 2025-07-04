@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License. See License.txt in the project root for
+ * license information.
+ */
+
 package com.microsoft.azure.kusto.functions;
 
 import static io.gatling.javaapi.core.CoreDsl.StringBody;
@@ -13,10 +19,14 @@ import static java.lang.System.getProperty;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +42,9 @@ import org.testcontainers.utility.MountableFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.kusto.data.Client;
+import com.microsoft.azure.kusto.data.ClientFactory;
+import com.microsoft.azure.kusto.data.auth.ConnectionStringBuilder;
 import com.microsoft.azure.kusto.functions.common.Item;
 import com.microsoft.azure.kusto.functions.common.Product;
 
@@ -51,6 +64,9 @@ public class FunctionsMultiLangTests extends Simulation {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
     private static final String PATH_TO_DOCKER_COMPOSE = "../samples/docker/docker-compose.yml";
+    private static final String PATH_TO_LOCAL_SETTINGS = "../samples/docker/local.settings.json";
+    private static final String PATH_TO_KQL_SCRIPTS_CREATE = "../samples/set-up/KQL-Setup.kql";
+    private static final String PATH_TO_KQL_SCRIPTS_TEARDOWN = "../samples/set-up/KQL-Teardown.kql";
     private static final String PATH_TO_DOCKER_COMPOSE_WITH_NO_RMQ = "../samples/docker/docker-compose-no-rmq.yml";
     private static final String CREATE_QUEUE = "../samples/docker/create-queue.sh";
 
@@ -63,8 +79,19 @@ public class FunctionsMultiLangTests extends Simulation {
                     Collections::<String, Integer> unmodifiableMap));
     private String language = getProperty("language", "node");
 
-    public FunctionsMultiLangTests() throws JsonProcessingException {
+    private final String cluster;
+    private final String database;
+    private final String accessToken;
+    private final String productsTable;
+    private final String itemsTable;
 
+    public FunctionsMultiLangTests() throws JsonProcessingException {
+        Map<String, String> connectionSecrets = System.getenv();
+        this.cluster = connectionSecrets.get("CLUSTER");
+        this.database = connectionSecrets.get("DATABASE");
+        this.accessToken = connectionSecrets.get("ACCESS_TOKEN");
+        this.productsTable = connectionSecrets.get("PRODUCTS_TABLE_NAME");
+        this.itemsTable = connectionSecrets.get("ITEMS_TABLE_NAME");
     }
 
     @Override
@@ -74,6 +101,9 @@ public class FunctionsMultiLangTests extends Simulation {
         // Start the test container based on the language passed
         // Copy the project into the container
         // Replace the DLL file
+
+
+
         language = getProperty("language", "node");
         if (!languagePortMap.containsKey(language)) {
             logger.warn(
@@ -81,7 +111,6 @@ public class FunctionsMultiLangTests extends Simulation {
                             + languagePortMap.keySet());
             System.exit(137);
         }
-        int hostPort = languagePortMap.get(language);
         String dockerComposeFile = RUN_TRIGGER ? PATH_TO_DOCKER_COMPOSE : PATH_TO_DOCKER_COMPOSE_WITH_NO_RMQ;
         File absoluteFilePath = new File(dockerComposeFile).getAbsoluteFile();
         try {
@@ -90,13 +119,124 @@ public class FunctionsMultiLangTests extends Simulation {
             environment = new DockerComposeContainer<>(new File(path));
             environment.start();
             environment.getContainerByServiceName("rabbitmq").ifPresent(FunctionsMultiLangTests::createQueue);
+            int hostPort = languagePortMap.get(language);
+            kustoSetup(cluster, database, productsTable, itemsTable, accessToken);
+            createLocalSettings(language,hostPort, cluster, database, productsTable,accessToken);
+            environment.getContainerByServiceName(BASE_IMAGE).ifPresent(cs -> {
+                // Copy the local.settings.json file to the container
+                copySettingsFile(cs, language);
+            });
             environment.getContainerByServiceName(BASE_IMAGE)
                     .ifPresent(containerState -> runContainerCommands(language, hostPort, containerState));
-        } catch (IOException e) {
+
+            boolean isDeleted = Paths.get(PATH_TO_LOCAL_SETTINGS).toFile().delete();
+            if (isDeleted) {
+                logger.info("Deleted local.settings.json file from the host");
+            } else {
+                logger.warn("Failed to delete local.settings.json file from the host");
+            }
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    // Create the tables and run the setup in kusto
+
+    private static void kustoRunScript(String cluster, String database, String productsTableName, String itemsTableName, String accessToken, String scriptPath) {
+        try {
+            ConnectionStringBuilder kcsb = ConnectionStringBuilder.createWithAadAccessTokenAuthentication(cluster, accessToken);
+            Client client = ClientFactory.createClient(kcsb);
+            Path kqlScriptPath = Paths.get(scriptPath);
+            List<String> kqlCommands = Files.readAllLines(kqlScriptPath);
+            kqlCommands.forEach(command -> {
+                if (!command.trim().isEmpty()) {
+                    String targetCommandString = command.replace("%PRODUCTS_TBL%", productsTableName).replace("%ITEMS_TBL%", itemsTableName);
+                    try {
+                        logger.info("Executing KQL command: {}", targetCommandString);
+                        client.executeMgmt(database, targetCommandString);
+                    } catch (Exception e) {
+                        logger.error("Failed to execute KQL command: {}", targetCommandString, e);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            logger.error("Failed to create Kusto client", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void kustoSetup(String cluster, String database, String productsTableName, String itemsTableName, String accessToken) {
+        kustoRunScript(cluster, database, productsTableName, itemsTableName, accessToken, PATH_TO_KQL_SCRIPTS_CREATE);
+    }
+
+    private static void kustoTearDown(String cluster, String database, String productsTableName, String itemsTableName, String accessToken) {
+        kustoRunScript(cluster, database, productsTableName, itemsTableName, accessToken, PATH_TO_KQL_SCRIPTS_TEARDOWN);
+    }
+
+
+    /**
+     * Creates the local.settings.json file in the resources folder with the required settings.
+     * @param language   The language of the function app.
+     * @param hostPort   The port on which the function app is running.
+     */
+
+    private static void createLocalSettings(String language, int hostPort , String cluster, String database, String productsTable,String accessToken) {
+                Map<String, String> values = new HashMap<>();
+        values.put("AzureWebJobsStorage", "UseDevelopmentStorage=true");
+        values.put("FUNCTIONS_WORKER_RUNTIME", language);
+        values.put("KustoConnectionString", "UseDevelopmentStorage=true");
+
+        if (cluster == null || database == null || accessToken == null) {
+            logger.error("Environment variables CLUSTER, DATABASE and ACCESS_TOKEN must be set");
+            System.exit(137);
+        }
+        values.put("KustoConnectionString",
+                String.format("Data Source=%s;Database=%s;Fed=True;UserToken=%s", cluster, database, accessToken));
+        values.put("DATABASE", database);
+        values.put("PRODUCTS_TABLE_NAME", productsTable);
+
+        Map<String,Object> localSettings = new HashMap<>();
+        localSettings.put("IsEncrypted", false);
+        localSettings.put("Values", values);
+        // Create the local.settings.json file
+        //Create a file called local.settings.json in the resources folder, copy it to the container and delete the file immediately
+        Path localSettingsPath = Paths.get(PATH_TO_LOCAL_SETTINGS);
+        try {
+            File localSettingsFile = new File(localSettingsPath.toString());
+            if (!localSettingsFile.exists()) {
+                localSettingsFile.createNewFile();
+            }
+            JSON_MAPPER.writeValue(localSettingsFile, localSettings);
+            logger.info("Created local.settings.json file at {}", localSettingsPath);
+        } catch (IOException e) {
+            logger.error("Failed to create local.settings.json file", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Copies the local.settings.json file to the container.
+     *
+     * @param containerState The state of the container.
+     * @param language       The language of the function app.
+     */
+
+    private static void copySettingsFile(ContainerState containerState,String language) {
+        try {
+            String targetDirectory = String.format("/src/samples-%s/local.settings.json",language);
+            // Copy the local.settings.json file to the container
+            containerState.copyFileToContainer(MountableFile.forHostPath(PATH_TO_LOCAL_SETTINGS),targetDirectory);
+            logger.info("Copied local.settings.json to container to target directory {}", targetDirectory);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Creates the RabbitMQ queue for the tests.
+     *
+     * @param containerState The state of the container.
+     */
     private static void createQueue(ContainerState containerState) {
         try {
             containerState.copyFileToContainer(MountableFile.forHostPath(CREATE_QUEUE), "/tmp/create-queue.sh");
@@ -109,6 +249,13 @@ public class FunctionsMultiLangTests extends Simulation {
         }
     }
 
+    /**
+     * Runs the container commands to start the function app.
+     *
+     * @param language       The language of the function app.
+     * @param exposedPort    The port on which the function app is running.
+     * @param containerState The state of the container.
+     */
     private static void runContainerCommands(String language, int exposedPort, ContainerState containerState) {
         try {
             // Goes to the samples folder
@@ -213,6 +360,9 @@ public class FunctionsMultiLangTests extends Simulation {
             }
         }
         environment.stop();
+        logger.info("Cleaning up Kusto tables {},{} and functions {}",
+                productsTable, itemsTable, "GetProductsByName");
+        kustoTearDown(cluster, database, productsTable, itemsTable, accessToken);
         logger.info("Simulation run finished!");
     }
 }
