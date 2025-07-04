@@ -151,7 +151,7 @@ Add the Java library for Kusto bindings to your functions project with an update
 <dependency>
     <groupId>com.microsoft.azure.functions</groupId>
     <artifactId>azure-functions-java-library-kusto</artifactId>
-    <version>1.0.9-Preview</version>
+    <version>1.0.13-Preview</version>
 </dependency>
 ```
 
