@@ -23,12 +23,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 
         public object[] ToObjectArray()
         {
-            return new object[]
-            {
+            object[] result =
+            [
                 this.ID,
                 this.Name,
                 this.Cost
-            };
+            ];
+            return result;
         }
     }
 }

@@ -27,10 +27,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
             log.LogInformation($"AddProducts function started");
             string body = new StreamReader(req.Body).ReadToEnd();
             Product[] products = JsonConvert.DeserializeObject<Product[]>(body);
-            products.ForEach(p =>
-            {
-                collector.Add(p);
-            });
+            products.ForEach(collector.Add);
             return products != null ? new ObjectResult(products) { StatusCode = StatusCodes.Status201Created } : new BadRequestObjectResult("Please pass a well formed JSON Product array in the body");
         }
     }

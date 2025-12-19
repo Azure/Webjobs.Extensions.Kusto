@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
 {
-    internal class AddProductJson
+    internal sealed class AddProductJson
     {
         [FunctionName("AddProductJson")]
         public static void Run(
