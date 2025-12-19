@@ -263,7 +263,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 newItemString = JsonConvert.SerializeObject(GetItem(nextId));
 
                 /*Create an item array*/
-                arrayItem = Enumerable.Range(0, 3).Select(s => GetItem(nextId++)).ToArray();
+                arrayItem = [.. Enumerable.Range(0, 3).Select(s => GetItem(nextId++))];
                 Task.WaitAll(
                 [
                     asyncCollector.AddAsync(GetItem(nextId++)),
