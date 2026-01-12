@@ -14,8 +14,8 @@
         Changes to the versions (including transitive ones in package.lock.json) here also should be reflected in
         https://github.com/Azure/azure-functions-extension-bundles/tree/main-preview/ExtensionBundle.Tests/TestData
     -->
-    <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="14.0.3" />
-    <PackageVersion Include="Microsoft.Azure.Kusto.Ingest" Version="14.0.3" />
+    <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="14.0.5-preview" />
+    <PackageVersion Include="Microsoft.Azure.Kusto.Ingest" Version="14.0.5-preview" />
     <PackageVersion Include="Microsoft.Azure.WebJobs" Version="3.0.44" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Core" Version="3.0.44" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions" Version="5.2.1" />
