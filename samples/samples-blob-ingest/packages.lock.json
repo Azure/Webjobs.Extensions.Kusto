@@ -34,11 +34,11 @@
       },
       "Azure.Core": {
         "type": "Transitive",
-        "resolved": "1.47.3",
-        "contentHash": "u/uCNtUWT+Q/Is7/PAMy3KP9kq5vY5klRnyAvRxO/kEa5OnV3/X5lHlCajNANC7vmej6jAqceqLBJNO/VyCKzg==",
+        "resolved": "1.50.0",
+        "contentHash": "GBNKZEhdIbTXxedvD3R7I/yDVFX9jJJEz02kCziFSJxspSQ5RMHc3GktulJ1s7+ffXaXD7kMgrtdQTaggyInLw==",
         "dependencies": {
           "Microsoft.Bcl.AsyncInterfaces": "8.0.0",
-          "System.ClientModel": "1.6.1",
+          "System.ClientModel": "1.8.0",
           "System.Memory.Data": "8.0.1"
         }
       },
@@ -52,15 +52,12 @@
       },
       "Azure.Identity": {
         "type": "Transitive",
-        "resolved": "1.13.1",
-        "contentHash": "4eeK9XztjTmvA4WN+qAvlUCSxSv45+LqTMeC8XT2giGGZHKthTMU2IuXcHjAOf5VLH3wE3Bo6EwhIcJxVB8RmQ==",
+        "resolved": "1.17.1",
+        "contentHash": "MSZkBrctcpiGxs9Cvr2VKKoN6qFLZlP3I6xuCWJ9iTgitI5Rgxtk5gfOSpXPZE3+CJmZ/mnqpQyGyjawFn5Vvg==",
         "dependencies": {
-          "Azure.Core": "1.44.1",
-          "Microsoft.Identity.Client": "4.66.1",
-          "Microsoft.Identity.Client.Extensions.Msal": "4.66.1",
-          "System.Memory": "4.5.5",
-          "System.Text.Json": "6.0.10",
-          "System.Threading.Tasks.Extensions": "4.5.4"
+          "Azure.Core": "1.50.0",
+          "Microsoft.Identity.Client": "4.78.0",
+          "Microsoft.Identity.Client.Extensions.Msal": "4.78.0"
         }
       },
       "Azure.Storage.Blobs": {
@@ -257,8 +254,8 @@
       },
       "Microsoft.Azure.Kusto.Cloud.Platform": {
         "type": "Transitive",
-        "resolved": "14.0.5-preview",
-        "contentHash": "o7LQpnaNUVT4fiu5ZJB0YMlgMJuQ9BRxYokojaSYk5dSKMGI76yqrN8VdYvm/8GhX6Em3q5PWPe6a1JNwxpIqw==",
+        "resolved": "14.1.0",
+        "contentHash": "m1odkSO8TwrgkACYxfrWY0JNFHKuL/8KAuXt1HYMV+qrW4l1VVOxWJrJKXqc0Ir720DXFTwLZ4gmZJwL9qUJrw==",
         "dependencies": {
           "Microsoft.CSharp": "4.7.0",
           "Microsoft.IO.RecyclableMemoryStream": "3.0.1",
@@ -273,25 +270,25 @@
       },
       "Microsoft.Azure.Kusto.Cloud.Platform.Msal": {
         "type": "Transitive",
-        "resolved": "14.0.5-preview",
-        "contentHash": "LEApgJEeIxOEQH26p9zooGiFRwITFGxHZy1PyjhhvG6LAxKic/OHU0RU146bRI6SviS19kGjwPFb/1KcWoT1Rg==",
+        "resolved": "14.1.0",
+        "contentHash": "VTBVkDcCSeKdF/rtNVKHo0KlfVSvbrYMHhp75CD4pkYJMmmjn6DYiYYQdVgyxBq6iAJ41GcbS4H/UTF1BvoQgA==",
         "dependencies": {
-          "Azure.Core": "1.47.3",
-          "Azure.Identity": "1.13.0",
-          "Microsoft.Azure.Kusto.Cloud.Platform": "14.0.5-preview",
+          "Azure.Core": "1.50.0",
+          "Azure.Identity": "1.17.1",
+          "Microsoft.Azure.Kusto.Cloud.Platform": "14.1.0",
           "Microsoft.Identity.Client": "4.78.0",
           "Microsoft.Identity.Client.Broker": "4.78.0"
         }
       },
       "Microsoft.Azure.Kusto.Ingest.Common": {
         "type": "Transitive",
-        "resolved": "14.0.5-preview",
-        "contentHash": "dnJ7E/azq9sdHMIhQqi+WsXPlRS7cVo23KuwZM33tZdyM/2UcHtG1qPcRztqiEEcipSTDeKXYJxam3w8Mi9NOw==",
+        "resolved": "14.1.0",
+        "contentHash": "sPz7k8re+Nwi11g5tiWwEsveg6Zce/GcfhV8yrXHacMllgfzCKyhVKq7TPRHpdiXZ9+pkoxImjh1w2IA0QHeoA==",
         "dependencies": {
           "Azure.Data.Tables": "12.11.0",
           "Azure.Storage.Blobs": "12.26.0",
           "Azure.Storage.Queues": "12.24.0",
-          "Microsoft.Azure.Kusto.Data": "14.0.5-preview",
+          "Microsoft.Azure.Kusto.Data": "14.1.0",
           "Microsoft.IO.RecyclableMemoryStream": "3.0.1",
           "System.Text.Json": "9.0.7"
         }
@@ -920,8 +917,8 @@
       },
       "System.ClientModel": {
         "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "xcHHhDqB5MnOOY8yIn64Vzp6gtBEs6k5J1hluG04CrShSvQNXOx4PSDs7wJiXLDidlY/FZJmxJdKTKskyJwjvw==",
+        "resolved": "1.8.0",
+        "contentHash": "AqRzhn0v29GGGLj/Z6gKq4lGNtvPHT4nHdG5PDJh9IfVjv/nYUVmX11hwwws1vDFeIAzrvmn0dPu8IjLtu6fAw==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
           "System.Memory.Data": "8.0.1"
@@ -1218,11 +1215,6 @@
           "System.Runtime.Extensions": "4.3.0",
           "System.Threading": "4.3.0"
         }
-      },
-      "System.Memory": {
-        "type": "Transitive",
-        "resolved": "4.5.5",
-        "contentHash": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw=="
       },
       "System.Memory.Data": {
         "type": "Transitive",
@@ -1695,8 +1687,8 @@
       },
       "System.Threading.Tasks.Extensions": {
         "type": "Transitive",
-        "resolved": "4.5.4",
-        "contentHash": "zteT+G8xuGu6mS+mzDzYXbzS7rd3K6Fjb9RiZlYlJPam2/hU7JCBZBVEcywNuR+oZ1ncTvc/cq0faRr3P01OVg=="
+        "resolved": "4.5.1",
+        "contentHash": "WSKUTtLhPR8gllzIWO2x6l4lmAIfbyMAiTlyXAis4QBDonXK4b4S6F8zGARX4/P8wH3DH+sLdhamCiHn+fTU1A=="
       },
       "System.Threading.Timer": {
         "type": "Transitive",
@@ -1761,8 +1753,8 @@
       "microsoft.azure.webjobs.extensions.kusto": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.Azure.Kusto.Data": "[14.0.5-preview, )",
-          "Microsoft.Azure.Kusto.Ingest": "[14.0.5-preview, )",
+          "Microsoft.Azure.Kusto.Data": "[14.1.0, )",
+          "Microsoft.Azure.Kusto.Ingest": "[14.1.0, )",
           "Microsoft.Azure.WebJobs": "[3.0.44, )",
           "Newtonsoft.Json": "[13.0.4, )"
         }
@@ -1815,24 +1807,24 @@
       },
       "Microsoft.Azure.Kusto.Data": {
         "type": "CentralTransitive",
-        "requested": "[14.0.5-preview, )",
-        "resolved": "14.0.5-preview",
-        "contentHash": "qpeLl9sHjvKAxwxZpKh3npm/0KJtajWfoS/+JAK96JDPZsHPTxl1t1dLA8U777C/pypLXHfeFxclgAwDb1qbCg==",
+        "requested": "[14.1.0, )",
+        "resolved": "14.1.0",
+        "contentHash": "dHahQYqWUQbM5dzJjymr1eQUFmpKtdmxw0ftNJMdlzGONCnyzSpj6H643oTvXWcra6vwnJzqMlcj87K6aPVDIg==",
         "dependencies": {
-          "Microsoft.Azure.Kusto.Cloud.Platform": "14.0.5-preview",
-          "Microsoft.Azure.Kusto.Cloud.Platform.Msal": "14.0.5-preview",
+          "Microsoft.Azure.Kusto.Cloud.Platform": "14.1.0",
+          "Microsoft.Azure.Kusto.Cloud.Platform.Msal": "14.1.0",
           "Microsoft.Identity.Client": "4.78.0",
           "Microsoft.Identity.Client.Extensions.Msal": "4.78.0"
         }
       },
       "Microsoft.Azure.Kusto.Ingest": {
         "type": "CentralTransitive",
-        "requested": "[14.0.5-preview, )",
-        "resolved": "14.0.5-preview",
-        "contentHash": "CB8MwHgAU/1Jz8i19bbzt+EPEDNEuVK5p3B7NrU2LdUNfRZBu0HlUKLJwUsm1YJlC/jqjhuTjbztw8HL3YA6/g==",
+        "requested": "[14.1.0, )",
+        "resolved": "14.1.0",
+        "contentHash": "EfIXyUyc20j5Xd/2sPb5IRBxMWwp9LaISqEMpY4EeWiuI2KasR4lbX/jrGHKaMjoGyGSoR8Y7BZ2JEhLigLOJA==",
         "dependencies": {
-          "Microsoft.Azure.Kusto.Data": "14.0.5-preview",
-          "Microsoft.Azure.Kusto.Ingest.Common": "14.0.5-preview"
+          "Microsoft.Azure.Kusto.Data": "14.1.0",
+          "Microsoft.Azure.Kusto.Ingest.Common": "14.1.0"
         }
       },
       "Microsoft.Azure.WebJobs": {
