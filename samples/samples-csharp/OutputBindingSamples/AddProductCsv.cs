@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Samples.OutputBindingSamples
 {
-    internal class AddProductCsv
+    internal sealed class AddProductCsv
     {
         [FunctionName("AddProductCsv")]
         public static IActionResult Run(

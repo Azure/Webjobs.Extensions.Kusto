@@ -12,12 +12,12 @@ echo "Running $language functions samples"
 cd /src/samples-$language
 if [ $language == "outofproc" ]; then
   echo "Changing language to c-sharp for out of process worker"
-  cd  bin/Debug/net6.0
+  cd  bin/Debug/net8.0
   func start --csharp --verbose --port $port >> func-logs.txt &
 # Added this as a seperate clause just in case we want to have this independent from OutOfProcess worker
 elif [ $language == "csharp" ]; then
   echo "Changing language to c-sharp for out of process worker"
-  cd  bin/Debug/net6
+  cd  bin/Debug/net8.0
   func start --csharp --verbose --port $port >> func-logs.txt &
 else
   # the compiled functions are in this location

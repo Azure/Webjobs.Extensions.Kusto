@@ -7,21 +7,12 @@ using Microsoft.Azure.Functions.Worker.Extensions.Abstractions;
 
 namespace Microsoft.Azure.Functions.Worker.Extensions.Kusto
 {
-    public sealed class KustoOutputAttribute : OutputBindingAttribute
+    public sealed class KustoOutputAttribute(string Database) : OutputBindingAttribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KustoAttribute"/> class.
-        /// </summary>
-        /// <param name="Database">The name of the Database</param>
-        public KustoOutputAttribute(string Database)
-        {
-            this.Database = Database ?? throw new ArgumentNullException(nameof(Database));
-        }
-
         /// <summary>
         /// The Database name where the table resides into which data has to be written
         /// </summary>
-        public string Database { get; private set; }
+        public string Database { get; private set; } = Database ?? throw new ArgumentNullException(nameof(Database));
 
         /// <summary>
         /// The table to which data has to be written

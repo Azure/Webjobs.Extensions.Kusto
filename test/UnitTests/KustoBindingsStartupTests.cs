@@ -36,7 +36,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
                 WebJobsStartupAttribute startupAttribute = typeof(KustoIngestContext).Assembly
                     .GetCustomAttributes<WebJobsStartupAttribute>().Single();
 
-                return new[] { startupAttribute.WebJobsStartupType };
+                return [startupAttribute.WebJobsStartupType];
             }
         }
     }

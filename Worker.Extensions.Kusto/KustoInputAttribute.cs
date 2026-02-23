@@ -6,21 +6,12 @@ using Microsoft.Azure.Functions.Worker.Extensions.Abstractions;
 
 namespace Microsoft.Azure.Functions.Worker.Extensions.Kusto
 {
-    public sealed class KustoInputAttribute : InputBindingAttribute
+    public sealed class KustoInputAttribute(string Database) : InputBindingAttribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KustoAttribute"/> class.
-        /// </summary>
-        /// <param name="Database">The name of the Database</param>
-        public KustoInputAttribute(string Database)
-        {
-            this.Database = Database ?? throw new ArgumentNullException(nameof(Database));
-        }
-
         /// <summary>
         /// The Database name where the table resides into which data has to be written
         /// </summary>
-        public string Database { get; private set; }
+        public string Database { get; private set; } = Database ?? throw new ArgumentNullException(nameof(Database));
 
         /// <summary>
         /// The KQL query command that is used for input mapping. Refer samples for sample queries that use declare parameters

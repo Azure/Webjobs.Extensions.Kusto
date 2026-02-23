@@ -56,7 +56,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         }
         private static IKustoIngestClient GetQueuedIngestClient(KustoConnectionStringBuilder dmKcsb)
         {
-            return KustoIngestFactory.CreateQueuedIngestClient(dmKcsb, new QueueOptions { MaxRetries = 3 });
+            return KustoIngestFactory.CreateQueuedIngestClient(dmKcsb);
         }
 
         private static IKustoIngestClient GetManagedStreamingClient(KustoConnectionStringBuilder engineKcsb, KustoConnectionStringBuilder dmKcsb)

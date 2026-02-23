@@ -287,16 +287,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.UnitTests
             {
                 newItem = new { };
                 newItemString = "{}";
-                arrayItem = new Item[]
-                {
+                arrayItem =
+                [
                     new Item(),
                     new Item()
-                };
-                Task.WaitAll(new[]
-                {
+                ];
+                Task.WaitAll(
+                [
                     asyncCollector.AddAsync(new { }),
                     asyncCollector.AddAsync(new { })
-                });
+                ]);
                 collector.Add(new { });
                 collector.Add(new { });
             }

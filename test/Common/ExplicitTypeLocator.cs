@@ -7,14 +7,9 @@ using System.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
 {
-    public class ExplicitTypeLocator : ITypeLocator
+    public class ExplicitTypeLocator(params Type[] types) : ITypeLocator
     {
-        private readonly IReadOnlyList<Type> types;
-
-        public ExplicitTypeLocator(params Type[] types)
-        {
-            this.types = types.ToList().AsReadOnly();
-        }
+        private readonly IReadOnlyList<Type> types = types.ToList().AsReadOnly();
 
         public IReadOnlyList<Type> GetTypes()
         {
