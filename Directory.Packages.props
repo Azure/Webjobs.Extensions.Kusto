@@ -14,26 +14,26 @@
         Changes to the versions (including transitive ones in package.lock.json) here also should be reflected in
         https://github.com/Azure/azure-functions-extension-bundles/tree/main-preview/ExtensionBundle.Tests/TestData
     -->
-    <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="14.1.0"/>
-    <PackageVersion Include="Microsoft.Azure.Kusto.Ingest" Version="14.1.0"/>
-    <PackageVersion Include="Microsoft.Azure.WebJobs" Version="3.0.44" />
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Core" Version="3.0.44" />
+    <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="14.1.1"/>
+    <PackageVersion Include="Microsoft.Azure.Kusto.Ingest" Version="14.1.1"/>
+    <PackageVersion Include="Microsoft.Azure.WebJobs" Version="3.0.45" />
+    <PackageVersion Include="Microsoft.Azure.WebJobs.Core" Version="3.0.45" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions" Version="5.2.1" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.Http" Version="3.2.0" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.RabbitMQ" Version="2.1.0" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="5.3.7" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.Storage.Blobs" Version="5.3.7" />
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Host.TestCommon" Version="3.0.44" />
+    <PackageVersion Include="Microsoft.Azure.WebJobs.Host.TestCommon" Version="3.0.45" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="4.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.5" />
     <PackageVersion Include="Microsoft.NET.Sdk.Functions" Version="4.6.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="System.Linq.Async" Version="7.0.0" />
     <PackageVersion Include="System.Linq.Async.Queryable" Version="7.0.0" />
     <PackageVersion Include="System.Runtime.Caching" Version="10.0.1" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="coverlet.collector" Version="8.0.1" />
     <PackageVersion Include="morelinq" Version="4.4.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
