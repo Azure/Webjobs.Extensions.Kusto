@@ -1,29 +1,60 @@
 #!/bin/bash
-# Takes 3 parameters the path to navigate to , the language and the port to run the func tools on
-while getopts l:p: flag
-do
-  case "${flag}" in
-    l) language=${OPTARG};;
-    p) port=${OPTARG};;
-  esac
+# Starts Azure Functions for a given language sample
+# Usage: start-functions.sh -l <language> -p <port>
+
+while getopts l:p: flag; do
+    case "${flag}" in
+        l) language=${OPTARG} ;;
+        p) port=${OPTARG} ;;
+    esac
 done
+
+if [ -z "${language:-}" ] || [ -z "${port:-}" ]; then
+    echo "Usage: start-functions.sh -l <language> -p <port>"
+    exit 1
+fi
+
 echo "Using language: $language & Port: $port"
 echo "Running $language functions samples"
-cd /src/samples-$language
-if [ $language == "outofproc" ]; then
-  echo "Changing language to c-sharp for out of process worker"
-  cd  bin/Debug/net8.0
-  func start --csharp --verbose --port $port >> func-logs.txt &
-# Added this as a seperate clause just in case we want to have this independent from OutOfProcess worker
-elif [ $language == "csharp" ]; then
-  echo "Changing language to c-sharp for out of process worker"
-  cd  bin/Debug/net8.0
-  func start --csharp --verbose --port $port >> func-logs.txt &
-else
-  # the compiled functions are in this location
-  if [[ $language == "java" ]]; then
-    echo "Changing to Java functions directory"
-    cd target/azure-functions/kustojavafunctionssample-20230130111810292
-  fi 
-  func start --$language --verbose --port $port >> func-logs.txt &
+
+SAMPLES_DIR="/src/samples-${language}"
+if [ ! -d "$SAMPLES_DIR" ]; then
+    echo "Error: Samples directory $SAMPLES_DIR not found"
+    exit 1
 fi
+
+cd "$SAMPLES_DIR"
+
+case "$language" in
+    outofproc)
+        echo "Starting out-of-process dotnet-isolated worker"
+        cd bin/Debug/net8.0
+        func start --dotnet-isolated --verbose --port "$port" >> func-logs.txt &
+        ;;
+    csharp)
+        echo "Starting C# in-process worker"
+        cd bin/Debug/net8.0
+        func start --csharp --verbose --port "$port" >> func-logs.txt &
+        ;;
+    node)
+        echo "Starting Node.js (JavaScript) worker"
+        func start --javascript --verbose --port "$port" >> func-logs.txt &
+        ;;
+    java)
+        echo "Starting Java worker"
+        cd target/azure-functions/kustojavafunctionssample-20230130111810292
+        func start --java --verbose --port "$port" >> func-logs.txt &
+        ;;
+    python)
+        echo "Starting Python worker"
+        func start --python --verbose --port "$port" >> func-logs.txt &
+        ;;
+    powershell)
+        echo "Starting PowerShell worker"
+        func start --powershell --verbose --port "$port" >> func-logs.txt &
+        ;;
+    *)
+        echo "Error: Unsupported language '$language'"
+        exit 1
+        ;;
+esac

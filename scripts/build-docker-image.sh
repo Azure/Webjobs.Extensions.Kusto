@@ -27,7 +27,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-BASE_IMAGE_TAG="node:4-node20-core-tools"
+BASE_IMAGE_TAG="node:4-node22"
 TARGET_IMAGE_NAME="func-az-kusto-base"
 BUILD_DATE=$(date +"%Y%m%d")
 TARGET_FILE_LOCATION="./samples/docker"
