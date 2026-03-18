@@ -1,94 +1,137 @@
 # Testing functions bindings using E2E tests
 
-This readme explains the process of testing function bindings using E2E tests. Azure functions bindings are by default 
-declarative and makes usage of this easy for developing applications. However, it is important to test the bindings to 
+This readme explains the process of testing function bindings using E2E tests. Azure functions bindings are by default
+declarative and makes usage of this easy for developing applications. However, it is important to test the bindings to
 validate the application behavior.
 
 This utilizes [TestContainers](https://www.testcontainers.org/) to run the bindings in a containerized environment.
 
-## Setting up the tests
+## Prerequisites
 
-To run the tests, you need to have Docker installed on your machine. Azure function base images to test the bindings are
-published on [DockerHub](https://hub.docker.com/_/microsoft-azure-functions) and on [Github](https://github.com/Azure/azure-functions-docker). 
-For ease of running the tests the best option would be to use the base tools image corresponding to the platform. For example to
-run the tests for .NET 6.0, the image `4-dotnet6-core-tools` can be used.
-The test examples in this repo using Java 11 for tests. This can be easily changed to any other languages by using TestContainers for
-the language of choice.
+- **Docker** installed and running
+- **Java 11+** (for running the test harness)
+- **Maven 3.8+**
+- **.NET SDK** (for building the extension)
+- **Azure CLI** (`az`) for obtaining access tokens
+- A Kusto (Azure Data Explorer) cluster and database, set up using the KQL script at [`samples/set-up/KQL-Setup.kql`](../samples/set-up/KQL-Setup.kql)
 
-The tests have the following high level steps, this assumes that the function app is already created and there are HTTP triggers configured : 
+## Scripts
 
-* Create a compose file using the base image to test with. If additional components are needed they can be orchestrated using a docker-compose file. 
-* In the following example, we use the java image and add RabbitMQ (for trigger tests) and Azurite (for saving function state) to the container.
+All automation scripts are in the [`scripts/`](../scripts/) directory:
+
+| Script | Description |
+|---|---|
+| `build-docker-image.sh` | Builds the Docker image with the Kusto extension (Linux) |
+| `BuildE2ETestImage.ps1` | Builds the Docker image with the Kusto extension (PowerShell) |
+| `run-e2e-tests.sh` / `.ps1` | Sets up environment for performance tests |
+| `run-functional-tests-e2e.sh` / `.ps1` | Full pipeline: build image → generate settings → run tests |
+
+## How the tests work
+
+The tests use a custom Docker image built on top of the [Azure Functions base image](https://hub.docker.com/_/microsoft-azure-functions)
+(`node:4-node20-core-tools`). The image includes Maven, Java, Python and all runtimes needed to test across languages.
+
+### High-level flow
+
+1. **Build the Docker image** — compiles the Kusto extension, generates a `DockerFile` from
+   `samples/docker/Docker-template.dockerfile`, and builds the image with `docker build --no-cache`.
+2. **Generate `local.settings.json`** for each language sample with the Kusto connection string and correct
+   `FUNCTIONS_WORKER_RUNTIME` value.
+3. **Start containers** via docker-compose (function host + Azurite + optional RabbitMQ).
+4. **Copy sample function apps** into the container and run them with `func start`.
+5. **Execute tests** against the function HTTP endpoints from the host via forwarded ports.
+6. **Assert results** by querying Kusto to validate data written/read by the bindings.
+
+### Docker compose
+
+The compose file orchestrates the function host alongside supporting services:
 
 ```yaml
-version: '3'
 services:
-    baseimage:
-        image: mcr.microsoft.com/azure-functions/java:4-dotnet6-core-tools
-        hostname: func-az-kusto-base
-        ports:
-          - "7101:7101"
-    rabbitmq:
-      image: rabbitmq:3.11.9-management
-      hostname: rabbitmq
-      ports:
-      - "7000:15672"
-      - "7001:5672"
-    azurite:
-      image: mcr.microsoft.com/azure-storage/azurite
-      hostname: azurite
-      ports:
+  baseimage:
+    image: func-az-kusto-base:latest
+    hostname: func-az-kusto-base
+    ports:
+      - "7101:7101"
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    hostname: azurite
+    ports:
       - "10000:10000"
       - "10001:10001"
       - "10002:10002"
 ```
-* The compose environment is instantiated referencing the compose file and then started.
-``          
-    DockerEnvironment environment = new DockerComposeContainer<>(new File(path));
-    environment.start();
-``
 
-* Copy the function app to the container or use a volume mount for mounting the function app
-```
-    containerState.copyFileToContainer(MountableFile.forHostPath(pathToFunctionApp),String.format("/src/samples-%s/", functionAppName));
-```
+### Container initialisation
 
-* Run the function app in the container. Use the function core tools to run the app
-```
-    containerState.execInContainer("func", "start", "--port", "7101", "--java" "--verbose");
-```
+Inside the container, two scripts handle setup:
 
-* Since the ports are forwarded from localhost, the tests can be run against the function app using the localhost url.
-```
-    String url = String.format("http://localhost:%d/api/%s", port, functionName);
+- **`init-functions.sh`** — copies the Kusto extension DLL into the extension bundle and registers it in `extensions.json`.
+- **`start-functions.sh`** — starts the function app for a given language (`-l node -p 7101`). Maps `node` to `--javascript` for the core tools.
+
+## Running the E2E tests
+
+### Option 1: Full automated pipeline
+
+```bash
+# From the repository root
+scripts/run-functional-tests-e2e.sh <CLUSTER> <DATABASE>
 ```
 
-* The values inserted or retrieved can then be asserted against the expected values ( by selecting data from Kusto and validating the results)
+This builds the image, generates `local.settings.json` for every language sample, and runs `mvn clean gatling:test`.
 
-## Running the tests
+The `CLUSTER` and `DATABASE` parameters are required and identify the Kusto cluster and database to test against.
+An access token is obtained automatically via `az account get-access-token`, or you can set the `ACCESS_TOKEN`
+environment variable beforehand.
 
-In this example , the tests are set up for java and can be run through the maven lifecycle. The tests can be run using the following command
+### Option 2: Step by step
 
-```
+```bash
+# 1. Build the Docker image
+scripts/build-docker-image.sh
+
+# 2. Run the Java test harness directly
+cd functions-int-tests
 mvn clean test
 ```
 
-## Running the tests for performance tests
+### Option 3: PowerShell
 
-This folder contains the performance tests for the bindings. The tests are run using [Gatling](https://gatling.io/). 
-The tests are run using the following command. The setup is exactly as described for the E2E tests. The only difference is that the test
-runs use the gatling framework for applying load to the function app and validating the results.
+```powershell
+# Full pipeline
+scripts/run-functional-tests-e2e.ps1 -Cluster <CLUSTER> -Database <DATABASE>
+
+# Build image only
+. scripts/BuildE2ETestImage.ps1
+BuildE2ETestImage -Acr <acr> -DockerPush $true
+```
+
+## Performance / stress tests
+
+The performance tests use [Gatling](https://gatling.io/) with the same containerized setup. They apply load to the
+function app and validate results under stress.
 
 ```bash
- mvn clean formatter:format gatling:test "-Dport=7105" "-Dlanguage=csharp" "-DrunDescription=.NETFunctions-StressTests" "-DrunTrigger=false"
+cd functions-int-tests
+mvn clean formatter:format gatling:test \
+  "-Dport=7105" \
+  "-Dlanguage=csharp" \
+  "-DrunDescription=.NETFunctions-StressTests" \
+  "-DrunTrigger=false"
 ```
 
 ## Building a custom image
 
-This folder contains steps to build a custom Docker image that can be catered to run against all language bindings. If this is the case that a
-custom image is needed the following steps can be followed. This assumes that you already have a container registry where the image can be pushed.
+To build and optionally push to a container registry:
 
 ```bash
-. .\BuildE2ETestImage.ps1
-BuildE2ETestImage -Acr <acr/container-registry> -DockerPush $true
+# Linux
+scripts/build-docker-image.sh --acr myacr.azurecr.io --push
+
+# PowerShell
+. scripts/BuildE2ETestImage.ps1
+BuildE2ETestImage -Acr myacr.azurecr.io -DockerPush $true
 ```
+
+The build script generates a `DockerFile` from `samples/docker/Docker-template.dockerfile`, builds with `--no-cache`,
+and tags as both `func-az-kusto-base:<date>` and `func-az-kusto-base:latest`.
