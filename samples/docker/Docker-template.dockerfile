@@ -27,8 +27,8 @@ RUN mkdir -p ${JAVA_HOME} \
     && tar -xzf /tmp/jdk.tar.gz -C ${JAVA_HOME} --strip-components=1 \
     && rm -f /tmp/jdk.tar.gz
 
-ENV MAVEN_HOME /usr/share/maven
-ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
+ENV MAVEN_HOME=/usr/share/maven
+ENV MAVEN_CONFIG="$USER_HOME_DIR/.m2"
 ENV JAVA_HOME=${JAVA_HOME}
 #Java installation complete
 RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3.9-dev python3.9-venv python3-pip python3-wheel build-essential && \

@@ -29,7 +29,7 @@ function BuildE2ETestImage {
     Write-Host "------------------------------------------------------------------------------------------------------------------------------"
     Write-Host "Cleaning and building Project" -ForegroundColor Green
     dotnet clean
-    dotnet build /p:Configuration=Release
+    dotnet publish src/Microsoft.Azure.WebJobs.Extensions.Kusto.csproj -c Release -o src/bin/Release/publish /p:RunTests=false
     # The docker file goes to resources folder
     Write-Host "------------------------------------------------------------------------------------------------------------------------------"
     #If a locally built extension bundle is specified , add it
@@ -49,13 +49,13 @@ function BuildE2ETestImage {
         $TagCreated = "${TargetImageName}:${BuildDate}"
         $LatestTagCreated = "$Acr/${TargetImageName}:latest"
         Write-Host "Creating docker tag $TagCreated and $LatestTagCreated " -ForegroundColor Green
-        docker build -t "${TargetImageName}-$TagCreated" -t "${TargetImageName}:latest" -f $TargetDockerFile .
+        docker build  -t "${TargetImageName}-$TagCreated" -t "${TargetImageName}:latest" -f $TargetDockerFile .
     }
     else {
         $TagCreated = "$Acr/${TargetImageName}:$BuildDate"
         $LatestTagCreated = "$Acr/${TargetImageName}:latest"
         Write-Host "Creating ACR docker tag $TagCreated and $LatestTagCreated " -ForegroundColor Green
-        docker build -t $TagCreated -t $LatestTagCreated -f $TargetDockerFile .
+        docker build  -t $TagCreated -t $LatestTagCreated -f $TargetDockerFile .
         if($true -eq $DockerPush)
         {
             docker image push --all-tags "$Acr/${TargetImageName}"
@@ -64,6 +64,12 @@ function BuildE2ETestImage {
     
     if ($?) {
         Write-Host "Image build '${TargetImageName}:${BuildDate}' complete " -ForegroundColor Green
+        # Update docker-compose files to reference the newly built image
+        $LatestImage = if ($Acr) { "$Acr/${TargetImageName}:latest" } else { "${TargetImageName}:latest" }
+        Get-ChildItem "$TargetFileLocation/docker-compose*.yml" | ForEach-Object {
+            (Get-Content $_.FullName -Raw) -replace 'image:.*func-az-kusto-base.*', "image: $LatestImage" | Set-Content $_.FullName
+            Write-Host "Updated $($_.Name) to use image $LatestImage" -ForegroundColor Green
+        }
     }
     else {
         Write-Host "Image build '${TargetImageName}:${BuildDate}'  failed. Is docker running  or are there any errors reported in execution of this script ?" -ForegroundColor Red

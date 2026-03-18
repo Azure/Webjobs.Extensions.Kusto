@@ -20,7 +20,7 @@
     <gatling-maven-plugin.version>4.2.9</gatling-maven-plugin.version>
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
-    <testcontainer.version>1.19.1</testcontainer.version>
+    <testcontainer.version>1.21.4</testcontainer.version>
     <rmq.test.version>0.8.0</rmq.test.version>
   </properties>
 
