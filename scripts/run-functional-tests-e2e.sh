@@ -2,28 +2,38 @@
 set -euo pipefail
 
 # Wrapper script to build the E2E test Docker image and configure local settings.
-# Usage: ./run-functional-tests-e2e.sh [KustoConnectionString]
-#   KustoConnectionString is built from CLUSTER and DATABASE env vars if set,
-#   otherwise falls back to the first positional parameter.
+# Usage: ./run-functional-tests-e2e.sh <Cluster> <Database> [Language]
+#
+#   Cluster and Database can also be set via CLUSTER and DATABASE env vars.
+#   Language selects which sample to test (must be a LANG_MAP key, e.g.
+#   samples-csharp, samples-java, etc.). Can also be set via SAMPLE_LANG env var.
+#   Defaults to samples-node.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
-# Build KustoConnectionString from CLUSTER/DATABASE env vars, or fall back to $1
-if [ -n "${CLUSTER:-}" ] && [ -n "${DATABASE:-}" ]; then
-    KUSTO_CONNECTION_STRING="Data Source=${CLUSTER};Database=${DATABASE};Fed=True"
-    echo "==> Using KustoConnectionString from CLUSTER and DATABASE env vars"
-elif [ $# -ge 1 ]; then
-    KUSTO_CONNECTION_STRING="$1"
-    echo "==> Using KustoConnectionString from parameter"
+# Build KustoConnectionString from positional args or CLUSTER/DATABASE env vars.
+# Positional args take precedence over env vars.
+LANG_ARG=""
+if [ $# -ge 2 ]; then
+    CLUSTER="$1"
+    DATABASE="$2"
+    LANG_ARG="${3:-}"
+    echo "==> Using Cluster and Database from positional parameters"
+elif [ -n "${CLUSTER:-}" ] && [ -n "${DATABASE:-}" ]; then
+    LANG_ARG="${1:-}"
+    echo "==> Using Cluster and Database from env vars"
 else
-    echo "Error: Either set CLUSTER and DATABASE env vars, or pass KustoConnectionString as \$1"
-    echo "Usage: $0 [KustoConnectionString]"
-    echo "  CLUSTER   - Kusto cluster URL (e.g. https://mycluster.kusto.windows.net)"
-    echo "  DATABASE  - Kusto database name"
+    echo "Error: Provide Cluster and Database as positional args, or set CLUSTER and DATABASE env vars"
+    echo "Usage: $0 <Cluster> <Database> [Language]"
+    echo "  Cluster   - Kusto cluster URL (e.g. https://mycluster.kusto.windows.net)"
+    echo "  Database  - Kusto database name"
+    echo "  Language  - LANG_MAP key (e.g. samples-csharp, samples-java). Default: samples-node"
     exit 1
 fi
+
+KUSTO_CONNECTION_STRING="Data Source=${CLUSTER};Database=${DATABASE};Fed=True"
 
 # Source access token from az CLI if not already set
 if [ -z "${ACCESS_TOKEN:-}" ]; then
@@ -33,7 +43,7 @@ fi
 
 # Map sample directories to their FUNCTIONS_WORKER_RUNTIME values
 declare -A LANG_MAP=(
-    ["samples-csharp"]="dotnet"
+    ["samples-csharp"]="csharp"
     ["samples-java"]="java"
     ["samples-node"]="node"
     ["samples-outofproc"]="dotnet-isolated"
@@ -41,40 +51,63 @@ declare -A LANG_MAP=(
     ["samples-python"]="python"
 )
 
+FUNC_PORT=7071
+
+# Resolve language: positional arg > SAMPLE_LANG env var > default (samples-node)
+if [ -n "$LANG_ARG" ]; then
+    SAMPLE_LANG="$LANG_ARG"
+else
+    SAMPLE_LANG="${SAMPLE_LANG:-samples-node}"
+fi
+
+# Validate SAMPLE_LANG against LANG_MAP
+if [ -z "${LANG_MAP[$SAMPLE_LANG]+_}" ]; then
+    echo "Error: '${SAMPLE_LANG}' is not a valid language key."
+    echo "Valid keys: ${!LANG_MAP[*]}"
+    exit 1
+fi
+echo "==> Running tests for language: ${SAMPLE_LANG} (runtime: ${LANG_MAP[$SAMPLE_LANG]})"
+
+runtime="${LANG_MAP[$SAMPLE_LANG]}"
+
 echo "=== Step 1: Building Docker image ==="
 "$SCRIPT_DIR/build-docker-image.sh"
 
-echo "=== Step 2: Generating local.settings.json for each language sample ==="
+echo "=== Step 2: Generating local.settings.json for ${SAMPLE_LANG} ==="
 
 CONN_STRING_WITH_TOKEN="${KUSTO_CONNECTION_STRING};AAD Federated Security=True;UserToken=${ACCESS_TOKEN}"
 
-for sample_dir in "${!LANG_MAP[@]}"; do
-    runtime="${LANG_MAP[$sample_dir]}"
-    target_dir="samples/${sample_dir}"
-    target="${target_dir}/local.settings.json"
+target_dir="samples/${SAMPLE_LANG}"
+target="${target_dir}/local.settings.json"
 
-    if [ ! -d "$target_dir" ]; then
-        echo "Warning: ${target_dir} does not exist, skipping"
-        continue
-    fi
+if [ ! -d "$target_dir" ]; then
+    echo "Error: ${target_dir} does not exist"
+    exit 1
+fi
 
-    echo "Creating ${target} with FUNCTIONS_WORKER_RUNTIME=${runtime}"
+rm -f "${target}"
+echo "Creating ${target} with FUNCTIONS_WORKER_RUNTIME=${runtime}"
 
-    # Use jq if available for safe JSON manipulation, otherwise fall back to sed
-    if command -v jq &>/dev/null; then
-        jq \
-            --arg runtime "$runtime" \
-            --arg connStr "$CONN_STRING_WITH_TOKEN" \
-            '.Values.FUNCTIONS_WORKER_RUNTIME = $runtime | .Values.KustoConnectionString = $connStr' \
-            local.settings.json.example > "${target}"
-    else
-        sed \
-            -e "s/<lang>/${runtime}/" \
-            -e "s|<KustoConnectionString>|${CONN_STRING_WITH_TOKEN//|/\\|}|" \
-            local.settings.json.example > "${target}"
-    fi
-done
+if command -v jq &>/dev/null; then
+    jq \
+        --arg runtime "$runtime" \
+        --arg connStr "$CONN_STRING_WITH_TOKEN" \
+        '.Values.FUNCTIONS_WORKER_RUNTIME = $runtime | .Values.KustoConnectionString = $connStr' \
+        local.settings.json.example > "${target}"
+else
+    sed \
+        -e "s/<lang>/${runtime}/" \
+        -e "s|<KustoConnectionString>|${CONN_STRING_WITH_TOKEN//|/\\|}|" \
+        local.settings.json.example > "${target}"
+fi
 
-echo "=== Step 3: Running functional tests ==="
+if [ "$SAMPLE_LANG" = "samples-outofproc" ]; then
+    echo "=== Step 3: Building ${SAMPLE_LANG} ==="
+    dotnet publish "${target_dir}" -c Debug -o "${target_dir}/bin/Debug/net8.0/publish"
+    cp "${target}" "${target_dir}/bin/Debug/net8.0/publish/local.settings.json"
+fi
+
+echo "=== Step 4: Running functional tests ==="
 cd "$REPO_ROOT/functions-int-tests"
-mvn clean gatling:test
+test_language="${SAMPLE_LANG#samples-}"
+mvn clean gatling:test -Dlanguage="${test_language}" -Dport="${FUNC_PORT}"

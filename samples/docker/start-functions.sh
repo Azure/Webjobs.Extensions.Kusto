@@ -28,30 +28,30 @@ cd "$SAMPLES_DIR"
 case "$language" in
     outofproc)
         echo "Starting out-of-process dotnet-isolated worker"
-        cd bin/Debug/net8.0
-        func start --dotnet-isolated --verbose --port "$port" >> func-logs.txt &
+        cd bin/Debug/net8.0/publish
+        FUNCTIONS_WORKER_RUNTIME=dotnet-isolated func start --dotnet-isolated --no-build --verbose --port "$port" >> func-logs.txt &
         ;;
     csharp)
         echo "Starting C# in-process worker"
         cd bin/Debug/net8.0
-        func start --csharp --verbose --port "$port" >> func-logs.txt &
+        FUNCTIONS_WORKER_RUNTIME=dotnet func start --csharp --verbose --port "$port" >> func-logs.txt &
         ;;
     node)
         echo "Starting Node.js (JavaScript) worker"
-        func start --javascript --verbose --port "$port" >> func-logs.txt &
+        FUNCTIONS_WORKER_RUNTIME=node func start --javascript --verbose --port "$port" >> func-logs.txt &
         ;;
     java)
         echo "Starting Java worker"
         cd target/azure-functions/kustojavafunctionssample-20230130111810292
-        func start --java --verbose --port "$port" >> func-logs.txt &
+        FUNCTIONS_WORKER_RUNTIME=java func start --java --verbose --port "$port" >> func-logs.txt &
         ;;
     python)
         echo "Starting Python worker"
-        func start --python --verbose --port "$port" >> func-logs.txt &
+        FUNCTIONS_WORKER_RUNTIME=python PYTHONPATH="$SAMPLES_DIR" func start --python --verbose --port "$port" >> func-logs.txt &
         ;;
     powershell)
         echo "Starting PowerShell worker"
-        func start --powershell --verbose --port "$port" >> func-logs.txt &
+        FUNCTIONS_WORKER_RUNTIME=powershell func start --powershell --verbose --port "$port" >> func-logs.txt &
         ;;
     *)
         echo "Error: Unsupported language '$language'"

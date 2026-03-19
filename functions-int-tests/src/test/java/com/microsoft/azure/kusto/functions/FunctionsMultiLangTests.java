@@ -45,7 +45,7 @@ public class FunctionsMultiLangTests extends Simulation {
     // File name in docker compose file
     private static final String BASE_IMAGE = "baseimage";
 
-    private static final int HOST_PORT = Integer.getInteger("port", 7103);
+    private static final int HOST_PORT = Integer.getInteger("port", 7071);
     private static final Boolean HOLD_CONTAINER = Boolean.getBoolean("debug");
     private static final Boolean RUN_TRIGGER = Boolean.getBoolean("runTrigger");
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
@@ -56,11 +56,6 @@ public class FunctionsMultiLangTests extends Simulation {
 
     private DockerComposeContainer<?> environment;
 
-    private final Map<String, Integer> languagePortMap = Stream
-            .of(new String[][] { { "outofproc", "7101" }, { "java", "7102" }, { "node", "7103" }, { "python", "7104" },
-                    { "csharp", "7105" } })
-            .collect(Collectors.collectingAndThen(Collectors.toMap(data -> data[0], data -> Integer.parseInt(data[1])),
-                    Collections::<String, Integer> unmodifiableMap));
     private String language = getProperty("language", "node");
 
     public FunctionsMultiLangTests() throws JsonProcessingException {
@@ -75,13 +70,7 @@ public class FunctionsMultiLangTests extends Simulation {
         // Copy the project into the container
         // Replace the DLL file
         language = getProperty("language", "node");
-        if (!languagePortMap.containsKey(language)) {
-            logger.warn(
-                    "Language " + language + " is not in the list of accepted languages for test. Accepted languages - "
-                            + languagePortMap.keySet());
-            System.exit(137);
-        }
-        int hostPort = languagePortMap.get(language);
+        int hostPort = 7071;
         String dockerComposeFile = RUN_TRIGGER ? PATH_TO_DOCKER_COMPOSE : PATH_TO_DOCKER_COMPOSE_WITH_NO_RMQ;
         File absoluteFilePath = new File(dockerComposeFile).getAbsoluteFile();
         try {
@@ -189,9 +178,9 @@ public class FunctionsMultiLangTests extends Simulation {
                     "/src/samples-%s/target/azure-functions/kustojavafunctionssample-20230130111810292/func-logs.txt",
                     language);
         } else if ("outofproc".equalsIgnoreCase(language)) {
-            containerPath = String.format("/src/samples-%s/bin/Debug/net6/func-logs.txt", language);
+            containerPath = String.format("/src/samples-%s/bin/Debug/net8.0/publish/func-logs.txt", language);
         } else if ("csharp".equalsIgnoreCase(language)) {
-            containerPath = String.format("/src/samples-%s/bin/Debug/net6/func-logs.txt", language);
+            containerPath = String.format("/src/samples-%s/bin/Debug/net8.0/func-logs.txt", language);
         } else {
             containerPath = String.format("/src/samples-%s/func-logs.txt", language);
         }

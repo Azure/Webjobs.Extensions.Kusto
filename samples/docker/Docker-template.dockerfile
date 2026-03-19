@@ -44,6 +44,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y python3.11 pyth
 RUN python3.11 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 #Python installation complete
+RUN apt-get update && apt-get install --no-install-recommends -y dotnet-sdk-8.0 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+#.NET 8 SDK for dotnet-isolated functions
 COPY ./samples/docker/host.json /src/host.json
 # Copy the DLL to the target use this for the tests
 COPY ./src/bin/Release/netstandard2.1/Microsoft.Azure.WebJobs.Extensions.Kusto.dll /src/Microsoft.Azure.WebJobs.Extensions.Kusto.dll
