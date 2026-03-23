@@ -92,7 +92,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
                     if (ingestionStatus.Status == Status.Failed || ingestionStatus.Status == Status.PartiallySucceeded)
                     {
                         string errorMessage = $"Ingestion status reported failure/partial success for {ingestSourceId}. Ingest detail {this._contextdetail.Value}, and status reported was {ingestionStatus.Status}";
-                        this._logger.LogError(errorMessage);
+                        this._logger.Log(LogLevel.Error, new EventId(0), KustoDiagnosticEvent.Create(KustoConstants.IngestionErrorCode, errorMessage, KustoConstants.KustoBindingHelpLink), null, (state, ex) => state.ToString());
                         throw new FunctionInvocationException(errorMessage);
                     }
                     this._rows.Clear();
