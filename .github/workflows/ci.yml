@@ -43,6 +43,8 @@ jobs:
           KustoConnectionStringNoPermissions: "Data Source=${{secrets.CLUSTER}};Database=webjobs-e2e-noperms;Fed=True;UserToken=${{env.ACCESS_TOKEN}}"
           KustoConnectionStringMSI: "Data Source=${{secrets.CLUSTER}};Database=webjobs-e2e;Fed=True;"
           KustoConnectionStringInvalidAttributes: "Data Source=${{secrets.CLUSTER}};Database=webjobs-e2e;Fed=True;AppClientId=${{ secrets.APP_ID }}"
+          TestDatabaseName: "webjobs-e2e"
+          TestDatabaseNameNoPermissions: "webjobs-e2e-noperms"
       - name: Upload dotnet test results
         uses: actions/upload-artifact@v4
         with:
