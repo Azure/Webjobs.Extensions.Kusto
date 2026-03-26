@@ -57,7 +57,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(TimeSpan.FromMinutes(ingestionTimeoutMinutes));
             IngestionStatus ingestionStatus = null;
-            while (!cancellationToken.IsCancellationRequested)
+            while (!cts.Token.IsCancellationRequested)
             {
                 ingestionStatus = queuedIngestResult.GetIngestionStatusBySourceId(sourceId);
                 if (ingestionStatus.Status == Status.Succeeded
@@ -67,7 +67,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 {
                     break;
                 }
-                await Task.Delay(TimeSpan.FromSeconds(pollIntervalSeconds), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(pollIntervalSeconds), cts.Token);
             }
             return ingestionStatus;
         }
