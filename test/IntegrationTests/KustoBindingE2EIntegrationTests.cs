@@ -115,7 +115,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
                 Assert.True(isError, readPrivilegeException.GetBaseException().Message);
 
                 // Fail scenario for no ingest privileges
-
                 string[] testsNoPrivilegesExecute = { nameof(KustoEndToEndTestClass.OutputFailForUserWithNoReadPrivileges) };
                 // , nameof(KustoEndToEndTestClass.OutputQueuedFailForUserWithNoReadPrivileges) 
                 foreach (string testNoPrivilegesExecute in testsNoPrivilegesExecute)

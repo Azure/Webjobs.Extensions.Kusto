@@ -47,6 +47,30 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             }
             return kustoIngestProperties;
         }
+
+        /// <summary>
+        /// Polls the ingestion status until a terminal state is reached or timeout occurs.
+        /// Used by both queued ingestion and managed ingestion when it falls back to queued.
+        /// </summary>
+        protected static async Task<IngestionStatus> PollIngestionStatus(IKustoIngestionResult queuedIngestResult, Guid sourceId, int ingestionTimeoutMinutes, int pollIntervalSeconds, CancellationToken cancellationToken)
+        {
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromMinutes(ingestionTimeoutMinutes));
+            IngestionStatus ingestionStatus = null;
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                ingestionStatus = queuedIngestResult.GetIngestionStatusBySourceId(sourceId);
+                if (ingestionStatus.Status == Status.Succeeded
+                    || ingestionStatus.Status == Status.Skipped
+                    || ingestionStatus.Status == Status.PartiallySucceeded
+                    || ingestionStatus.Status == Status.Failed)
+                {
+                    break;
+                }
+                await Task.Delay(TimeSpan.FromSeconds(pollIntervalSeconds), cancellationToken);
+            }
+            return ingestionStatus;
+        }
     }
 
     internal class KustoManagedIngestionService : IKustoIngestionService
@@ -68,6 +92,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             if (this._logger.IsEnabled(LogLevel.Debug))
             {
                 this._logger.LogDebug($"Ingestion status for sourceId {streamSourceOptions.SourceId} is {managedIngestionStatus.Status}");
+            }
+            // When managed streaming ingestion falls back to queued, the immediate status is Queued/Pending.
+            // In this case, poll for the final status to ensure we catch permission and ingestion errors.
+            if (managedIngestionStatus.Status == Status.Queued || managedIngestionStatus.Status == Status.Pending)
+            {
+                this._logger.LogDebug($"Managed ingestion fell back to queued for sourceId {streamSourceOptions.SourceId}. Polling for final status.");
+                return await PollIngestionStatus(ingestionResult, streamSourceOptions.SourceId, 1, 5, cancellationToken);
             }
             return managedIngestionStatus;
         }
@@ -122,28 +153,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 this._logger.LogTrace($"Queued ingestion for sourceId {streamSourceOptions.SourceId}. Using ingestion properties {logString}");
             }
             return await PollIngestionStatus(ingestionResult, streamSourceOptions.SourceId, pollTimeoutMinutes, pollIntervalSeconds, cancellationToken);
-        }
-
-        private static async Task<IngestionStatus> PollIngestionStatus(IKustoIngestionResult queuedIngestResult, Guid sourceId, int ingestionTimeoutMinutes, int pollIntervalSeconds, CancellationToken cancellationToken)
-        {
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(TimeSpan.FromMinutes(ingestionTimeoutMinutes));
-            IngestionStatus ingestionStatus = null;
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                ingestionStatus = queuedIngestResult.GetIngestionStatusBySourceId(sourceId);
-                // Check if the ingestion status indicates completion
-                if (ingestionStatus.Status == Status.Succeeded
-                    || ingestionStatus.Status == Status.Skipped // The ingestion was skipped because it was already ingested 
-                    || ingestionStatus.Status == Status.PartiallySucceeded // Some of the records were ingested 
-                    || ingestionStatus.Status == Status.Failed)
-                {
-                    break;
-                }
-                // Wait for a specified interval before polling again
-                await Task.Delay(TimeSpan.FromSeconds(pollIntervalSeconds), cancellationToken);
-            }
-            return ingestionStatus;
         }
     }
 }
