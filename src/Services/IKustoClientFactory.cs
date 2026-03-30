@@ -114,8 +114,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 ClientVersionForTracing = ClientDetailForTracing,
             };
-            AdditionalOptions[FunctionsRuntime] = runtimeName;
-            AdditionalOptions[BindingType] = bindingDirection;
+            var options = new System.Collections.Generic.Dictionary<string, string>(AdditionalOptions)
+            {
+                [FunctionsRuntime] = runtimeName,
+                [BindingType] = bindingDirection
+            };
             if (!string.IsNullOrEmpty(managedIdentity))
             {
                 // There exists a managed identity. Check if that is UserManaged or System identity
@@ -123,17 +126,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 if ("system".EqualsOrdinalIgnoreCase(managedIdentity))
                 {
                     logger.LogDebug($"Using system managed user identity : {managedIdentity}");
-                    AdditionalOptions[ManagedIdentity] = SystemManagedIdentity;
+                    options[ManagedIdentity] = SystemManagedIdentity;
                     kcsb = kcsb.WithAadSystemManagedIdentity();
                 }
                 else
                 {
                     logger.LogDebug($"Using user managed identity : {managedIdentity}");
-                    AdditionalOptions[ManagedIdentity] = UserManagedIdentity;
+                    options[ManagedIdentity] = UserManagedIdentity;
                     kcsb = kcsb.WithAadUserManagedIdentity(managedIdentity);
                 }
             }
-            kcsb.SetConnectorDetails(name: AzFunctionsClientName, version: AssemblyVersion, additional: AdditionalOptions.Select(kv => (kv.Key, kv.Value)).ToArray(), sendUser: true);
+            kcsb.SetConnectorDetails(name: AzFunctionsClientName, version: AssemblyVersion, additional: options.Select(kv => (kv.Key, kv.Value)).ToArray(), sendUser: true);
             return kcsb;
         }
     }

@@ -28,13 +28,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Common
     internal sealed class KustoTestHelper
     {
         public const string DefaultTestConnectionString = "Data Source=https://kustofunctionscluster.eastus.dev.kusto.windows.net;Database=unittestdb;Fed=True;AppClientId=11111111-xxxx-xxxx-xxxx-111111111111;AppKey=appKey~appKey;Authority Id=1111111-1111-1111-1111-111111111111";
-        public static KustoIngestContext CreateContext(IKustoIngestClient ingestClientService, string database = "unittest", string tableName = "items", string mappingRef = "", string dataFormat = "json")
+        public static KustoIngestContext CreateContext(IKustoIngestClient ingestClientService, string database = "unittest", string tableName = "items", string mappingRef = "", string dataFormat = "json", string ingestionType = "managed")
         {
             var attribute = new KustoAttribute(database)
             {
                 TableName = tableName,
                 MappingRef = mappingRef,
-                DataFormat = dataFormat
+                DataFormat = dataFormat,
+                IngestionType = ingestionType
             };
             return new KustoIngestContext
             {

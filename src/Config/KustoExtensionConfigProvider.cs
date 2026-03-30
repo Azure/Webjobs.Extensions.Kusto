@@ -122,11 +122,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 string logContext = $"Error creating ingest connection : TableName='{kustoAttribute?.TableName}',Database='{kustoAttribute?.Database}'," +
                     $"MappingRef='{kustoAttribute?.MappingRef}'," +
-                    $"DataFormat='{kustoAttribute?.DataFormat}'" +
+                    $"DataFormat='{kustoAttribute?.DataFormat}'," +
                     $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
                     $"IngestionType='{kustoAttribute?.IngestionType}'," +
                     $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
-                this._logger.LogError(logContext, e);
+                this._logger.LogError(e, logContext);
                 throw;
             }
         }
@@ -163,7 +163,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     $"KqlParameters='{kustoAttribute?.KqlParameters}'," +
                     $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
                     $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
-                this._logger.LogError(logContext, e);
+                this._logger.LogError(e, logContext);
                 throw;
             }
         }
@@ -188,7 +188,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     $"KqlParameters='{kustoAttribute?.KqlParameters}'," +
                     $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
                     $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
-                this._logger.LogError(logContext, e);
+                this._logger.LogError(e, logContext);
                 throw;
             }
         }

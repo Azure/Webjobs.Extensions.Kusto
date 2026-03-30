@@ -54,7 +54,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         /// </summary>
         protected static async Task<IngestionStatus> PollIngestionStatus(IKustoIngestionResult queuedIngestResult, Guid sourceId, int ingestionTimeoutMinutes, int pollIntervalSeconds, CancellationToken cancellationToken)
         {
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(TimeSpan.FromMinutes(ingestionTimeoutMinutes));
             IngestionStatus ingestionStatus = null;
             while (!cts.Token.IsCancellationRequested)

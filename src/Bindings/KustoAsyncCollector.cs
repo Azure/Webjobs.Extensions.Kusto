@@ -101,7 +101,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
             catch (Exception ex)
             {
                 // Once we have the blob Id all the attributes of DataIngestPull can then be retrieved (format,metadata about the ingest etc.)
-                this._logger.LogError("Exception ingesting rows with SourceId {IngestSourceId}. Ingest detail {IngestDetail}", ingestSourceId.ToString(), this._contextdetail.Value, ex);
+                this._logger.LogError(ex, "Exception ingesting rows with SourceId {IngestSourceId}. Ingest detail {IngestDetail}", ingestSourceId.ToString(), this._contextdetail.Value);
                 throw;
             }
             finally

@@ -151,7 +151,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
             string[] invalidJsonTests = { nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), nameof(KustoEndToEndTestClass.OutputMixedJsonFailure) };
             foreach (string test in invalidJsonTests)
             {
-                Exception invalidOutputsException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(nameof(KustoEndToEndTestClass.OutputsWithInvalidJson), parameter));
+                Exception invalidOutputsException = await Record.ExceptionAsync(() => jobHost.GetJobHost().CallAsync(test, parameter));
                 Assert.IsType<FunctionInvocationException>(invalidOutputsException);
                 string baseMessage = invalidOutputsException.GetBaseException().Message;
                 // Streaming ingestion may return a different error format than managed ingestion
@@ -254,8 +254,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.IntegrationTests
         public override void After(MethodInfo methodUnderTest)
         {
             // Drop the tables once done
-            _ = this.KustoAdminClient.ExecuteControlCommandAsync(this._resolvedDbName, this.DropTableMappings);
-            _ = this.KustoAdminClient.ExecuteControlCommandAsync(this._resolvedDbName, this.DropTable);
+            this.KustoAdminClient.ExecuteControlCommand(this._resolvedDbName, this.DropTableMappings);
+            this.KustoAdminClient.ExecuteControlCommand(this._resolvedDbName, this.DropTable);
             this.KustoAdminClient.Dispose();
             this.KustoQueryClient.Dispose();
         }
