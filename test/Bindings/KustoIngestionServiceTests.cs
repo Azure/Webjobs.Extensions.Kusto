@@ -153,9 +153,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto.Tests.Bindings
                     It.IsAny<StreamSourceOptions>()))
                 .ReturnsAsync(mockIngestionResult.Object);
 
-            // Act — use queued ingestion type
+            // Act — use queued ingestion type with short poll intervals for fast tests
             KustoIngestContext context = KustoTestHelper.CreateContext(
-                mockIngestionClient.Object, ingestionType: "queued");
+                mockIngestionClient.Object, ingestionType: "queued", ingestionProperties: "@pollIntervalSeconds=1,@pollTimeoutMinutes=1");
             var collector = new KustoAsyncCollector<Item>(context, this._logger);
             await collector.AddAsync(new Item { ID = 4, Name = "queued-test" });
             await collector.FlushAsync();

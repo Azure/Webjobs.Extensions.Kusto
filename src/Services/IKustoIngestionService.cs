@@ -69,6 +69,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 }
                 await Task.Delay(TimeSpan.FromSeconds(pollIntervalSeconds), cts.Token);
             }
+            if (ingestionStatus == null)
+            {
+                cts.Token.ThrowIfCancellationRequested();
+            }
             return ingestionStatus;
         }
     }
