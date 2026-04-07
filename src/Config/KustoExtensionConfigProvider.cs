@@ -83,7 +83,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             if (string.IsNullOrEmpty(resolvedConnectionString))
             {
                 string attributeProperty = $"{nameof(KustoAttribute)}.{nameof(KustoAttribute.Connection)}";
-                throw new InvalidOperationException($"Parameter {attributeProperty} should be passed as an environment variable. This value resolved to null");
+                string errorMessage = $"Parameter {attributeProperty} should be passed as an environment variable. This value resolved to null";
+                this._logger.Log(LogLevel.Error, new EventId(0), KustoDiagnosticEvent.Create(KustoConstants.ConnectionErrorCode, errorMessage, KustoConstants.KustoBindingHelpLink), null, (state, ex) => state.ToString());
+                throw new InvalidOperationException(errorMessage);
             }
             // Empty database check is added right when the KustoAttribute is constructed. This however is deferred here. 
             // TODO : Add check based on parameters and parameter indexes ?
@@ -120,11 +122,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
             {
                 string logContext = $"Error creating ingest connection : TableName='{kustoAttribute?.TableName}',Database='{kustoAttribute?.Database}'," +
                     $"MappingRef='{kustoAttribute?.MappingRef}'," +
-                    $"DataFormat='{kustoAttribute?.DataFormat}'" +
+                    $"DataFormat='{kustoAttribute?.DataFormat}'," +
                     $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
                     $"IngestionType='{kustoAttribute?.IngestionType}'," +
                     $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
-                this._logger.LogError(logContext, e);
+                this._logger.LogError(e, logContext);
                 throw;
             }
         }
@@ -161,7 +163,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     $"KqlParameters='{kustoAttribute?.KqlParameters}'," +
                     $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
                     $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
-                this._logger.LogError(logContext, e);
+                this._logger.LogError(e, logContext);
                 throw;
             }
         }
@@ -186,7 +188,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                     $"KqlParameters='{kustoAttribute?.KqlParameters}'," +
                     $"ManagedIdentity='{kustoAttribute?.ManagedServiceIdentity}'," +
                     $"KustoConnectionString='{KustoBindingUtils.ToSecureString(engineConnectionString)}";
-                this._logger.LogError(logContext, e);
+                this._logger.LogError(e, logContext);
                 throw;
             }
         }

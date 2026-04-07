@@ -22,6 +22,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
         public const string InputBindingType = "InputBinding";
         public const string OutputBindingType = "OutputBinding";
         public const string FunctionsRuntimeHostKey = "FUNCTIONS_WORKER_RUNTIME";
+        // Diagnostic event keys used by the Functions runtime to surface events in the Portal
+        public const string DiagnosticEventKey = "MS_DiagnosticEvent";
+        public const string HelpLinkKey = "MS_HelpLink";
+        public const string ErrorCodeKey = "MS_ErrorCode";
+        // Kusto extension error codes
+        public const string ConnectionErrorCode = "AZFK0001";
+        public const string IngestionErrorCode = "AZFK0002";
+        public const string QueryErrorCode = "AZFK0003";
+        // Help links for documentation
+        public const string KustoBindingHelpLink = "https://learn.microsoft.com/azure/azure-functions/functions-bindings-azure-data-explorer";
         public static readonly string AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static readonly string ClientDetailForTracing = $"{AzFunctionsClientName}:{AssemblyVersion}";
         public static readonly string ClientRequestId = $"AzFunctions.InputBinding;{AssemblyVersion}";

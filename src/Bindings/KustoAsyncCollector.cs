@@ -92,7 +92,7 @@ namespace Microsoft.Azure.WebJobs.Kusto
                     if (ingestionStatus.Status == Status.Failed || ingestionStatus.Status == Status.PartiallySucceeded)
                     {
                         string errorMessage = $"Ingestion status reported failure/partial success for {ingestSourceId}. Ingest detail {this._contextdetail.Value}, and status reported was {ingestionStatus.Status}";
-                        this._logger.LogError(errorMessage);
+                        this._logger.Log(LogLevel.Error, new EventId(0), KustoDiagnosticEvent.Create(KustoConstants.IngestionErrorCode, errorMessage, KustoConstants.KustoBindingHelpLink), null, (state, ex) => state.ToString());
                         throw new FunctionInvocationException(errorMessage);
                     }
                     this._rows.Clear();
@@ -100,8 +100,9 @@ namespace Microsoft.Azure.WebJobs.Kusto
             }
             catch (Exception ex)
             {
-                // Once we have the blob Id all the attributes of DataIngestPull can then be retrieved (format,metadata about the ingest etc.)
-                this._logger.LogError("Exception ingesting rows with SourceId {IngestSourceId}. Ingest detail {IngestDetail}", ingestSourceId.ToString(), this._contextdetail.Value, ex);
+                // Emit diagnostic event for ingestion exceptions (e.g. permission errors, timeouts)
+                string exErrorMessage = $"Exception ingesting rows with SourceId {ingestSourceId}. Ingest detail {this._contextdetail.Value}";
+                this._logger.Log(LogLevel.Error, new EventId(0), KustoDiagnosticEvent.Create(KustoConstants.IngestionErrorCode, exErrorMessage, KustoConstants.KustoBindingHelpLink), ex, (state, e) => state.ToString());
                 throw;
             }
             finally

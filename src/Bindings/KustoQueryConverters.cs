@@ -72,7 +72,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Kusto
                 catch (Exception ex)
                 {
                     string logMessage = $"Error in Query/Conversion. Attributes [DB='{attribute?.Database}', Query='{attribute?.KqlCommand}',Parameters='{attribute?.KqlParameters}',CRP='{attribute?.ClientRequestProperties}']";
-                    this._logger.LogError(ex, logMessage);
+                    this._logger.Log(LogLevel.Error, new EventId(0), KustoDiagnosticEvent.Create(KustoConstants.QueryErrorCode, logMessage, KustoConstants.KustoBindingHelpLink), ex, (state, e) => state.ToString());
                     throw new InvalidOperationException(logMessage, ex);
                 }
             }

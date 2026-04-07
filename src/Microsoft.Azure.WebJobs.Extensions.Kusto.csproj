@@ -9,7 +9,6 @@
     <!-- Default Version for dev -->
     <Version>1.0.13-Preview</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <DebugSymbols>true</DebugSymbols>
@@ -20,7 +19,7 @@
     <PackageTags>Microsoft Azure WebJobs AzureFunctions Kusto</PackageTags>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/Azure/azure-functions-kusto-extension</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Azure/Webjobs.Extensions.Kusto</PackageProjectUrl>
     <PackageIcon>pkgicon.png</PackageIcon>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
