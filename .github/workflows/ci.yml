@@ -20,7 +20,7 @@ jobs:
         dotnet-version: ['6.0.x']
     steps:
       - name: Azure login
-        uses: azure/login@v2
+        uses: azure/login@7184910d9eb2b1c5e48f7073824a90609bb9b6d6 # v2.3.1
         with:
           client-id: ${{ secrets.APP_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
@@ -29,9 +29,9 @@ jobs:
         run: |
               access_token=$(az account get-access-token --resource=${{ secrets.APP_ID }} --scope=${{ secrets.CLUSTER }}/.default --query accessToken -o tsv)
               echo "ACCESS_TOKEN=$access_token" >> $GITHUB_ENV      
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@55ec9447dda3d1cf6bd587150f3262f30ee10815 # v3.4.2
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
       - name: Install dependencies
@@ -44,7 +44,7 @@ jobs:
           KustoConnectionStringMSI: "Data Source=${{secrets.CLUSTER}};Database=webjobs-e2e;Fed=True;"
           KustoConnectionStringInvalidAttributes: "Data Source=${{secrets.CLUSTER}};Database=webjobs-e2e;Fed=True;AppClientId=${{ secrets.APP_ID }}"
       - name: Upload dotnet test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dotnet-results-${{ matrix.dotnet-version }}
           path: TestResults-${{ matrix.dotnet-version }}
